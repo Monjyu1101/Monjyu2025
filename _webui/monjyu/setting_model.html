@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setting (Model)</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+
+        /* 入力エリアのスタイル */
+        .setting-container {
+            background-color: #f0f0f0;
+            width: calc(100% - 15px);
+        }
+
+        /* ヘッダーのスタイル */
+        .setting-container h2 {
+            background-color: #e0e0e0;
+            margin: 0 0 5px 0;
+            font-size: medium;
+        }
+
+        /* タブ全体のスタイル */
+        .frame-tab {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* タブのヘッダーのスタイル */
+        .frame-tab .tab-header {
+            display: flex;
+            background-color: #eee;
+        }
+
+        /* タブのボタンのスタイル */
+        .frame-tab .tab-header button {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: small;
+        }
+
+        /* アクティブなタブのボタンのスタイル */
+        .frame-tab .tab-header button.active {
+            background-color: #000;
+            color: #fff;
+            font-size: medium;
+        }
+
+        /* タブのコンテンツのスタイル */
+        .frame-tab .tab-content {
+            display: none;
+            flex-grow: 1;
+            height: calc(100% - 20px); /* タブヘッダーの高さを考慮 */
+            overflow: auto;
+        }
+
+        /* アクティブなタブのコンテンツのスタイル */
+        .frame-tab .tab-content.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 初期設定値 -->
+    <input type="hidden" id="core_endpoint" name="core_endpoint" value="http://localhost:8000">
+    <input type="hidden" id="user_id" name="user_id" value="admin">
+
+    <div class="setting-container">
+
+        <h2>【 Setting (Model) 】</h2>
+
+        <div class="frame-tab">
+
+            <!-- タブのヘッダー -->
+            <div class="tab-header">
+                <button data-target="reset">Reset</button>
+                <button data-target="gpt">ChatGPT</button>
+                <button data-target="asst">Assist</button>
+                <button data-target="resp">Respo</button>
+                <button data-target="gemn">Gemini</button>
+                <button data-target="free">FreeAI</button>
+                <button data-target="clad">Claude</button>
+                <button data-target="ort">OpenRouter</button>
+                <button data-target="pplx">Perplexity</button>
+                <button data-target="grok">Grok</button>
+                <button data-target="groq">Groq</button>
+                <button data-target="olm">Ollama</button>
+            </div>
+
+            <!-- Resetタブ -->
+            <div class="tab-content" id="reset" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">
+                            リセット :
+                        </td>
+                        <td>
+                            <button type="button" id="reset-button">Reset (リセット)</button>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                </table>
+            </div>
+
+            <!-- ChatGPTタブ -->
+            <div class="tab-content" id="gpt" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">【ChatGPT】</td>
+                        <td><a href="https://platform.openai.com/docs/models#current-model-aliases" target="_blank">https://platform.openai.com/docs/models</a></td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Setting)</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Timeout :</td>
+                        <td>
+                            <select id="gpt_max_wait_sec" name="gpt_max_wait_sec">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(OpenAI Models)</td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="gpt_a_nick_name">gpt-a</span>, :</td>
+                        <td>
+                            <select id="gpt_a_model" name="gpt_a_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="gpt_a_use_tools" name="gpt_a_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td align="center"><button type="button" id="gpt-a2bvx-button">↓ (a to b,v,x,)</button></td></tr>
+                    <tr>
+                        <td align="right"><span id="gpt_b_nick_name">gpt-b</span>, :</td>
+                        <td>
+                            <select id="gpt_b_model" name="gpt_b_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="gpt_b_use_tools" name="gpt_b_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="gpt_v_nick_name">gpt-v</span>, :</td>
+                        <td>
+                            <select id="gpt_v_model" name="gpt_v_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="gpt_v_use_tools" name="gpt_v_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="gpt_x_nick_name">gpt-x</span>, :</td>
+                        <td>
+                            <select id="gpt_x_model" name="gpt_x_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="gpt_x_use_tools" name="gpt_x_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Assistタブ -->
+            <div class="tab-content" id="asst" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">【Assist】</td>
+                        <td><a href="https://platform.openai.com/docs/models#current-model-aliases" target="_blank">https://platform.openai.com/docs/models</a></td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>※ OpenAI Assistant API 利用</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Setting)</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Timeout :</td>
+                        <td>
+                            <select id="asst_max_wait_sec" name="asst_max_wait_sec">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(OpenAI Models)</td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="asst_a_nick_name">assist-a</span>, :</td>
+                        <td>
+                            <select id="asst_a_model" name="asst_a_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="asst_a_use_tools" name="asst_a_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td align="center"><button type="button" id="asst-a2bvx-button">↓ (a to b,v,x,)</button></td></tr>
+                    <tr>
+                        <td align="right"><span id="asst_b_nick_name">assist-b</span>, :</td>
+                        <td>
+                            <select id="asst_b_model" name="asst_b_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="asst_b_use_tools" name="asst_b_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="asst_v_nick_name">assist-v</span>, :</td>
+                        <td>
+                            <select id="asst_v_model" name="asst_v_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="asst_v_use_tools" name="asst_v_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="asst_x_nick_name">assist-x</span>, :</td>
+                        <td>
+                            <select id="asst_x_model" name="asst_x_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="asst_x_use_tools" name="asst_x_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Respoタブ -->
+            <div class="tab-content" id="resp" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">【Responses】</td>
+                        <td><a href="https://platform.openai.com/docs/models#current-model-aliases" target="_blank">https://platform.openai.com/docs/models</a></td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>※ OpenAI Responses API 利用</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Setting)</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Timeout :</td>
+                        <td>
+                            <select id="resp_max_wait_sec" name="resp_max_wait_sec">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(OpenAI Models)</td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="resp_a_nick_name">respo-a</span>, :</td>
+                        <td>
+                            <select id="resp_a_model" name="resp_a_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="resp_a_use_tools" name="resp_a_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td align="center"><button type="button" id="resp-a2bvx-button">↓ (a to b,v,x,)</button></td></tr>
+                    <tr>
+                        <td align="right"><span id="resp_b_nick_name">respo-b</span>, :</td>
+                        <td>
+                            <select id="resp_b_model" name="resp_b_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="resp_b_use_tools" name="resp_b_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="resp_v_nick_name">respo-v</span>, :</td>
+                        <td>
+                            <select id="resp_v_model" name="resp_v_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="resp_v_use_tools" name="resp_v_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="resp_x_nick_name">respo-x</span>, :</td>
+                        <td>
+                            <select id="resp_x_model" name="resp_x_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="resp_x_use_tools" name="resp_x_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Geminiタブ -->
+            <div class="tab-content" id="gemn" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">【Gemini】</td>
+                        <td><a href="https://ai.google.dev/gemini-api/docs/models/gemini" target="_blank">https://ai.google.dev/gemini-api/docs/models/gemini</a></td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Setting)</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Timeout :</td>
+                        <td>
+                            <select id="gemn_max_wait_sec" name="gemn_max_wait_sec">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Google Models)</td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="gemn_a_nick_name">gemini-a</span>, :</td>
+                        <td>
+                            <select id="gemn_a_model" name="gemn_a_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="gemn_a_use_tools" name="gemn_a_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td align="center"><button type="button" id="gemn-a2bvx-button">↓ (a to b,v,x,)</button></td></tr>
+                    <tr>
+                        <td align="right"><span id="gemn_b_nick_name">gemini-b</span>, :</td>
+                        <td>
+                            <select id="gemn_b_model" name="gemn_b_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="gemn_b_use_tools" name="gemn_b_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="gemn_v_nick_name">gemini-v</span>, :</td>
+                        <td>
+                            <select id="gemn_v_model" name="gemn_v_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="gemn_v_use_tools" name="gemn_v_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="gemn_x_nick_name">gemini-x</span>, :</td>
+                        <td>
+                            <select id="gemn_x_model" name="gemn_x_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="gemn_x_use_tools" name="gemn_x_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- FreeAIタブ -->
+            <div class="tab-content" id="free" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">【FreeAI】</td>
+                        <td><a href="https://ai.google.dev/gemini-api/docs/models/gemini" target="_blank">https://ai.google.dev/gemini-api/docs/models/gemini</a></td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Setting)</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Timeout :</td>
+                        <td>
+                            <select id="free_max_wait_sec" name="free_max_wait_sec">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Google Models)</td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="free_a_nick_name">free-a</span>, :</td>
+                        <td>
+                            <select id="free_a_model" name="free_a_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="free_a_use_tools" name="free_a_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td align="center"><button type="button" id="free-a2bvx-button">↓ (a to b,v,x,)</button></td></tr>
+                    <tr>
+                        <td align="right"><span id="free_b_nick_name">free-b</span>, :</td>
+                        <td>
+                            <select id="free_b_model" name="free_b_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="free_b_use_tools" name="free_b_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="free_v_nick_name">free-v</span>, :</td>
+                        <td>
+                            <select id="free_v_model" name="free_v_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="free_v_use_tools" name="free_v_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="free_x_nick_name">free-x</span>, :</td>
+                        <td>
+                            <select id="free_x_model" name="free_x_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="free_x_use_tools" name="free_x_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+             <!-- Claudeタブ -->
+             <div class="tab-content" id="clad" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">【Claude】</td>
+                        <td><a href="https://docs.anthropic.com/en/docs/about-claude/models" target="_blank">https://docs.anthropic.com/en/docs/about-claude/models</a></td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Setting)</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Timeout :</td>
+                        <td>
+                            <select id="clad_max_wait_sec" name="clad_max_wait_sec">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Anthropic Models)</td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="clad_a_nick_name">claude-a</span>, :</td>
+                        <td>
+                            <select id="clad_a_model" name="clad_a_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="clad_a_use_tools" name="clad_a_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td align="center"><button type="button" id="clad-a2bvx-button">↓ (a to b,v,x,)</button></td></tr>
+                    <tr>
+                        <td align="right"><span id="clad_b_nick_name">claude-b</span>, :</td>
+                        <td>
+                            <select id="clad_b_model" name="clad_b_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="clad_b_use_tools" name="clad_b_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="clad_v_nick_name">claude-v</span>, :</td>
+                        <td>
+                            <select id="clad_v_model" name="clad_v_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="clad_v_use_tools" name="clad_v_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="clad_x_nick_name">claude-x</span>, :</td>
+                        <td>
+                            <select id="clad_x_model" name="clad_x_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="clad_x_use_tools" name="clad_x_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- OpenRouterタブ -->
+            <div class="tab-content" id="ort" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">【OpenRouter】</td>
+                        <td><a href="https://openrouter.ai/models" target="_blank">https://openrouter.ai/models</a></td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Setting)</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Timeout :</td>
+                        <td>
+                            <select id="ort_max_wait_sec" name="ort_max_wait_sec">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(OpenRouter Models)</td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="ort_a_nick_name">ort-a</span>, :</td>
+                        <td>
+                            <select id="ort_a_model" name="ort_a_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="ort_a_use_tools" name="ort_a_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td align="center"><button type="button" id="ort-a2bvx-button">↓ (a to b,v,x,)</button></td></tr>
+                    <tr>
+                        <td align="right"><span id="ort_b_nick_name">ort-b</span>, :</td>
+                        <td>
+                            <select id="ort_b_model" name="ort_b_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="ort_b_use_tools" name="ort_b_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="ort_v_nick_name">ort-v</span>, :</td>
+                        <td>
+                            <select id="ort_v_model" name="ort_v_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="ort_v_use_tools" name="ort_v_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="ort_x_nick_name">ort-x</span>, :</td>
+                        <td>
+                            <select id="ort_x_model" name="ort_x_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="ort_x_use_tools" name="ort_x_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+             <!-- Perplexityタブ -->
+             <div class="tab-content" id="pplx" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">【Perplexity】</td>
+                        <td><a href="https://docs.perplexity.ai/guides/model-cards" target="_blank">https://docs.perplexity.ai/guides/model-cards</a></td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Setting)</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Timeout :</td>
+                        <td>
+                            <select id="pplx_max_wait_sec" name="pplx_max_wait_sec">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Perplexity Models)</td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="pplx_a_nick_name">pplx-a</span>, :</td>
+                        <td>
+                            <select id="pplx_a_model" name="pplx_a_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="pplx_a_use_tools" name="pplx_a_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td align="center"><button type="button" id="pplx-a2bvx-button">↓ (a to b,v,x,)</button></td></tr>
+                    <tr>
+                        <td align="right"><span id="pplx_b_nick_name">pplx-b</span>, :</td>
+                        <td>
+                            <select id="pplx_b_model" name="pplx_b_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="pplx_b_use_tools" name="pplx_b_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="pplx_v_nick_name">pplx-v</span>, :</td>
+                        <td>
+                            <select id="pplx_v_model" name="pplx_v_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="pplx_v_use_tools" name="pplx_v_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="pplx_x_nick_name">pplx-x</span>, :</td>
+                        <td>
+                            <select id="pplx_x_model" name="pplx_x_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="pplx_x_use_tools" name="pplx_x_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- grokタブ -->
+            <div class="tab-content" id="grok" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">【grok】</td>
+                        <td><a href="https://docs.x.ai/docs/models?cluster=us-east-1" target="_blank">https://docs.x.ai/docs/models</a></td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Setting)</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Timeout :</td>
+                        <td>
+                            <select id="grok_max_wait_sec" name="grok_max_wait_sec">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(xAI Models)</td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="grok_a_nick_name">grok-a</span>, :</td>
+                        <td>
+                            <select id="grok_a_model" name="grok_a_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="grok_a_use_tools" name="grok_a_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td align="center"><button type="button" id="grok-a2bvx-button">↓ (a to b,v,x,)</button></td></tr>
+                    <tr>
+                        <td align="right"><span id="grok_b_nick_name">grok-b</span>, :</td>
+                        <td>
+                            <select id="grok_b_model" name="grok_b_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="grok_b_use_tools" name="grok_b_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="grok_v_nick_name">grok-v</span>, :</td>
+                        <td>
+                            <select id="grok_v_model" name="grok_v_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="grok_v_use_tools" name="grok_v_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="grok_x_nick_name">grok-x</span>, :</td>
+                        <td>
+                            <select id="grok_x_model" name="grok_x_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="grok_x_use_tools" name="grok_x_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Groqタブ -->
+            <div class="tab-content" id="groq" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">【Groq】</td>
+                        <td><a href="https://console.groq.com/docs/models" target="_blank">https://console.groq.com/docs/models</a></td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Setting)</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Timeout :</td>
+                        <td>
+                            <select id="groq_max_wait_sec" name="groq_max_wait_sec">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Groq Models)</td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="groq_a_nick_name">groq-a</span>, :</td>
+                        <td>
+                            <select id="groq_a_model" name="groq_a_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="groq_a_use_tools" name="groq_a_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td align="center"><button type="button" id="groq-a2bvx-button">↓ (a to b,v,x,)</button></td></tr>
+                    <tr>
+                        <td align="right"><span id="groq_b_nick_name">groq-b</span>, :</td>
+                        <td>
+                            <select id="groq_b_model" name="groq_b_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="groq_b_use_tools" name="groq_b_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="groq_v_nick_name">groq-v</span>, :</td>
+                        <td>
+                            <select id="groq_v_model" name="groq_v_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="groq_v_use_tools" name="groq_v_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="groq_x_nick_name">groq-x</span>, :</td>
+                        <td>
+                            <select id="groq_x_model" name="groq_x_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="groq_x_use_tools" name="groq_x_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Ollamaタブ -->
+            <div class="tab-content" id="olm" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">【Ollama】</td>
+                        <td><a href="https://ollama.com/search" target="_blank">https://ollama.com/search</a></td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Setting)</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Timeout :</td>
+                        <td>
+                            <select id="olm_max_wait_sec" name="olm_max_wait_sec">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">　</td>
+                        <td>(Ollama Models)</td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="olm_a_nick_name">olm-a</span>, :</td>
+                        <td>
+                            <select id="olm_a_model" name="olm_a_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="olm_a_use_tools" name="olm_a_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td align="center"><button type="button" id="olm-a2bvx-button">↓ (a to b,v,x,)</button></td></tr>
+                    <tr>
+                        <td align="right"><span id="olm_b_nick_name">olm-b</span>, :</td>
+                        <td>
+                            <select id="olm_b_model" name="olm_b_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="olm_b_use_tools" name="olm_b_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="olm_v_nick_name">olm-v</span>, :</td>
+                        <td>
+                            <select id="olm_v_model" name="olm_v_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="olm_v_use_tools" name="olm_v_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><span id="olm_x_nick_name">olm-x</span>, :</td>
+                        <td>
+                            <select id="olm_x_model" name="olm_x_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">tools :</td>
+                        <td>
+                            <select id="olm_x_use_tools" name="olm_x_use_tools">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes">Yes (有効)</option>
+                                <option value="no">No (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        var js = 'setting_model.js';
+        var script = document.createElement('script');
+        script.src = js + '?v=' + Math.random();
+        document.head.appendChild(script);
+    </script>
+
+</body>
+</html>

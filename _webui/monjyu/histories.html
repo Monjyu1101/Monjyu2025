@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histories</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* 表示エリアのスタイル */
+        .histories-container {
+            background-color: #f0f0f0; 
+            width: calc(100% - 15px); 
+        }
+        .histories-container h2 {
+            background-color: #e0e0e0;
+            margin: 0 0 5px 0;
+            font-size: medium;
+        }
+        /* テーブルのスタイル */
+        .table-container {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 10px;
+            table-layout: fixed; 
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 3px;
+            position: relative; 
+            text-align: left; 
+        }
+        th {
+            background-color: #f2f2f2;
+            text-align: center;
+            position: sticky; 
+            top: 0;
+            z-index: 1;
+        }
+        /* 列幅の調整 */
+        .key-col {
+            width: 4%;
+            text-align: center;
+        }
+        .key-val {
+            width: 11%;
+            text-align: center;
+        }
+        .time-col {
+            width: 5%;
+            text-align: center;
+        }
+        .req-col, .inp-col, .out-col, .data-col {
+            width: 20%;
+            text-align: left;
+            vertical-align: top;
+            padding-top: 3px;
+        }
+        /* スクロールバースタイル */
+        .table-container::-webkit-scrollbar {
+            width: 5px;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background-color: #ddd;
+        }
+
+        /* textareaのスタイル */
+        textarea {
+            width: 100%;
+            height: 6em;
+            overflow-y: auto;
+            overflow-x: auto;
+            resize: none;
+            border: none; /* 枠線なし */
+            white-space: pre;
+            font-size: smaller; /* 文字サイズを小さく */
+
+            /* スクロールバーの幅を調整 */
+            scrollbar-width: thin;  /* Firefox */
+            scrollbar-color: #ddd #f0f0f0; /* スクロールバーの色 (thumb, track) */
+            ::-webkit-scrollbar {
+                width: 5px;  /* スクロールバーの幅 */
+                height: 5px; /* スクロールバーの高さ */
+            }
+            ::-webkit-scrollbar-thumb {
+                background-color: #ddd; /* スクロールバーの色 */
+                border-radius: 3px; /* 角を丸くする */
+            }
+            ::-webkit-scrollbar-track {
+                background-color: #f0f0f0; /* スクロールバーのトラックの色 */
+            }
+        }
+
+        /* タブレット以下のスタイル調整 */
+        @media (max-width: 768px) { 
+            table {
+                font-size: 8px;
+            }
+            .req-col, .inp-col, .out-col, .data-col {
+                font-size: 8px;
+                text-align: left;
+                vertical-align: top;
+                padding-top: 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- サーバーエンドポイントとユーザーID -->
+    <input type="hidden" id="core_endpoint" name="core_endpoint" value="http://localhost:8000">
+    <input type="hidden" id="user_id" name="user_id" value="admin">
+    <div class="histories-container">
+        <!-- セッション一覧 -->
+        <h2>【 Histories (履歴) 】</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="key-col">No.</th>
+                        <th class="key-val">Key</th>
+                        <th class="time-col">Time</th>
+                        <th class="req-col">Request (要求)</th>
+                        <th class="inp-col">Input (入力)</th>
+                        <th class="out-col">Output (応答)</th>
+                        <th class="data-col">Data (結果)</th>
+                    </tr>
+                </thead>
+                <tbody id="histories">
+                    <!-- セッションデータを表示するテーブル本体 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        var js = 'histories.js';
+        var script = document.createElement('script');
+        script.src = js + '?v=' + Math.random();
+        document.head.appendChild(script);
+    </script>
+
+</body>
+</html>

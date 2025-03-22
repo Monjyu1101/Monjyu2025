@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Url Speech</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* 表示エリアのスタイル */
+        .urlSpeech-container {
+            background-color: #f0f0f0;
+            width: calc(100% - 15px);
+        }
+        /* ヘッダーのスタイル */
+        .urlSpeech-container h2 {
+            background-color: #e0e0e0;
+            margin: 0 0 5px 0;
+            font-size: medium;
+        }
+        /* テキストエリアのスタイル */
+        textarea {
+            width: 100%;
+            overflow-y: auto;
+            overflow-x: auto;
+            resize: none;
+            box-sizing: border-box;
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+    <input type="hidden" id="core_endpoint" name="core_endpoint" value="http://localhost:8000">
+    <input type="hidden" id="user_id" name="user_id" value="admin">
+    <input type="hidden" id="to_port" name="to_port" value="">
+    <div class="urlSpeech-container">
+        <h2>【 URL 】</h2>
+
+        <table width="100%">
+            <tr>
+                <td width="5%" align="right" valign="top"> </td>
+                <td width="95%">
+                    <button type="button" id="url-seijyo-1">↓ 聖女1</button>
+                    <button type="button" id="url-honzuki-1">↓ 本好き1</button>
+                    <button type="button" id="url-honzuki-594">本好き594</button>
+                    <button type="button" id="url-tensura-1">↓ 転スラ1</button>
+                    <button type="button" id="url-tensura-283">転スラ283</button>
+                </td>
+            </tr>
+            <tr>
+                <td width="5%" align="right" valign="top">Path:</td>
+                <td width="95%">
+                    <textarea id="url_path" name="url_path" style="width: 100%; height: 5vh;"></textarea>        
+                </td>
+            </tr>
+            <tr>
+                <td width="5%" align="right" valign="top"> </td>
+                <td width="95%">
+                    <button type="button" id="url2text-button">↓ URL2Text</button>
+                    <button type="button" id="url1add-button">URL += 1</button>
+                    <button type="button" id="url1sub-button">URL -= 1</button>
+                    自動処理：<button type="button" id="auto-url2speech-button">URL2Speech</button>
+                </td>
+            </tr>
+            <tr>
+                <td width="5%" align="right" valign="top">
+                    Text:
+                    <br><br>
+                    <img src="static/speaker.png" id="tts-url-button" width="100%">
+                </td>
+                <td width="95%">
+                    <textarea id="url_text" name="url_text" style="width: 100%; height: 15vh;"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td width="5%" align="right" valign="top">Req:</td>
+                <td width="95%">
+                    <textarea id="req_text" name="req_text" style="width: 100%; height: 10vh;"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td width="5%" align="right" valign="top">Json:</td>
+                <td width="95%">
+                    <textarea id="res_json" name="res_json" style="width: 100%; height: 5vh;"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td width="5%" align="right" valign="top"> </td>
+                <td width="95%">
+                    <button type="button" id="submit-button">Submit</button>
+                </td>
+            </tr>
+        </table>
+
+        <br>
+
+        <h2>【 Working (作業エリア) 】</h2>
+        <table width="100%">
+            <tr>
+                <td width="5%" align="right" valign="top">Last:</td>
+                <td width="95%">
+                    <textarea id="last_text" readonly style="width: 100%; height: 10vh;"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td width="5%" align="right" valign="top"> </td>
+                <td width="95%" valign="center">
+                    （男1：
+                    <select id="speaker_male1" name="speaker_male1">
+                        <option value="">Auto (自動)</option>
+                        <option value="none">none</option>
+                        <option value="free">free</option>
+                        <option value="google">google</option>
+                        <option value="openai">openai</option>
+                        <option value="青山龍星">青山龍星</option>
+                        <option value="玄野武宏">玄野武宏</option>
+                        <option value="ずんだもん">ずんだもん</option>
+                    </select>
+                    男*：
+                    <select id="speaker_male2" name="speaker_male2">
+                        <option value="">Auto (自動)</option>
+                        <option value="none">none</option>
+                        <option value="free">free</option>
+                        <option value="google">google</option>
+                        <option value="openai">openai</option>
+                        <option value="青山龍星">青山龍星</option>
+                        <option value="玄野武宏">玄野武宏</option>
+                        <option value="ずんだもん">ずんだもん</option>
+                    </select>
+                    女1：
+                    <select id="speaker_female1" name="speaker_female1">
+                        <option value="">Auto (自動)</option>
+                        <option value="none">none</option>
+                        <option value="free">free</option>
+                        <option value="google">google</option>
+                        <option value="openai">openai</option>
+                        <option value="四国めたん">四国めたん</option>
+                        <option value="九州そら">九州そら</option>
+                        <option value="ずんだもん">ずんだもん</option>
+                    </select>
+                    女2：
+                    <select id="speaker_female2" name="speaker_female2">
+                        <option value="">Auto (自動)</option>
+                        <option value="none">none</option>
+                        <option value="free">free</option>
+                        <option value="google">google</option>
+                        <option value="openai">openai</option>
+                        <option value="四国めたん">四国めたん</option>
+                        <option value="九州そら">九州そら</option>
+                        <option value="ずんだもん">ずんだもん</option>
+                    </select>
+                    他：
+                    <select id="speaker_etc" name="speaker_etc">
+                        <option value="">Auto (自動)</option>
+                        <option value="none">none</option>
+                        <option value="free">free</option>
+                        <option value="google">google</option>
+                        <option value="openai">openai</option>
+                        <option value="四国めたん">四国めたん</option>
+                        <option value="九州そら">九州そら</option>
+                        <option value="ずんだもん">ずんだもん</option>
+                    </select>
+                    ）<br>
+                    <button type="button" id="post-json-text-button">↓ json2text</button>
+                    <button id="post-json-tts-button"><img src="static/speaker.png" style="height: 2vh;"></button>
+                </td>
+            </tr>
+            <tr>
+                <td width="5%" align="right" valign="top">
+                    Speech:
+                    <br><br>
+                    <img src="static/speaker.png" id="tts-speech-button" width="70%">
+                </td>
+                <td width="95%">
+                    <textarea id="speech_text" style="width: 100%; height: 20vh;"></textarea>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <textarea id="sys_text" name="sys_text" style="display:none;">
+あなたは美しい日本語を話す賢いアシスタントです。
+    </textarea>
+    <textarea id="req_doc" name="req_doc" style="display:none;">
+小説の内容を主人公視点に修正してください。
+話し言葉を中心に要約してください。
+性別、発言者または心の声、言葉をjson形式で出力して下さい。
+jsonはタブで見やすく成形して出力して下さい。
+{"speech":[{"gender": str, "who": str, "text": str }]}
+    </textarea>
+    <textarea id="schema_doc" name="schema_doc" style="display:none;">
+{"speech":[{"gender": str, "who": str, "text": str }]}
+    </textarea>
+                
+    <script>
+        var js = 'urlSpeech.js';
+        var script = document.createElement('script');
+        script.src = js + '?v=' + Math.random();
+        document.head.appendChild(script);
+    </script>
+
+</body>
+</html>

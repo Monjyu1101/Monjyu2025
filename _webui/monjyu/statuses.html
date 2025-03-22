@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statuses</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+
+        /* ステータスコンテナのスタイル */
+        .statuses-container {
+            background-color: #f0f0f0;
+            width: calc(100% - 15px);
+        }
+
+        /* ヘッダーのスタイル */
+        .statuses-container h2 {
+            background-color: #e0e0e0;
+            margin: 0 0 5px 0;
+            font-size: medium;
+        }
+
+        /* サブAIグリッドのスタイル */
+        .subai-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 8px;
+        }
+
+        /* サブAIのスタイル */
+        .subai {
+            padding: 3px;
+            text-align: center;
+            border: 1px solid #ccc;
+            font-size: 12px;
+            position: relative;
+            width: 100px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ステータスに応じた背景色の設定 */
+        .READY { background-color: #90EE90; } 
+        .CHAT { color: #FFFFFF; background-color: #ff8c00; } 
+        .SERIAL { color: #FFFFFF; background-color: #ff00ff; } 
+        .PARALLEL { color: #FFFFFF; background-color: #ff00ff; } 
+        .SESSION { background-color: #ffa0ff; } 
+        .NONE { background-color: #D3D3D3; } 
+        .CANCEL { color: #FF0000; background-color: #D3D3D3; } 
+        .ERROR { color: #FF0000; background-color: #D3D3D3; } 
+
+        /* ツールチップのスタイル */
+        .subai .tooltip {
+            visibility: hidden;
+            width: auto;
+            max-width: 250px;
+            background-color: rgba(255, 255, 208, 0.95);
+            color: #000;
+            text-align: left;
+            border-radius: 6px;
+            padding: 10px;
+            position: fixed;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s, visibility 0.2s;
+            max-height: 350px;
+            overflow-y: auto;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        /* マウスオーバー時のツールチップの表示 */
+        .subai:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* 点滅アニメーション */
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* 点滅する要素 */
+        .blinking {
+            animation: blink 0.7s linear infinite;
+        }
+
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            .subai-grid {
+                grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
+            }
+            .subai { font-size: 8px; }
+            .subai .tooltip { font-size: 8px; }
+        }
+
+        /* スマホサイズ以下の場合(480px以下)のスタイル */
+        @media (max-width: 480px) {
+            .subai-grid {
+                grid-template-columns: 1fr;
+            }
+            .subai { font-size: 6px; }
+            .subai .tooltip { font-size: 6px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 隠しフィールド -->
+    <input type="hidden" id="core_endpoint" name="core_endpoint" value="http://localhost:8000">
+    <input type="hidden" id="user_id" name="user_id" value="admin">
+    
+
+    <!-- ステータス表示エリア -->
+    <div class="statuses-container">
+        <h2>【 Statuses (状況) 】</h2>
+        <div class="subai-grid">
+            {subai_divs}
+        </div>
+    </div>    
+
+    <script>
+        var js = 'statuses.js';
+        var script = document.createElement('script');
+        script.src = js + '?v=' + Math.random();
+        document.head.appendChild(script);
+    </script>
+
+</body>
+</html>

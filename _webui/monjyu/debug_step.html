@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Step</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+
+        /* 出力エリアのスタイル */
+        .debug-step-container {
+            background-color: #f0f0f0; 
+            width: calc(100% - 15px); 
+        }
+
+        /* ヘッダーのスタイル */
+        .debug-step-container h2 {
+            background-color: #e0e0e0;
+            margin: 0 0 5px 0;
+            font-size: medium;
+        }
+
+        /* テキストエリアのスタイル */
+        textarea {
+            width: 100%;
+            overflow-y: auto;
+            overflow-x: auto;
+            resize: none; 
+            box-sizing: border-box; 
+            white-space: pre;  
+        }
+
+        /* 外枠を点滅させるアニメーション */
+        .blink-border {
+            animation: blink-border 1s linear infinite;
+            border-width: 2px;
+            border-style: solid;
+        }
+        
+        /* アニメーションの定義 */
+        @keyframes blink-border {
+            0% { border-color: blue; }
+            50% { border-color: transparent; }
+            100% { border-color: blue; }
+        }       
+    </style>
+</head>
+<body>
+
+    <!-- コアエンドポイントのURLとユーザーID -->
+    <input type="hidden" id="core_endpoint" name="core_endpoint" value="http://localhost:8000">
+    <input type="hidden" id="user_id" name="user_id" value="admin">
+
+    <!-- デバッグ情報出力エリア -->
+    <div class="debug-step-container">
+        <h2>【 Debug (処理状況) 】</h2>
+        <table width="100%">
+            <tr>
+                <td width="5%" align="right" valign="top">Out:</td>
+                <td width="95%"><textarea id="debug_text" readonly style="height: 35vh;"></textarea></td>
+            </tr>
+            <tr>
+                <td width="5%" align="right" valign="top">Data:</td>
+                <td width="95%"><textarea id="debug_data" readonly style="height: 35vh;"></textarea></td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        var js = 'debug_step.js';
+        var script = document.createElement('script');
+        script.src = js + '?v=' + Math.random();
+        document.head.appendChild(script);
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文殊 / Monjyu (もんじゅ)</title>
+    <link href="static/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+
+        /* 全体のスタイル */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* タイトルのスタイル */
+        h1 {
+            background-color: #000;
+            color: #fff;
+            padding: 10px;
+            margin: 0;
+            line-height: 0.75;
+            text-align: center;
+        }
+
+        /* タイトルの下線 */
+        .title-underline {
+            height: 12px;
+            background-color: #000;
+        }
+
+        /* タブのスタイル */
+        .tabs {
+            display: flex;
+            overflow-x: auto;
+            background-color: #fff;
+            padding: 10px;
+        }
+
+        /* 個々のタブのスタイル */
+        .tab {
+            display: inline-block;
+            margin-right: 10px;
+            padding: 5px 10px;
+            background-color: #ddd;
+            text-decoration: none;
+            color: #000;
+            border-radius: 5px;
+            flex-shrink: 0;
+        }
+
+        /* アクティブなタブのスタイル */
+        .tab.active {
+            background-color: #000;
+            color: #fff;
+        }
+
+        /* フレームのスタイル */
+        #main-frame {
+            width: 100%;
+            height: calc(100vh - 125px);
+            border: none;
+        }
+
+        /* タブレット以下の場合のスタイル */
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            .tab {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <input type="hidden" id="core_endpoint" name="core_endpoint" value="http://localhost:8000">
+    <input type="hidden" id="user_id" name="user_id" value="admin">
+
+    <!-- タイトル -->
+    <h1>文殊 / Monjyu (もんじゅ: Multiple AI Platforms)</h1>
+
+    <!-- タイトルの下線 -->
+    <div class="title-underline"></div>
+
+    <!-- タブメニュー -->
+    <div class="tabs">
+        <table width="100%">
+            <tr>
+                <td align="center">
+                    <a class="tab" href="/index.html?inner_page=mainui">MainUI</a>
+                    <a class="tab" href="/index.html?inner_page=setting">Settings</a>
+                    <a class="tab" href="/index.html?inner_page=chat">Chat</a>
+                    <a class="tab" href="/index.html?inner_page=input">Input</a>
+                    <a class="tab" href="/index.html?inner_page=output">Output</a>
+                    <a class="tab" href="/index.html?inner_page=histories">Histories</a>
+                    <a class="tab" href="/index.html?inner_page=statuses">Statuses</a>
+                    <a class="tab" href="/index.html?inner_page=sessions">Sessions</a>
+                    <a class="tab" href="/index.html?inner_page=debug_log">Debug log</a>
+                    <a class="tab" href="/index.html?inner_page=links">Links</a>            
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- メインフレーム -->
+    <iframe id="main-frame"></iframe>
+
+    <script>
+        var js = 'index.js';
+        var script = document.createElement('script');
+        script.src = js + '?v=' + Math.random();
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>

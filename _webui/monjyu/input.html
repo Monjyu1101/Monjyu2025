@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* 入力エリアのスタイル */
+        .input-container {
+            background-color: #f0f0f0;
+            width: calc(100% - 15px);
+        }
+        /* ヘッダーのスタイル */
+        .input-container h2 {
+            background-color: #e0e0e0;
+            margin: 0 0 5px 0;
+            font-size: medium;
+        }
+        /* テキストエリアのスタイル */
+        textarea {
+            width: 100%;
+            overflow-y: auto;
+            overflow-x: auto;
+            resize: none;
+            box-sizing: border-box;
+            white-space: pre;
+        }
+        /* リストのスタイル */
+        li {
+            white-space: nowrap;
+        }
+        /* ファイルアップロードエリアのスタイル */
+        #input_files {
+            border: 2px solid #ccc;
+            width: 100%;
+            height: 30vh;
+            overflow-y: auto;
+            overflow-x: auto;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: white;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        /* ファイルアップロードリストのスタイル */
+        #input_files_list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            overflow-x: auto; 
+            overflow-y: auto; 
+        }
+        /* ファイルアップロードリストの項目のスタイル */
+        #input_files_list li {
+            margin-bottom: 5px;
+            text-align: left;
+        }
+        /* ファイルが選択されていない場合のメッセージのスタイル */
+        #input_files_empty {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #ccc;
+            display: none;
+        }
+        /* ファイルアップロードエリアにマウスカーソルが乗った場合のスタイル */
+        #input_files:hover {
+            background-color: #e1e7f0;
+            cursor: pointer;
+        }
+
+        /* 外枠を点滅させるアニメーション */
+        .blink-border {
+            animation: blink-border 1s linear infinite;
+            border-width: 2px;
+            border-style: solid;
+        }
+        
+        /* アニメーションの定義 */
+        @keyframes blink-border {
+            0% { border-color: blue; }
+            50% { border-color: transparent; }
+            100% { border-color: blue; }
+        }       
+    </style>
+</head>
+<body>
+    <input type="hidden" id="core_endpoint" name="core_endpoint" value="http://localhost:8000">
+    <input type="hidden" id="user_id" name="user_id" value="admin">
+    
+    <div class="input-container">
+        <h2>【 Input (入力) 】</h2>
+        
+        <form id="process-form">
+            <table width="100%">
+                <tr>
+                    <td width="5%" align="right" valign="top">Sys:</td>
+                    <td width="95%">
+                        <textarea id="system_text" name="system_text" style="height: 6vh;" data-drop-target="system_text">あなたは美しい日本語を話す賢いアシスタントです。</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="5%" align="right" valign="top">
+                        Req:
+                        <br><br>
+                        <img src="static/microphone.png" id="stt-req-button" width="100%">
+                        <br>
+                        <img src="static/speaker.png" id="tts-req-button" width="100%">
+                    </td>
+                    <td width="95%">
+                        <textarea id="request_text" name="request_text" placeholder="要求内容を入力してください" required style="height: 30vh;" data-drop-target="request_text"></textarea>
+                    </td>
+                </tr>
+            </table>
+            
+            <table width="100%">
+                <tr>
+                    <td width="5%" align="right" valign="top">
+                        Inp:
+                        <br><br>
+                        <button type="button" id="set-request-button">↗＋</button>
+                        <br><br>
+                        <img src="static/microphone.png" id="stt-inp-button" width="100%">
+                        <br>
+                        <img src="static/speaker.png" id="tts-inp-button" width="100%">
+                        <br><br>
+                        <button type="button" id="set-outData-button">→</button>
+                    </td>
+                    <td width="65%">
+                        <textarea id="input_text" name="input_text" style="height: 30vh;" data-drop-target="input_text"></textarea>
+                    </td>
+                    <td width="30%">
+                        <div id="input_files">
+                            <ul id="input_files_list">
+                                <!-- アップロードされたファイルの一覧を表示 -->
+                            </ul>
+                            <div id="input_files_empty" style="text-align: center; color: #888;">(Drop Files...)</div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </form>
+        
+        <table width="100%">
+            <tr>
+                <td width="5%"></td>
+                <td width="95%">
+                    <table width="100%">
+                        <tr>
+                            <td align="left">
+                                <button type="button" id="clear-button" style="width: 160px; height: 30px;">Clear (クリア)</button>
+                            </td>
+                            <td align="center">
+                                Mode (モード):
+                                <select id="req_mode" name="req_mode" style="height: 30px;">
+                                    <option value="chat">Chat (会話)</option>
+                                    <option value="vision">Vision (画像認識)</option>
+                                    <option value="websearch">WebSearch (Web検索)</option>
+                                    <option value="serial">Serial (順次処理)</option>
+                                    <option value="parallel">Parallel (並列処理)</option>
+                                    <option value="clip">Clip (CoreAI利用)</option>
+                                </select>
+                            </td>
+                            <td align="right">
+                                <button type="button" id="submit-button" style="width: 160px; height: 30px;">Exec (送信/実行)</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="left">
+                                <button type="button" id="reset-button" style="width: 160px;">Reset (リセット)</button>
+                            </td>
+                            <td align="center">
+                                Target AI (依頼AI):
+                                <select id="to_port" name="to_port">
+                                    <option value="">Auto (自動)</option>
+                                </select>
+                            </td>
+                            <td align="right">
+                                <button type="button" id="cancel-button" style="width: 160px;">Cancel (キャンセル)</button>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        var js = 'input.js';
+        var script = document.createElement('script');
+        script.src = js + '?v=' + Math.random();
+        document.head.appendChild(script);
+    </script>
+
+</body>
+</html>

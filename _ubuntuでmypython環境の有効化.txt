@@ -1,0 +1,44 @@
+ubuntuÇ≈mypythonä¬ã´ÇÃóLå¯âª
+
+cd ..
+
+Å°Å°Å°Å°Å° PYTHON Å°Å°Å°Å°Å°
+
+sudo apt update
+sudo apt -y upgrade
+
+sudo apt install -y python3-pip
+sudo apt install -y python3-venv
+sudo apt install -y build-essential libssl-dev libffi-dev python3-dev
+sudo apt install -y portaudio19-dev
+sudo apt install -y python3-tk
+
+cd ~/
+python3 -m venv mypython
+source ~/mypython/bin/activate
+cd ~/mypython
+
+python3
+
+
+
+Å°Å°Å°Å°Å° Git, npm, Node.js Claude CODE Å°Å°Å°Å°Å°
+
+sudo apt install -y git
+sudo apt install -y npm
+sudo apt install -y nodejs
+
+sudo npm install -g @anthropic-ai/claude-code --force --no-os-check
+
+claude
+
+
+
+Å°Å°Å°Å°Å° VS CODE Å°Å°Å°Å°Å°
+
+sudo snap install --classic code
+
+code
+
+
+

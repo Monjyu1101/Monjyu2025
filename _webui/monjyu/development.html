@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Development</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* 表示エリアのスタイル */
+        .dev-container {
+            background-color: #f0f0f0;
+            width: calc(100% - 15px);
+        }
+        /* ヘッダーのスタイル */
+        .dev-container h2 {
+            background-color: #e0e0e0;
+            margin: 0 0 5px 0;
+            font-size: medium;
+        }
+    </style>
+</head>
+<body>
+    <input type="hidden" id="core_endpoint" name="core_endpoint" value="http://localhost:8000">
+    <input type="hidden" id="user_id" name="user_id" value="admin">
+    <div class="dev-container">
+        <h2>【 Development (開発) 】</h2>
+        <br><br>
+        
+        <!-- デバッグボタン群 -->
+        <button type="button" id="btnDebugParallel">デバッグ(parallel)実行</button>
+        <button type="button" id="btnDebugSerial">デバッグ(serial)実行</button>
+        <button type="button" id="btnDebugChat">デバッグ(chat)実行</button>
+        
+        <br><br>
+        
+        <!-- リクエストボタン群 -->
+        <button type="button" id="btnReq_pyjs1">py,js 1 (コメント)</button>
+        <button type="button" id="btnReq_pyjs2">py,js 2 (みやすさ,型統一)</button>
+        <button type="button" id="btnReq_pyjs3">py,js 3 (修正)</button>
+        <br>
+        <button type="button" id="btnReq_html1">html 1 (コメント)</button>
+        <button type="button" id="btnReq_html2">html 2 (みやすさ)</button>
+        <button type="button" id="btnReq_html3">html 3 (修正)</button>
+        <br>
+        <button type="button" id="btnReq_index">index.html (生成)</button>
+        <button type="button" id="btnReq_react">react (生成)</button>
+        
+        <br><br>
+        
+        <!-- ソースコードリクエストボタン群 -->
+        <button type="button" id="btnSource_allPy2Text">All (py) to Text</button>
+        <button type="button" id="btnSource_allPyRequest">All (py) Request</button>
+        <br>
+        <button type="button" id="btnSource_Monjyu">Monjyu.py</button>
+        <button type="button" id="btnSource_conf">_conf.py</button>
+        <button type="button" id="btnSource_data">_data.py</button>
+        <button type="button" id="btnSource_addin">_addin.py</button>
+        <button type="button" id="btnSource_coreai">_coreai.py</button>
+        <button type="button" id="btnSource_subai">_subai.py</button>
+        <button type="button" id="btnSource_subbot">_subbot.py</button>
+        <button type="button" id="btnSource_webui">_webui.py</button>
+        
+        <br><br>
+        
+        <button type="button" id="btnSource_allHtml2Text">All (html) to Text</button>
+        <button type="button" id="btnSource_allHtmlRequest">All (html) Request</button>
+        <br>
+        <button type="button" id="btnSource_index">index.html</button>
+        <button type="button" id="btnSource_mainui">mainui.html</button>
+        <button type="button" id="btnSource_setting">setting.html</button>
+        <button type="button" id="btnSource_setting_engine">_engine.html</button>
+        <button type="button" id="btnSource_setting_model">_model.html</button>
+        <button type="button" id="btnSource_setting_live">_live.html</button>
+        <button type="button" id="btnSource_setting_agent">_agent.html</button>
+        <button type="button" id="btnSource_setting_other">_other.html</button>
+        <button type="button" id="btnSource_chat">chat.html</button>
+        <button type="button" id="btnSource_input">input.html</button>
+        <button type="button" id="btnSource_vision">vision.html</button>
+        <button type="button" id="btnSource_statuses">statuses.html</button>
+        <button type="button" id="btnSource_output">output.html</button>
+        <button type="button" id="btnSource_histories">histories.html</button>
+        <button type="button" id="btnSource_sessions">sessions.html</button>
+        <button type="button" id="btnSource_debug_step">debug_step.html</button>
+        <button type="button" id="btnSource_debug_log">_log.html</button>
+        <button type="button" id="btnSource_react">react.html</button>
+        <button type="button" id="btnSource_writing">writing.html</button>
+        <button type="button" id="btnSource_development">development.html</button>
+        <button type="button" id="btnSource_links">links.html</button>
+        
+        <br><br>
+        
+        <button type="button" id="btnSource_allJs2Text">All (js) to Text</button>
+        <button type="button" id="btnSource_allJsRequest">All (js) Request</button>
+        <br>
+        <button type="button" id="btnSource_index_js">index.js</button>
+        <button type="button" id="btnSource_mainui_js">mainui.js</button>
+        <button type="button" id="btnSource_setting_js">setting.js</button>
+        <button type="button" id="btnSource_setting_engine_js">_engine.js</button>
+        <button type="button" id="btnSource_setting_model_js">_model.js</button>
+        <button type="button" id="btnSource_setting_live_js">_live.js</button>
+        <button type="button" id="btnSource_setting_agent_js">_agent.js</button>
+        <button type="button" id="btnSource_setting_other_js">_other.js</button>
+        <button type="button" id="btnSource_chat_js">chat.js</button>
+        <button type="button" id="btnSource_input_js">input.js</button>
+        <button type="button" id="btnSource_vision_js">vision.js</button>
+        <button type="button" id="btnSource_statuses_js">statuses.js</button>
+        <button type="button" id="btnSource_output_js">output.js</button>
+        <button type="button" id="btnSource_histories_js">histories.js</button>
+        <button type="button" id="btnSource_sessions_js">sessions.js</button>
+        <button type="button" id="btnSource_debug_step_js">debug_step.js</button>
+        <button type="button" id="btnSource_debug_log_js">_log.js</button>
+        <button type="button" id="btnSource_react_js">react.js</button>
+        <button type="button" id="btnSource_writing_js">writing.js</button>
+        <button type="button" id="btnSource_development_js">development.js</button>
+        
+        <br><br>
+        
+        <button type="button" id="btnSource_test1_py">_test1.py</button>
+        <button type="button" id="btnSource_test2_py">_test2.py</button>
+        <button type="button" id="btnSource_test3_py">_test3.py</button>
+        <button type="button" id="btnSource_test4_py">_test4.py</button>
+        <button type="button" id="btnSource_test5_py">_test5.py</button>
+    </div>
+
+    <textarea id="req_pyjs1" name="req_pyjs1" style="display:none;">
+ソースコードを修正してください。
+今回はコメントの修正のみ実施してください。
+日本語でお願いします。
+コメントが入っていない箇所は、適切なコメントを追加してください。
+コメントが入っている箇所は、適切なコメントか判断し、間違ってる場合は訂正してください。
+コメントアウトされたソースコードは残します。
+その前提で不必要なコメントは削除してください。
+コメントは１行を基準に、処理ブロック前後の行間も調整して解り易くしてください。
+修正後のソースコードはすべて出力してください。
+ソースコードのロジック改良案は最後に報告してください。
+    </textarea>
+    
+    <textarea id="req_pyjs2" name="req_pyjs2" style="display:none;">
+ソースコードを修正してください。
+関数で型定義が抜けているところは、現在の型を推察し定義してください。
+改行の入れ方など工夫して、見やすいソースコードに仕上げてください。
+コメントアウトされたソースコードは残していますので、削除しないでください。
+修正後のソースコードはすべて出力してください。
+ソースコードのロジック改良案は最後に報告してください。
+    </textarea>
+    
+    <textarea id="req_pyjs3" name="req_pyjs3" style="display:none;">
+ソースコードを修正してください。
+・
+ソースコードは、修正点のみ、わかりやすく出力してください。
+    </textarea>
+    
+    <textarea id="req_html1" name="req_html1" style="display:none;">
+HTMLテンプレートのコメント修正のみ実施してください。
+日本語でお願いします。
+スタイル設定の行右側の説明コメントは削除してください。
+過度なコメントは不要です。
+ブロック毎のコメント以外は削除してください。
+コメントアウトされたソースコードは残します。
+その前提で不必要なコメントは削除してください。
+ブロック毎のコメントが入っていない箇所は、適切なコメントを追加してください。
+コメントは１行を基準に、ブロック前後の行間も追加し見やすくしてください。
+ブロック毎のコメントが入っている箇所は、適切なコメントか判断し、間違ってる場合は訂正してください。
+２行以上のコメントは端的な１行に要約し、ブロック前後の行間も追加し見やすくしてください。
+修正後のテンプレートはすべて出力してください。
+テンプレートのスクリプト改良案は最後に報告してください。
+    </textarea>
+    
+    <textarea id="req_html2" name="req_html2" style="display:none;">
+HTMLテンプレートを修正してください。
+改行の入れ方など工夫して、見やすいソースコードに仕上げてください。
+コメントアウトされたソースコードは残していますので、削除しないでください。
+修正後のテンプレートはすべて出力してください。
+テンプレートのスクリプト改良案は最後に報告してください。
+    </textarea>
+    
+    <textarea id="req_html3" name="req_html3" style="display:none;">
+HTMLテンプレートを修正してください。
+・
+テンプレートは、修正点のみ、わかりやすく出力してください。
+    </textarea>
+
+    <textarea id="req_index" name="req_index" style="display:none;">
+sonnet,
+htmlだけで動くクールなプログラムを作成してください。
+javascript部分は、テストしやすいように、html内に内包させ、1つのファイルにまとめてください。
+javascript部分は、テスト後に分離しやすいように、html下部にまとめてください。
+コーディングサンプルとして適切なコメントも記述してください。
+以下の仕様で作成してください。
+・
+    </textarea>
+
+    <textarea id="req_react" name="req_react" style="display:none;">
+assistant,
+React(nodejs)で動作する以下のプログラムを生成してください。
+・Hallo World!
+
+フォルダ構造は、後記の形式で、application-nameを置き換えてください。
+生成したhtml,jsコードはユーザーのSandbox環境で動作させますので、
+解凍、配置、動作させるためのソース一式をZIPでまとめて出力してください。
+
+フォルダ構造
+application-name/
+├── package.json
+├── public
+│　　　└── index.html
+└── src
+　　　　├── index.js
+　　　　└── App.js
+    </textarea>
+    <script>
+        var js = 'development.js';
+        var script = document.createElement('script');
+        script.src = js + '?v=' + Math.random();
+        document.head.appendChild(script);
+    </script>
+
+</body>
+</html>

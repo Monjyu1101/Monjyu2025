@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MainUI</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* 全体のスタイル設定 */
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            height: 100%;
+            overflow: hidden;
+        }
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+        .frame-container {
+            display: flex;
+            width: 100%;
+            height: calc(100% - 20px); 
+        }
+        .frame-left, .frame-right {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .frame-left .tab-header, .frame-right .tab-header {
+            display: flex;
+            background-color: #eee;
+        }
+        .frame-left .tab-header button, .frame-right .tab-header button {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: small;
+        }
+        .frame-left .tab-header button.active, .frame-right .tab-header button.active {
+            background-color: #000; 
+            color: #fff; 
+            font-size: medium;
+        }
+        .frame-left .tab-content, .frame-right .tab-content {
+            display: none;
+            flex-grow: 1;
+            height: calc(100% - 20px);
+            overflow: auto;
+        }
+        .frame-left .tab-content.active, .frame-right .tab-content.active {
+            display: flex;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        @media (max-width: 768px) {
+            .frame-left, .frame-right {
+                width: 100%;
+            }
+            .frame-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="frame-container">
+
+            <div class="frame-left">
+                
+                <!-- 左側フレーム -->
+                <div class="tab-header">
+                    <button data-target="input">Input</button>
+                    <button data-target="statuses">Statuses</button>
+                    <button data-target="vision">Vision</button>
+                    <button data-target="urlSpeech">urlSpeech</button>
+                    <button data-target="etc-left">etc</button>
+                </div>
+
+                <!-- 入力用のiframe -->
+                <div class="tab-content" id="input">
+                    <iframe id="iframe-input" src="/input.html"></iframe>
+                </div>
+
+                <!-- ステータス表示用のiframe -->
+                <div class="tab-content" id="statuses">
+                    <iframe id="iframe-statuses" src="/statuses.html"></iframe>
+                </div>
+
+                <!-- Visionのiframe -->
+                <div class="tab-content" id="vision">
+                    <iframe id="iframe-vision" src="/vision.html"></iframe>
+                </div>
+
+                <!-- urlSpeechのiframe -->
+                <div class="tab-content" id="urlSpeech">
+                    <iframe id="iframe-urlSpeech" src="/urlSpeech.html"></iframe>
+                </div>
+
+                <!-- その他の表示 -->
+                <div class="tab-content" id="etc-left">
+                    Hallo World !
+                </div>
+
+            </div>
+
+            <div class="frame-right">
+
+                <!-- 右側フレーム -->
+                <div class="tab-header">
+                    <button data-target="output">Output</button>
+                    <button data-target="histories">Histories</button>
+                    <button data-target="debug_step">Debug(Step)</button>
+                    <button data-target="sandbox">Sandbox</button>
+                    <button data-target="writing">Writing</button>
+                    <button data-target="development">Development</button>
+                    <button data-target="etc-right">etc</button>
+                </div>
+
+                <!-- 出力用のiframe -->
+                <div class="tab-content" id="output">
+                    <iframe id="iframe-output" src="/output.html"></iframe>
+                </div>
+
+                <!-- 履歴表示用のiframe -->
+                <div class="tab-content" id="histories">
+                    <iframe id="iframe-histories" src="/histories.html"></iframe>
+                </div>
+
+                <!-- デバッグ出力用のiframe -->
+                <div class="tab-content" id="debug_step">
+                    <iframe id="iframe-debug_step" src="/debug_step.html"></iframe>
+                </div>
+
+                <!-- Sandboxのiframe -->
+                <div class="tab-content" id="sandbox">
+                    <iframe id="iframe-sandbox" src="/sandbox.html"></iframe>
+                </div>
+
+                <!-- 執筆支援のiframe -->
+                <div class="tab-content" id="writing">
+                    <iframe id="iframe-writing" src="/writing.html"></iframe>
+                </div>
+
+                <!-- 開発支援のiframe -->
+                <div class="tab-content" id="development">
+                    <iframe id="iframe-development" src="/development.html"></iframe>
+                </div>
+
+                <!-- その他の表示 -->
+                <div class="tab-content" id="etc-right">
+                    Hallo World !
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <script>
+        var js = 'mainui.js';
+        var script = document.createElement('script');
+        script.src = js + '?v=' + Math.random();
+        document.head.appendChild(script);
+    </script>
+
+</body>
+</html>

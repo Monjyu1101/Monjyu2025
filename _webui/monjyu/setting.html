@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* 全体のスタイル設定 */
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            height: 100%;
+            overflow: hidden;
+        }
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+        .frame-container {
+            display: flex;
+            width: 100%;
+            height: calc(100% - 20px); 
+        }
+        .frame-left, .frame-right {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .frame-left .tab-header, .frame-right .tab-header {
+            display: flex;
+            background-color: #eee;
+        }
+        .frame-left .tab-header button, .frame-right .tab-header button {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: small;
+        }
+        .frame-left .tab-header button.active, .frame-right .tab-header button.active {
+            background-color: #000; 
+            color: #fff; 
+            font-size: medium;
+        }
+        .frame-left .tab-content, .frame-right .tab-content {
+            display: none;
+            flex-grow: 1;
+            height: calc(100% - 20px);
+            overflow: auto;
+        }
+        .frame-left .tab-content.active, .frame-right .tab-content.active {
+            display: flex;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        @media (max-width: 768px) {
+            .frame-left, .frame-right {
+                width: 100%;
+            }
+            .frame-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="frame-container">
+
+            <div class="frame-left">
+                
+                <!-- 左側フレーム -->
+                <div class="tab-header">
+                    <button data-target="engine">Engine</button>
+                    <button data-target="model">Model</button>
+                    <button data-target="live">Live</button>
+                    <button data-target="agent">Agent</button>
+                    <button data-target="webui">WebUI</button>
+                    <button data-target="etc-left">etc</button>
+                </div>
+
+                <div class="tab-content" id="engine">
+                    <!-- 設定用のiframe -->
+                    <iframe id="iframe-engine" src="/setting_engine.html"></iframe>
+                </div>
+
+                <div class="tab-content" id="model">
+                    <!-- 設定用のiframe -->
+                    <iframe id="iframe-model" src="/setting_model.html"></iframe>
+                </div>
+
+                <div class="tab-content" id="live">
+                    <!-- 設定用のiframe -->
+                    <iframe id="iframe-live" src="/setting_live.html"></iframe>
+                </div>
+
+                <div class="tab-content" id="agent">
+                    <!-- 設定用のiframe -->
+                    <iframe id="iframe-agent" src="/setting_agent.html"></iframe>
+                </div>
+
+                <div class="tab-content" id="webui">
+                    <!-- WebUIのiframe -->
+                    <iframe id="iframe-webui" src="/webui.html"></iframe>
+                </div>
+
+                <div class="tab-content" id="etc-left">
+                    <!-- その他の表示 -->
+                    Hallo World !
+                </div>
+
+            </div>
+
+            <div class="frame-right">
+
+                <!-- 右側フレーム -->
+                <div class="tab-header">
+                    <button data-target="other">Other</button>
+                    <button data-target="input">Input</button>
+                    <button data-target="output">Output</button>
+                    <button data-target="etc-right">etc</button>
+                </div>
+
+                <div class="tab-content" id="other">
+                    <!-- 設定用のiframe -->
+                    <iframe id="iframe-other" src="/setting_other.html"></iframe>
+                </div>
+
+                <div class="tab-content" id="input">
+                    <!-- 設定用のiframe -->
+                    <iframe id="iframe-other" src="/input.html"></iframe>
+                </div>
+
+                <div class="tab-content" id="output">
+                    <!-- 設定用のiframe -->
+                    <iframe id="iframe-other" src="/output.html"></iframe>
+                </div>
+
+                <div class="tab-content" id="etc-right">
+                    <!-- その他の表示 -->
+                    Hallo World !
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <script>
+        var js = 'setting.js';
+        var script = document.createElement('script');
+        script.src = js + '?v=' + Math.random();
+        document.head.appendChild(script);
+    </script>
+
+</body>
+</html>

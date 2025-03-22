@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+
+        /* 入力エリアのスタイル */
+        .input-container {
+            background-color: #f0f0f0;
+            width: calc(100% - 15px);
+        }
+
+        /* 入力ヘッダーのスタイル */
+        .input-container h2 {
+            background-color: #e0e0e0;
+            margin: 0 0 5px 0;
+            font-size: medium;
+        }
+
+        /* 画像情報エリアのスタイル */
+        #image_info {
+            border: 2px solid #ccc;
+            width: 100%;
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+            overflow: hidden; 
+            padding: 0;
+            box-sizing: border-box; 
+        }
+        
+        /* 画像のサイズ調整 */
+        #image_info img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; 
+        }
+
+        /* テキストエリアのスタイル */
+        textarea {
+            width: 100%;
+            overflow-y: auto;
+            overflow-x: auto;
+            resize: none;
+            box-sizing: border-box;
+            white-space: pre;
+        }
+       
+        /* ドラッグオーバー時のスタイル */
+        .drag-over {
+            border: 2px dashed #4a90e2 !important;
+            background-color: rgba(74, 144, 226, 0.1);
+        }
+
+        /* 外枠を点滅させるアニメーション */
+        .blink-border {
+            animation: blink-border 1s linear infinite;
+            border-width: 2px;
+            border-style: solid;
+        }
+        
+        /* アニメーションの定義 */
+        @keyframes blink-border {
+            0% { border-color: blue; }
+            50% { border-color: transparent; }
+            100% { border-color: blue; }
+        }       
+    </style>
+</head>
+<body>
+    <input type="hidden" id="core_endpoint" name="core_endpoint" value="http://localhost:8000">
+    <input type="hidden" id="user_id" name="user_id" value="admin">
+        
+    <!-- 入力エリア -->
+    <div class="input-container">
+        <h2>【 Vision 】</h2>
+
+        <form id="process-form">
+            <input type="hidden" id="system_text" name="system_text" value="あなたは美しい日本語を話す賢いアシスタントです。">
+            <input type="hidden" id="req_mode" name="req_mode" value="vision">
+            <input type="hidden" id="to_port" name="to_port" value="8000">
+            <table width="100%">
+                <tr>
+                    <td>
+                        <div id="image_info" data-drop-target="image" style="height: 200px;">
+                            <div id="image_none">Drop File...</div>
+                            <img id="image_img" src="" style="display: none;">
+                            <video id="stream_img" style="display: none; max-width: 100%; max-height: 100%;"></video>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center">
+                        <button type="button" id="cam-button">Cam</button>
+                        <button type="button" id="desktop-button">Desktop</button>
+                        <button type="button" id="stop-button">Stop</button>
+                    </td>
+                </tr>
+            </table>
+            <table width="100%">
+                <tr>
+                    <td width="5%" align="right" valign="top">
+                        Req:
+                    </td>
+                    <td width="94%">
+                        <textarea id="vision_request" name="vision_request" placeholder="指示を入力してください" required style="height: 150px;"></textarea>
+                    </td>
+                    <td width="1%">
+                        <div id="input_files">
+                            <ul id="input_files_list">
+                                <!-- アップロードされたファイルの一覧を表示 -->
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </form>
+            
+        <table width="100%">
+            <tr>
+                <td width="5%"></td>
+                <td width="95%">
+                    <table width="100%">
+                        <tr>
+                            <td align="left">
+                                <button type="button" id="clear-button" style="width: 160px; height: 30px;">Clear (クリア)</button>
+                            </td>
+                            <td align="right">
+                                <button type="button" id="submit-button" style="width: 160px; height: 30px;">Exec (送信/実行)</button>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+
+        <h2>【 Result (結果) 】</h2>
+
+        <table width="100%">
+            <tr>
+                <td width="5%" align="right" valign="top">
+                    Data:
+                </td>
+                <td width="95%">
+                    <textarea id="output_data" style="height: 150px;"></textarea>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        var js = 'vision.js';
+        var script = document.createElement('script');
+        script.src = js + '?v=' + Math.random();
+        document.head.appendChild(script);
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writing</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* 表示エリアのスタイル */
+        .writing-container {
+            background-color: #f0f0f0;
+            width: calc(100% - 15px);
+        }
+        /* ヘッダーのスタイル */
+        .writing-container h2 {
+            background-color: #e0e0e0;
+            margin: 0 0 5px 0;
+            font-size: medium;
+        }
+        /* テキストエリアのスタイル */
+        textarea {
+            width: 100%;
+            overflow-y: auto;
+            overflow-x: auto;
+            resize: none;
+            box-sizing: border-box;
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+    <input type="hidden" id="core_endpoint" name="core_endpoint" value="http://localhost:8000">
+    <input type="hidden" id="user_id" name="user_id" value="admin">
+    <div class="writing-container">
+        <h2>【 Writing (執筆) 】</h2>
+        <br>
+
+        １）話数設定☆:
+        <select id="n_max" name="n_max">
+            <option value="6">6話</option>
+            <option value="12">12話</option>
+            <option value="24">24話</option>
+            <option value="36">36話</option>
+            <option value="48">48話</option>
+        </select>
+        <br>
+        ２）プロット☆:<br>
+        <textarea id="plot_text" name="plot_text" style="width: 100%; height: 5vh;"></textarea>
+
+        <br><br>
+               
+        <!-- リクエストボタン群 -->
+        <button type="button" id="btnReq_doc1">３）あらすじ設定☆</button>
+        <button type="button" id="btnReq_doc2">執筆</button>
+        <button type="button" id="btnReq_doc3">更生</button>
+        
+        <br><br>
+
+        <!-- 実行ボタン群 -->
+        <button type="button" id="btnArasuji_all">４）あらすじ全話生成☆</button>
+        <br><br>
+        <button type="button" id="btnNovel_parallel">５）並列全話生成</button>
+        <br>
+        <button type="button" id="btnNovel_serial1">５）順次１話生成</button>
+        <button type="button" id="btnNovel_serial1_TTS">順次１話生成TTS</button>
+        <br>
+        <button type="button" id="btnNovel_serial2">５）順次全話生成☆</button>
+        <button type="button" id="btnNovel_serial2_TTS">順次全話生成TTS</button>
+        <br><br>
+
+        <h2>【 Working (作業エリア) 】</h2>
+        <table width="100%">
+            <tr>
+                <td width="5%" align="right" valign="top">Sum:</td>
+                <td width="95%">
+                    <textarea id="summary_text" readonly style="width: 100%; height: 15vh;"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td width="5%" align="right" valign="top">Last:</td>
+                <td width="95%">
+                    <textarea id="last_text" readonly style="width: 100%; height: 15vh;"></textarea>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <textarea id="req_doc1" name="req_doc1" style="display:none;">
+全{ ***N_MAX*** }話で完結する新規小説のあらすじ作成をお願いします。
+題材は以下の内容でお願いします。
+
+・{ ***PLOT_TEXT*** }
+
+題名と大まかな物語内容を決めてください。
+主要登場人物の名前と人物像を決めてください。
+時代背景、政治環境などの小説としての場面設定も決めてください。
+各話は1000文字程度を予定しています。
+{ ***N_MAX*** }話であらすじ内容を、各話10行以上で200文字を超えるように作成してください。
+あらすじは内容は、ライトノベル風に改行を多く入れて、読みやすい文章でお願いします。
+    </textarea>
+
+    <textarea id="req_doc2" name="req_doc2" style="display:none;">
+あらすじに沿って、第{ ***N*** }話について執筆(原案がある場合は改稿)してください。
+小説の執筆ですので、（発言者）のような注釈や、行先頭に行表示などの記載は不要です。
+原稿案がある場合、原作者の表現したい意図を分析し、その部分をより分かりやすく執筆してください。
+主人公の心情や周りの環境について、細かく描写するようにお願いします。
+大筋の内容は絶対に変えないようにお願いします。
+作成する文章は100行以上で2000文字を超えるように物語を膨らませてください。
+改稿時は、必ず修正前より文章が長くなるようにお願いします。
+読者の好奇心を刺激するとともに、感動を与える表現をお願いします。
+執筆は、ライトノベル風に改行を多く入れて、読みやすい文章でお願いします。
+    </textarea>
+
+    <textarea id="req_doc3" name="req_doc3" style="display:none;">
+小説の加筆修正をお願いします。
+修正点は以下の内容でお願いします。
+・第{ ***N*** }話について、心情の動きをもっと丁寧に描写してください。
+必ず修正前より文章が長くなるようにお願いします。
+ライトノベル風に改行を多く入れて、読みやすい文章でお願いします。
+    </textarea>
+
+    <script>
+        var js = 'writing.js';
+        var script = document.createElement('script');
+        script.src = js + '?v=' + Math.random();
+        document.head.appendChild(script);
+    </script>
+
+</body>
+</html>

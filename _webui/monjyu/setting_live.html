@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setting (Live)</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+
+        /* 入力エリアのスタイル */
+        .setting-container {
+            background-color: #f0f0f0;
+            width: calc(100% - 15px);
+        }
+
+        /* ヘッダーのスタイル */
+        .setting-container h2 {
+            background-color: #e0e0e0;
+            margin: 0 0 5px 0;
+            font-size: medium;
+        }
+
+        /* タブ全体のスタイル */
+        .frame-tab {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* タブのヘッダーのスタイル */
+        .frame-tab .tab-header {
+            display: flex;
+            background-color: #eee;
+        }
+
+        /* タブのボタンのスタイル */
+        .frame-tab .tab-header button {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: small;
+        }
+
+        /* アクティブなタブのボタンのスタイル */
+        .frame-tab .tab-header button.active {
+            background-color: #000;
+            color: #fff;
+            font-size: medium;
+        }
+
+        /* タブのコンテンツのスタイル */
+        .frame-tab .tab-content {
+            display: none;
+            flex-grow: 1;
+            height: calc(100% - 20px); /* タブヘッダーの高さを考慮 */
+            overflow: auto;
+            flex-direction: column; /* 縦方向に配置 */
+        }
+
+        /* アクティブなタブのコンテンツのスタイル */
+        .frame-tab .tab-content.active {
+            display: flex;
+        }
+
+        /* テキストエリアのスタイル */
+        textarea {
+            width: 100%;
+            overflow-y: auto;
+            overflow-x: auto;
+            resize: none;
+            box-sizing: border-box;
+            white-space: pre;
+        }
+
+        /* 外枠を点滅させるアニメーション */
+        .blink-border {
+            animation: blink-border 1s linear infinite;
+            border-width: 2px;
+            border-style: solid;
+        }
+        
+        /* アニメーションの定義 */
+        @keyframes blink-border {
+            0% { border-color: blue; }
+            50% { border-color: transparent; }
+            100% { border-color: blue; }
+        }       
+
+        /* 設定と入力欄の区切り線 */
+        .setting-separator {
+            border-top: 1px solid #ccc; /* ヘアライン */
+            margin: 15px 0; /* 上下の余白 */
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 初期設定値 -->
+    <input type="hidden" id="core_endpoint" name="core_endpoint" value="http://localhost:8000">
+    <input type="hidden" id="user_id" name="user_id" value="admin">
+
+    <div class="setting-container">
+
+        <h2>【 Setting (Live) 】</h2>
+
+        <div class="frame-tab">
+
+            <!-- タブのヘッダー -->
+            <div class="tab-header">
+                <button data-target="reset">Reset</button>
+                <button data-target="freeai">FreeAI</button>
+                <button data-target="openai">OpenAI</button>
+            </div>
+
+            <!-- Resetタブ -->
+            <div class="tab-content" id="reset" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">
+                            リセット :
+                        </td>
+                        <td>
+                            <button type="button" id="reset-button">Reset (リセット)</button>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                </table>
+            </div>
+
+            <!-- FreeAIタブ -->
+            <div class="tab-content" id="freeai" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">【FreeAI】</td>
+                        <td>(live)</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Model:</td>
+                        <td>
+                            <select id="freeai_live_model" name="freeai_live_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Voice:</td>
+                        <td>
+                            <select id="freeai_live_voice" name="freeai_live_voice">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">画像送信間隔(秒):</td>
+                        <td>
+                            <select id="freeai_shot_interval_sec" name="freeai_shot_interval_sec">
+                                <option value="">Auto (自動)</option>
+                                <option value="1">1秒間隔</option>
+                                <option value="2">2秒間隔</option>
+                                <option value="3">3秒間隔</option>
+                                <option value="5">5秒間隔</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">クリップ送信後アイドル(秒):</td>
+                        <td>
+                            <select id="freeai_clip_interval_sec" name="freeai_clip_interval_sec">
+                                <option value="">Auto (自動)</option>
+                                <option value="15">15秒待機</option>
+                                <option value="30">30秒待機</option>
+                                <option value="60">60秒待機</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="setting-separator"></div> <!-- 区切り線 -->
+
+                <table width="100%">
+                    <tr>
+                        <td width="15%" align="right" valign="top">
+                            Req:<br>
+                            (Live)
+                        </td>
+                        <td width="70%">
+                            <textarea id="freeai_live_request" name="freeai_live_request" placeholder="要求内容を入力してください" required style="height: 10vh;" data-drop-target="freeai_live_request"></textarea>
+                        </td>
+                        <td width="15%">　</td>
+                    </tr>
+                    <tr>
+                        <td width="15%">　</td>
+                        <td width="65%">
+                            <button type="button" id="freeai-live-button">Req→Live</button>
+                        </td>
+                        <td width="15%">　</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- OpenAIタブ -->
+            <div class="tab-content" id="openai" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">【openai】</td>
+                        <td>(live)</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Model:</td>
+                        <td>
+                            <select id="openai_live_model" name="openai_live_model">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Voice:</td>
+                        <td>
+                            <select id="openai_live_voice" name="openai_live_voice">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">画像送信間隔(秒):</td>
+                        <td>
+                            <select id="openai_shot_interval_sec" name="openai_shot_interval_sec">
+                                <option value="">Auto (自動)</option>
+                                <option value="1">1秒間隔</option>
+                                <option value="2">2秒間隔</option>
+                                <option value="3">3秒間隔</option>
+                                <option value="5">5秒間隔</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">クリップ送信後アイドル(秒):</td>
+                        <td>
+                            <select id="openai_clip_interval_sec" name="openai_clip_interval_sec">
+                                <option value="">Auto (自動)</option>
+                                <option value="15">15秒待機</option>
+                                <option value="30">30秒待機</option>
+                                <option value="60">60秒待機</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="setting-separator"></div> <!-- 区切り線 -->
+
+                <table width="100%">
+                    <tr>
+                        <td width="15%" align="right" valign="top">
+                            Req:<br>
+                            (Live)
+                        </td>
+                        <td width="70%">
+                            <textarea id="openai_live_request" name="openai_live_request" placeholder="要求内容を入力してください" required style="height: 10vh;" data-drop-target="openai_live_request"></textarea>
+                        </td>
+                        <td width="15%">　</td>
+                    </tr>
+                    <tr>
+                        <td width="15%">　</td>
+                        <td width="65%">
+                            <button type="button" id="openai-live-button">Req→Live</button>
+                        </td>
+                        <td width="15%">　</td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        var js = 'setting_live.js';
+        var script = document.createElement('script');
+        script.src = js + '?v=' + Math.random();
+        document.head.appendChild(script);
+    </script>
+
+</body>
+</html>

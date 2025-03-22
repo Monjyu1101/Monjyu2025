@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setting (Other)</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+
+        /* 入力エリアのスタイル */
+        .setting-container {
+            background-color: #f0f0f0;
+            width: calc(100% - 15px);
+        }
+
+        /* ヘッダーのスタイル */
+        .setting-container h2 {
+            background-color: #e0e0e0;
+            margin: 0 0 5px 0;
+            font-size: medium;
+        }
+
+        /* タブ全体のスタイル */
+        .frame-tab {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* タブのヘッダーのスタイル */
+        .frame-tab .tab-header {
+            display: flex;
+            background-color: #eee;
+        }
+
+        /* タブのボタンのスタイル */
+        .frame-tab .tab-header button {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: small;
+        }
+
+        /* アクティブなタブのボタンのスタイル */
+        .frame-tab .tab-header button.active {
+            background-color: #000;
+            color: #fff;
+            font-size: medium;
+        }
+
+        /* タブのコンテンツのスタイル */
+        .frame-tab .tab-content {
+            display: none;
+            flex-grow: 1;
+            height: calc(100% - 20px); /* タブヘッダーの高さを考慮 */
+            overflow: auto;
+        }
+
+        /* アクティブなタブのコンテンツのスタイル */
+        .frame-tab .tab-content.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 初期設定値 -->
+    <input type="hidden" id="core_endpoint" name="core_endpoint" value="http://localhost:8000">
+    <input type="hidden" id="user_id" name="user_id" value="admin">
+
+    <div class="setting-container">
+
+        <h2>【 Setting (Other) 】</h2>
+
+        <div class="frame-tab">
+
+            <!-- タブのヘッダー -->
+            <div class="tab-header">
+                <button data-target="reset">Reset</button>
+                <button data-target="addins">Addins</button>
+                <button data-target="reacts">Reacts</button>
+            </div>
+
+            <!-- Resetタブ -->
+            <div class="tab-content" id="reset" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">
+                            リセット :
+                        </td>
+                        <td>
+                            <button type="button" id="reset-button">Reset (リセット)</button>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                </table>
+            </div>
+
+            <!-- Addinsタブ -->
+            <div class="tab-content" id="addins" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">Save (結果保存):</td>
+                        <td>
+                            <select id="result_text_save" name="result_text_save">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes,">yes, (有効)</option>
+                                <option value="no,">no, (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">STT (音声認識):</td>
+                        <td>
+                            <select id="speech_stt_engine" name="speech_stt_engine">
+                                <option value="">Auto (自動)</option>
+                                <option value="google">free(google)</option>
+                                <option value="openai">openai</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">TTS (音声合成):</td>
+                        <td>
+                            <select id="speech_tts_engine" name="speech_tts_engine">
+                                <option value="">Auto (自動)</option>
+                                <option value="free">free</option>
+                                <option value="google">google</option>
+                                <option value="openai">openai</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Clip (Clip入力):</td>
+                        <td>
+                            <select id="text_clip_input" name="text_clip_input">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes,">yes, (有効)</option>
+                                <option value="no,">no, (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">URL (URL文字化):</td>
+                        <td>
+                            <select id="text_url_execute" name="text_url_execute">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes,">yes, (有効)</option>
+                                <option value="no,">no, (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">PDF (PDF文字化):</td>
+                        <td>
+                            <select id="text_pdf_execute" name="text_pdf_execute">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes,">yes, (有効)</option>
+                                <option value="no,">no, (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">OCR (文字認識):</td>
+                        <td>
+                            <select id="image_ocr_execute" name="image_ocr_execute">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes,">yes, (有効)</option>
+                                <option value="no,">no, (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Yolo (画像認識):</td>
+                        <td>
+                            <select id="image_yolo_execute" name="image_yolo_execute">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes,">yes, (有効)</option>
+                                <option value="no,">no, (無効)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Reactsタブ -->
+            <div class="tab-content" id="reacts" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">
+                            Hallo World :
+                        </td>
+                        <td>
+                            <button type="button" id="btn-react_sandbox">Reset Sandbox (Hallo World)</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            Realtime Console (openai) :
+                        </td>
+                        <td>
+                            <button type="button" id="btn-realtimeConsole-openai">Realtime Console (openai)</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            Realtime Console (google) :
+                        </td>
+                        <td>
+                            <button type="button" id="btn-realtimeConsole-google">Realtime Console (google)</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        var js = 'setting_other.js';
+        var script = document.createElement('script');
+        script.src = js + '?v=' + Math.random();
+        document.head.appendChild(script);
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setting (Engine)</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+
+        /* 入力エリアのスタイル */
+        .setting-container {
+            background-color: #f0f0f0;
+            width: calc(100% - 15px);
+        }
+
+        /* ヘッダーのスタイル */
+        .setting-container h2 {
+            background-color: #e0e0e0;
+            margin: 0 0 5px 0;
+            font-size: medium;
+        }
+
+        /* タブ全体のスタイル */
+        .frame-tab {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* タブのヘッダーのスタイル */
+        .frame-tab .tab-header {
+            display: flex;
+            background-color: #eee;
+        }
+
+        /* タブのボタンのスタイル */
+        .frame-tab .tab-header button {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: small;
+        }
+
+        /* アクティブなタブのボタンのスタイル */
+        .frame-tab .tab-header button.active {
+            background-color: #000;
+            color: #fff;
+            font-size: medium;
+        }
+
+        /* タブのコンテンツのスタイル */
+        .frame-tab .tab-content {
+            display: none;
+            flex-grow: 1;
+            height: calc(100% - 20px); /* タブヘッダーの高さを考慮 */
+            overflow: auto;
+        }
+
+        /* アクティブなタブのコンテンツのスタイル */
+        .frame-tab .tab-content.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 初期設定値 -->
+    <input type="hidden" id="core_endpoint" name="core_endpoint" value="http://localhost:8000">
+    <input type="hidden" id="user_id" name="user_id" value="admin">
+
+    <div class="setting-container">
+
+        <h2>【 Setting (Engile) 】</h2>
+
+        <div class="frame-tab">
+
+            <!-- タブのヘッダー -->
+            <div class="tab-header">
+                <button data-target="reset">Reset</button>
+                <button data-target="chat">Chat</button>
+                <button data-target="vision">Vision</button>
+                <button data-target="websearch">WebSearch</button>
+                <button data-target="serial">Serial</button>
+                <button data-target="parallel">Parallel</button>
+                <button data-target="session">Session</button>
+                <button data-target="clip">Clip</button>
+                <button data-target="voice">Voice</button>
+            </div>
+
+            <!-- Resetタブ -->
+            <div class="tab-content" id="reset" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">
+                            リセット :
+                        </td>
+                        <td>
+                            <button type="button" id="reset-button">Reset (リセット)</button>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">
+                            Chat,V..,Web (AI) 一括設定 :
+                        </td>
+                        <td>
+                            <button type="button" id="chat-auto">Auto (自動設定)</button>
+                            <button type="button" id="chat-freeai">[freeai]</button>
+                            <button type="button" id="chat-openrt">[openrt]</button>
+                            <button type="button" id="chat-openai">[openai]</button>
+                            <button type="button" id="chat-grok">[grok]</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            Serial (AI) 一括設定 :
+                        </td>
+                        <td>
+                            <button type="button" id="serial-auto">Auto (自動設定)</button>
+                            <button type="button" id="serial-freeai">[freeai]</button>
+                            <button type="button" id="serial-openrt">[openrt]</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            Parallel (AI) 一括設定 :
+                        </td>
+                        <td>
+                            <button type="button" id="parallel-auto">Auto (自動設定)</button>
+                            <button type="button" id="parallel-freeai">[freeai]</button>
+                            <button type="button" id="parallel-openrt">[openrt]</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Chatタブ -->
+            <div class="tab-content" id="chat" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">Chat</td>
+                        <td>(bot)設定</td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="chat_req_engine" name="chat_req_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td>　</td><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">Functions (拡張):</td>
+                        <td>
+                            <select id="chat_req_functions" name="chat_req_functions">
+                                <option value="">Auto (自動)</option>
+                                <option value="no,">No (利用無)</option>
+                                <option value="yes,">Yes (利用有)</option>
+                            </select>
+                        </td>
+                        <td align="right">Reset History (会話):</td>
+                        <td>
+                            <select id="chat_req_reset" name="chat_req_reset">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes,">Yes (消去)</option>
+                                <option value="no,">No (継続)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Retry (再試行):</td>
+                        <td>
+                            <select id="chat_max_retry" name="chat_max_retry">
+                                <option value="">Auto (自動)</option>
+                                <option value="0">No Retry (無)</option>
+                            </select>
+                        </td>
+                        <td align="right">Num AIs (利用AI数):</td>
+                        <td>
+                            <input type="hidden" id="chat_max_ai_count" name="chat_max_ai_count" value="">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Before (前処理):</td>
+                        <td>
+                            <select id="chat_before_proc" name="chat_before_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="prompt,">prompt,</option>
+                                <option value="profile,">profile,</option>
+                                <option value="profile,prompt,">profile,prompt,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="chat_before_engine" name="chat_before_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">After (後処理):</td>
+                        <td>
+                            <select id="chat_after_proc" name="chat_after_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="all,">all,</option>
+                                <option value="code,">code,</option>
+                                <option value="summary,">summary,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="chat_after_engine" name="chat_after_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Check (検証):</td>
+                        <td>
+                            <select id="chat_check_proc" name="chat_check_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="yes,">yes,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="chat_check_engine" name="chat_check_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Visionタブ -->
+            <div class="tab-content" id="vision" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">Vision</td>
+                        <td>(bot)設定</td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="vision_req_engine" name="vision_req_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td>　</td><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">Functions (拡張):</td>
+                        <td>
+                            <select id="vision_req_functions" name="vision_req_functions">
+                                <option value="">Auto (自動)</option>
+                                <option value="no,">No (利用無)</option>
+                                <option value="yes,">Yes (利用有)</option>
+                            </select>
+                        </td>
+                        <td align="right">Reset History (会話):</td>
+                        <td>
+                            <select id="vision_req_reset" name="vision_req_reset">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes,">Yes (消去)</option>
+                                <option value="no,">No (継続)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Retry (再試行):</td>
+                        <td>
+                            <select id="vision_max_retry" name="vision_max_retry">
+                                <option value="">Auto (自動)</option>
+                                <option value="0">No Retry (無)</option>
+                            </select>
+                        </td>
+                        <td align="right">Num AIs (利用AI数):</td>
+                        <td>
+                            <input type="hidden" id="vision_max_ai_count" name="vision_max_ai_count" value="">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Before (前処理):</td>
+                        <td>
+                            <select id="vision_before_proc" name="vision_before_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="prompt,">prompt,</option>
+                                <option value="profile,">profile,</option>
+                                <option value="profile,prompt,">profile,prompt,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="vision_before_engine" name="vision_before_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">After (後処理):</td>
+                        <td>
+                            <select id="vision_after_proc" name="vision_after_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="all,">all,</option>
+                                <option value="code,">code,</option>
+                                <option value="summary,">summary,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="vision_after_engine" name="vision_after_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Check (検証):</td>
+                        <td>
+                            <select id="vision_check_proc" name="vision_check_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="yes,">yes,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="vision_check_engine" name="vision_check_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- WebSearchタブ -->
+            <div class="tab-content" id="websearch" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">WebSearch</td>
+                        <td>(bot)設定</td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="websearch_req_engine" name="websearch_req_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td>　</td><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">Functions (拡張):</td>
+                        <td>
+                            <select id="websearch_req_functions" name="websearch_req_functions">
+                                <option value="">Auto (自動)</option>
+                                <option value="no,">No (利用無)</option>
+                                <option value="yes,">Yes (利用有)</option>
+                            </select>
+                        </td>
+                        <td align="right">Reset History (会話):</td>
+                        <td>
+                            <select id="websearch_req_reset" name="websearch_req_reset">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes,">Yes (消去)</option>
+                                <option value="no,">No (継続)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Retry (再試行):</td>
+                        <td>
+                            <select id="websearch_max_retry" name="websearch_max_retry">
+                                <option value="">Auto (自動)</option>
+                                <option value="0">No Retry (無)</option>
+                            </select>
+                        </td>
+                        <td align="right">Num AIs (利用AI数):</td>
+                        <td>
+                            <input type="hidden" id="websearch_max_ai_count" name="websearch_max_ai_count" value="">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Before (前処理):</td>
+                        <td>
+                            <select id="websearch_before_proc" name="websearch_before_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="prompt,">prompt,</option>
+                                <option value="profile,">profile,</option>
+                                <option value="profile,prompt,">profile,prompt,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="websearch_before_engine" name="websearch_before_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">After (後処理):</td>
+                        <td>
+                            <select id="websearch_after_proc" name="websearch_after_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="all,">all,</option>
+                                <option value="code,">code,</option>
+                                <option value="summary,">summary,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="websearch_after_engine" name="websearch_after_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Check (検証):</td>
+                        <td>
+                            <select id="websearch_check_proc" name="websearch_check_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="yes,">yes,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="websearch_check_engine" name="websearch_check_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Serialタブ -->
+            <div class="tab-content" id="serial" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">Serial</td>
+                        <td>(bot)設定</td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="serial_req_engine" name="serial_req_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td>　</td><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">Functions (拡張):</td>
+                        <td>
+                            <select id="serial_req_functions" name="serial_req_functions">
+                                <option value="">Auto (自動)</option>
+                                <option value="no,">No (利用無)</option>
+                                <option value="yes,">Yes (利用有)</option>
+                            </select>
+                        </td>
+                        <td align="right">Reset History (会話):</td>
+                        <td>
+                            <select id="serial_req_reset" name="serial_req_reset">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes,">Yes (消去)</option>
+                                <option value="no,">No (継続)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Retry (再試行):</td>
+                        <td>
+                            <select id="serial_max_retry" name="serial_max_retry">
+                                <option value="">Auto (自動)</option>
+                                <option value="0">No Retry (無)</option>
+                            </select>
+                        </td>
+                        <td align="right">Num AIs (利用AI数):</td>
+                        <td>
+                            <input type="hidden" id="serial_max_ai_count" name="websearch_max_ai_count" value="">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Before (前処理):</td>
+                        <td>
+                            <select id="serial_before_proc" name="serial_before_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="prompt,">prompt,</option>
+                                <option value="profile,">profile,</option>
+                                <option value="profile,prompt,">profile,prompt,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="serial_before_engine" name="serial_before_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">After (後処理):</td>
+                        <td>
+                            <select id="serial_after_proc" name="serial_after_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="all,">all,</option>
+                                <option value="code,">code,</option>
+                                <option value="summary,">summary,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="serial_after_engine" name="serial_after_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Check (検証):</td>
+                        <td>
+                            <select id="serial_check_proc" name="serial_check_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="yes,">yes,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="serial_check_engine" name="serial_check_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Parallelタブ -->
+            <div class="tab-content" id="parallel" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">Parallel</td>
+                        <td>(bot)設定</td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="parallel_req_engine" name="parallel_req_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td>　</td><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">Functions (拡張):</td>
+                        <td>
+                            <select id="parallel_req_functions" name="parallel_req_functions">
+                                <option value="">Auto (自動)</option>
+                                <option value="no,">No (利用無)</option>
+                                <option value="yes,">Yes (利用有)</option>
+                            </select>
+                        </td>
+                        <td align="right">Reset History (会話):</td>
+                        <td>
+                            <select id="parallel_req_reset" name="parallel_req_reset">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes,">Yes (消去)</option>
+                                <option value="no,">No (継続)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Retry (再試行):</td>
+                        <td>
+                            <select id="parallel_max_retry" name="parallel_max_retry">
+                                <option value="">Auto (自動)</option>
+                                <option value="0">No Retry (無)</option>
+                            </select>
+                        </td>
+                        <td align="right">Num AIs (利用AI数):</td>
+                        <td>
+                            <select id="parallel_max_ai_count" name="parallel_max_ai_count">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Before (前処理):</td>
+                        <td>
+                            <select id="parallel_before_proc" name="parallel_before_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="prompt,">prompt,</option>
+                                <option value="profile,">profile,</option>
+                                <option value="profile,prompt,">profile,prompt,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="parallel_before_engine" name="parallel_before_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">After (後処理):</td>
+                        <td>
+                            <select id="parallel_after_proc" name="parallel_after_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="all,">all,</option>
+                                <option value="code,">code,</option>
+                                <option value="summary,">summary,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="parallel_after_engine" name="parallel_after_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Check (検証):</td>
+                        <td>
+                            <select id="parallel_check_proc" name="parallel_check_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="yes,">yes,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="parallel_check_engine" name="parallel_check_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Sessionタブ -->
+            <div class="tab-content" id="session" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">Session</td>
+                        <td>(bot)設定</td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="session_req_engine" name="session_req_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td>　</td><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">Functions (拡張):</td>
+                        <td>
+                            <select id="session_req_functions" name="session_req_functions">
+                                <option value="">Auto (自動)</option>
+                                <option value="no,">No (利用無)</option>
+                                <option value="yes,">Yes (利用有)</option>
+                            </select>
+                        </td>
+                        <td align="right">Reset History (会話):</td>
+                        <td>
+                            <select id="session_req_reset" name="session_req_reset">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes,">Yes (消去)</option>
+                                <option value="no,">No (継続)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Retry (再試行):</td>
+                        <td>
+                            <select id="session_max_retry" name="session_max_retry">
+                                <option value="">Auto (自動)</option>
+                                <option value="0">No Retry (無)</option>
+                            </select>
+                        </td>
+                        <td align="right">Num AIs (利用AI数):</td>
+                        <td>
+                            <input type="hidden" id="session_max_ai_count" name="session_max_ai_count" value="">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Before (前処理):</td>
+                        <td>
+                            <select id="session_before_proc" name="session_before_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="prompt,">prompt,</option>
+                                <option value="profile,">profile,</option>
+                                <option value="profile,prompt,">profile,prompt,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="session_before_engine" name="session_before_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">After (後処理):</td>
+                        <td>
+                            <select id="session_after_proc" name="session_after_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="all,">all,</option>
+                                <option value="code,">code,</option>
+                                <option value="summary,">summary,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="session_after_engine" name="session_after_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Check (検証):</td>
+                        <td>
+                            <select id="session_check_proc" name="session_check_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="yes,">yes,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="session_check_engine" name="session_check_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Clipタブ -->
+            <div class="tab-content" id="clip" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">Clip</td>
+                        <td>(bot)設定</td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="clip_req_engine" name="clip_req_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td>　</td><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">Functions (拡張):</td>
+                        <td>
+                            <select id="clip_req_functions" name="clip_req_functions">
+                                <option value="">Auto (自動)</option>
+                                <option value="no,">No (利用無)</option>
+                                <option value="yes,">Yes (利用有)</option>
+                            </select>
+                        </td>
+                        <td align="right">Reset History (会話):</td>
+                        <td>
+                            <select id="clip_req_reset" name="clip_req_reset">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes,">Yes (消去)</option>
+                                <option value="no,">No (継続)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Retry (再試行):</td>
+                        <td>
+                            <select id="clip_max_retry" name="clip_max_retry">
+                                <option value="">Auto (自動)</option>
+                                <option value="0">No Retry (無)</option>
+                            </select>
+                        </td>
+                        <td align="right">Num AIs (利用AI数):</td>
+                        <td>
+                            <input type="hidden" id="clip_max_ai_count" name="clip_max_ai_count" value="">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Before (前処理):</td>
+                        <td>
+                            <select id="clip_before_proc" name="clip_before_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="prompt,">prompt,</option>
+                                <option value="profile,">profile,</option>
+                                <option value="profile,prompt,">profile,prompt,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="clip_before_engine" name="clip_before_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">After (後処理):</td>
+                        <td>
+                            <select id="clip_after_proc" name="clip_after_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="all,">all,</option>
+                                <option value="code,">code,</option>
+                                <option value="summary,">summary,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="clip_after_engine" name="clip_after_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Check (検証):</td>
+                        <td>
+                            <select id="clip_check_proc" name="clip_check_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="yes,">yes,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="clip_check_engine" name="clip_check_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Voiceタブ -->
+            <div class="tab-content" id="voice" style="justify-content: center;">
+                <table>
+                    <tr><td align="right">　</td><td>　</td><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">Voice</td>
+                        <td>(bot)設定</td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="voice_req_engine" name="voice_req_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">　</td><td>　</td><td align="right">　</td><td>　</td></tr>
+                    <tr>
+                        <td align="right">Functions (拡張):</td>
+                        <td>
+                            <select id="voice_req_functions" name="voice_req_functions">
+                                <option value="">Auto (自動)</option>
+                                <option value="no,">No (利用無)</option>
+                                <option value="yes,">Yes (利用有)</option>
+                            </select>
+                        </td>
+                        <td align="right">Reset History (会話):</td>
+                        <td>
+                            <select id="voice_req_reset" name="voice_req_reset">
+                                <option value="">Auto (自動)</option>
+                                <option value="yes,">Yes (消去)</option>
+                                <option value="no,">No (継続)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Retry (再試行):</td>
+                        <td>
+                            <select id="voice_max_retry" name="voice_max_retry">
+                                <option value="">Auto (自動)</option>
+                                <option value="0">No Retry (無)</option>
+                            </select>
+                        </td>
+                        <td align="right">Num AIs (利用AI数):</td>
+                        <td>
+                            <input type="hidden" id="voice_max_ai_count" name="voice_max_ai_count" value="">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Before (前処理):</td>
+                        <td>
+                            <select id="voice_before_proc" name="voice_before_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="prompt,">prompt,</option>
+                                <option value="profile,">profile,</option>
+                                <option value="profile,prompt,">profile,prompt,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="voice_before_engine" name="voice_before_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">After (後処理):</td>
+                        <td>
+                            <select id="voice_after_proc" name="voice_after_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="all,">all,</option>
+                                <option value="code,">code,</option>
+                                <option value="summary,">summary,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="voice_after_engine" name="voice_after_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">Check (検証):</td>
+                        <td>
+                            <select id="voice_check_proc" name="voice_check_proc">
+                                <option value="">Auto (自動)</option>
+                                <option value="none,">None (無)</option>
+                                <option value="yes,">yes,</option>
+                            </select>
+                        </td>
+                        <td align="right">Engine (エンジン):</td>
+                        <td>
+                            <select id="voice_check_engine" name="voice_check_engine">
+                                <option value="">Auto (自動)</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        var js = 'setting_engine.js';
+        var script = document.createElement('script');
+        script.src = js + '?v=' + Math.random();
+        document.head.appendChild(script);
+    </script>
+
+</body>
+</html>
