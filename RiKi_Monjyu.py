@@ -22,7 +22,9 @@ import random
 import threading
 import multiprocessing
 
-# ダミーインポート
+import asyncio
+
+# ダミーインポート(pyinstaller用)
 #import pip
 import keyboard
 import screeninfo
@@ -436,6 +438,9 @@ if __name__ == '__main__':
     qLog.log('info', main_id, "================================================================================================")
     print()
     main.main_all_ready = True
+
+    # モデル情報設定
+    _ = asyncio.run( coreai.get_models(req_mode='chat') )    
 
     # 無限ループでプロセスを監視
     while True:
