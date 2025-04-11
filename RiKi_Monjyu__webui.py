@@ -3,13 +3,23 @@
 
 # ------------------------------------------------
 # COPYRIGHT (C) 2014-2025 Mitsuo KONDOU.
-# This software is released under the not MIT License.
-# Permission from the right holder is required for use.
-# https://github.com/konsan1101
+# This software is released under the MIT License.
+# https://github.com/monjyu1101
 # Thank you for keeping the rules.
 # ------------------------------------------------
 
-# RiKi_Monjyu__webui.py
+# モジュール名
+MODULE_NAME = 'webui'
+
+# ロガーの設定
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)-10s - %(levelname)-8s - %(message)s',
+    datefmt='%H:%M:%S'
+)
+logger = logging.getLogger(MODULE_NAME)
+
 
 import sys
 import os
@@ -58,8 +68,6 @@ qSandBox_name = 'react_sandbox'
 win_code_path = 'C:/Program Files/Microsoft VS Code/Code.exe'
 
 # 共通ルーチンのインポートと初期化
-import _v6__qLog
-qLog = _v6__qLog.qLog_class()
 import  _v6__qFunc
 qFunc = _v6__qFunc.qFunc_class()
 
@@ -190,16 +198,14 @@ class WebUiClass:
                         self_port: str = '8008', ):
         self.runMode = runMode
 
-        # ログ設定
-        self.proc_name = f"{ self_port }:ui"
-        self.proc_id = '{0:10s}'.format(self.proc_name).replace(' ', '_')
-        if not os.path.isdir(qPath_log):
-            os.makedirs(qPath_log)
+        # ログファイル名の生成
         if qLog_fn == '':
             nowTime = datetime.datetime.now()
             qLog_fn = qPath_log + nowTime.strftime('%Y%m%d.%H%M%S') + '.' + os.path.basename(__file__) + '.log'
-        qLog.init(mode='logger', filename=qLog_fn)
-        qLog.log('info', self.proc_id, 'init')
+        
+        # ログの初期化
+        #qLog.init(mode='logger', filename=qLog_fn)
+        logger.debug('init')
 
         # 各種設定の初期化
         self.main      = main
@@ -440,189 +446,189 @@ class WebUiClass:
 
                 if (engine == 'chatgpt'):
                     self.data.engine_setting['chatgpt'] = {
-                        "a_nick_name": self.coreai.chat_class.chatgptAPI.chatgpt_a_nick_name,
-                        "b_nick_name": self.coreai.chat_class.chatgptAPI.chatgpt_b_nick_name,
-                        "v_nick_name": self.coreai.chat_class.chatgptAPI.chatgpt_v_nick_name,
-                        "x_nick_name": self.coreai.chat_class.chatgptAPI.chatgpt_x_nick_name,
-                        "max_wait_sec": str(self.coreai.chat_class.chatgptAPI.chatgpt_max_wait_sec),
-                        "a_model": self.coreai.chat_class.chatgptAPI.chatgpt_a_model,
-                        "a_use_tools": self.coreai.chat_class.chatgptAPI.chatgpt_a_use_tools,
-                        "b_model": self.coreai.chat_class.chatgptAPI.chatgpt_b_model,
-                        "b_use_tools": self.coreai.chat_class.chatgptAPI.chatgpt_b_use_tools,
-                        "v_model": self.coreai.chat_class.chatgptAPI.chatgpt_v_model,
-                        "v_use_tools": self.coreai.chat_class.chatgptAPI.chatgpt_v_use_tools,
-                        "x_model": self.coreai.chat_class.chatgptAPI.chatgpt_x_model,
-                        "x_use_tools": self.coreai.chat_class.chatgptAPI.chatgpt_x_use_tools,
+                        "a_nick_name": self.coreai.chat_class.chatgptAPI.a_nick_name,
+                        "b_nick_name": self.coreai.chat_class.chatgptAPI.b_nick_name,
+                        "v_nick_name": self.coreai.chat_class.chatgptAPI.v_nick_name,
+                        "x_nick_name": self.coreai.chat_class.chatgptAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreai.chat_class.chatgptAPI.max_wait_sec),
+                        "a_model": self.coreai.chat_class.chatgptAPI.a_model,
+                        "a_use_tools": self.coreai.chat_class.chatgptAPI.a_use_tools,
+                        "b_model": self.coreai.chat_class.chatgptAPI.b_model,
+                        "b_use_tools": self.coreai.chat_class.chatgptAPI.b_use_tools,
+                        "v_model": self.coreai.chat_class.chatgptAPI.v_model,
+                        "v_use_tools": self.coreai.chat_class.chatgptAPI.v_use_tools,
+                        "x_model": self.coreai.chat_class.chatgptAPI.x_model,
+                        "x_use_tools": self.coreai.chat_class.chatgptAPI.x_use_tools,
                     }
 
                 elif (engine == 'assist'):
                     self.data.engine_setting['assist'] = {
-                        "a_nick_name": self.coreai.chat_class.assistAPI.assist_a_nick_name,
-                        "b_nick_name": self.coreai.chat_class.assistAPI.assist_b_nick_name,
-                        "v_nick_name": self.coreai.chat_class.assistAPI.assist_v_nick_name,
-                        "x_nick_name": self.coreai.chat_class.assistAPI.assist_x_nick_name,
-                        "max_wait_sec": str(self.coreai.chat_class.assistAPI.assist_max_wait_sec),
-                        "a_model": self.coreai.chat_class.assistAPI.assist_a_model,
-                        "a_use_tools": self.coreai.chat_class.assistAPI.assist_a_use_tools,
-                        "b_model": self.coreai.chat_class.assistAPI.assist_b_model,
-                        "b_use_tools": self.coreai.chat_class.assistAPI.assist_b_use_tools,
-                        "v_model": self.coreai.chat_class.assistAPI.assist_v_model,
-                        "v_use_tools": self.coreai.chat_class.assistAPI.assist_v_use_tools,
-                        "x_model": self.coreai.chat_class.assistAPI.assist_x_model,
-                        "x_use_tools": self.coreai.chat_class.assistAPI.assist_x_use_tools,
+                        "a_nick_name": self.coreai.chat_class.assistAPI.a_nick_name,
+                        "b_nick_name": self.coreai.chat_class.assistAPI.b_nick_name,
+                        "v_nick_name": self.coreai.chat_class.assistAPI.v_nick_name,
+                        "x_nick_name": self.coreai.chat_class.assistAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreai.chat_class.assistAPI.max_wait_sec),
+                        "a_model": self.coreai.chat_class.assistAPI.a_model,
+                        "a_use_tools": self.coreai.chat_class.assistAPI.a_use_tools,
+                        "b_model": self.coreai.chat_class.assistAPI.b_model,
+                        "b_use_tools": self.coreai.chat_class.assistAPI.b_use_tools,
+                        "v_model": self.coreai.chat_class.assistAPI.v_model,
+                        "v_use_tools": self.coreai.chat_class.assistAPI.v_use_tools,
+                        "x_model": self.coreai.chat_class.assistAPI.x_model,
+                        "x_use_tools": self.coreai.chat_class.assistAPI.x_use_tools,
                     }
 
                 elif (engine == 'respo'):
                     self.data.engine_setting['respo'] = {
-                        "a_nick_name": self.coreai.chat_class.respoAPI.respo_a_nick_name,
-                        "b_nick_name": self.coreai.chat_class.respoAPI.respo_b_nick_name,
-                        "v_nick_name": self.coreai.chat_class.respoAPI.respo_v_nick_name,
-                        "x_nick_name": self.coreai.chat_class.respoAPI.respo_x_nick_name,
-                        "max_wait_sec": str(self.coreai.chat_class.respoAPI.respo_max_wait_sec),
-                        "a_model": self.coreai.chat_class.respoAPI.respo_a_model,
-                        "a_use_tools": self.coreai.chat_class.respoAPI.respo_a_use_tools,
-                        "b_model": self.coreai.chat_class.respoAPI.respo_b_model,
-                        "b_use_tools": self.coreai.chat_class.respoAPI.respo_b_use_tools,
-                        "v_model": self.coreai.chat_class.respoAPI.respo_v_model,
-                        "v_use_tools": self.coreai.chat_class.respoAPI.respo_v_use_tools,
-                        "x_model": self.coreai.chat_class.respoAPI.respo_x_model,
-                        "x_use_tools": self.coreai.chat_class.respoAPI.respo_x_use_tools,
+                        "a_nick_name": self.coreai.chat_class.respoAPI.a_nick_name,
+                        "b_nick_name": self.coreai.chat_class.respoAPI.b_nick_name,
+                        "v_nick_name": self.coreai.chat_class.respoAPI.v_nick_name,
+                        "x_nick_name": self.coreai.chat_class.respoAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreai.chat_class.respoAPI.max_wait_sec),
+                        "a_model": self.coreai.chat_class.respoAPI.a_model,
+                        "a_use_tools": self.coreai.chat_class.respoAPI.a_use_tools,
+                        "b_model": self.coreai.chat_class.respoAPI.b_model,
+                        "b_use_tools": self.coreai.chat_class.respoAPI.b_use_tools,
+                        "v_model": self.coreai.chat_class.respoAPI.v_model,
+                        "v_use_tools": self.coreai.chat_class.respoAPI.v_use_tools,
+                        "x_model": self.coreai.chat_class.respoAPI.x_model,
+                        "x_use_tools": self.coreai.chat_class.respoAPI.x_use_tools,
                     }
 
                 elif (engine == 'gemini'):
                     self.data.engine_setting['gemini'] = {
-                        "a_nick_name": self.coreai.chat_class.geminiAPI.gemini_a_nick_name,
-                        "b_nick_name": self.coreai.chat_class.geminiAPI.gemini_b_nick_name,
-                        "v_nick_name": self.coreai.chat_class.geminiAPI.gemini_v_nick_name,
-                        "x_nick_name": self.coreai.chat_class.geminiAPI.gemini_x_nick_name,
-                        "max_wait_sec": str(self.coreai.chat_class.geminiAPI.gemini_max_wait_sec),
-                        "a_model": self.coreai.chat_class.geminiAPI.gemini_a_model,
-                        "a_use_tools": self.coreai.chat_class.geminiAPI.gemini_a_use_tools,
-                        "b_model": self.coreai.chat_class.geminiAPI.gemini_b_model,
-                        "b_use_tools": self.coreai.chat_class.geminiAPI.gemini_b_use_tools,
-                        "v_model": self.coreai.chat_class.geminiAPI.gemini_v_model,
-                        "v_use_tools": self.coreai.chat_class.geminiAPI.gemini_v_use_tools,
-                        "x_model": self.coreai.chat_class.geminiAPI.gemini_x_model,
-                        "x_use_tools": self.coreai.chat_class.geminiAPI.gemini_x_use_tools,
+                        "a_nick_name": self.coreai.chat_class.geminiAPI.a_nick_name,
+                        "b_nick_name": self.coreai.chat_class.geminiAPI.b_nick_name,
+                        "v_nick_name": self.coreai.chat_class.geminiAPI.v_nick_name,
+                        "x_nick_name": self.coreai.chat_class.geminiAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreai.chat_class.geminiAPI.max_wait_sec),
+                        "a_model": self.coreai.chat_class.geminiAPI.a_model,
+                        "a_use_tools": self.coreai.chat_class.geminiAPI.a_use_tools,
+                        "b_model": self.coreai.chat_class.geminiAPI.b_model,
+                        "b_use_tools": self.coreai.chat_class.geminiAPI.b_use_tools,
+                        "v_model": self.coreai.chat_class.geminiAPI.v_model,
+                        "v_use_tools": self.coreai.chat_class.geminiAPI.v_use_tools,
+                        "x_model": self.coreai.chat_class.geminiAPI.x_model,
+                        "x_use_tools": self.coreai.chat_class.geminiAPI.x_use_tools,
                     }
 
                 elif (engine == 'freeai'):
                     self.data.engine_setting['freeai'] = {
-                        "a_nick_name": self.coreai.chat_class.freeaiAPI.freeai_a_nick_name,
-                        "b_nick_name": self.coreai.chat_class.freeaiAPI.freeai_b_nick_name,
-                        "v_nick_name": self.coreai.chat_class.freeaiAPI.freeai_v_nick_name,
-                        "x_nick_name": self.coreai.chat_class.freeaiAPI.freeai_x_nick_name,
-                        "max_wait_sec": str(self.coreai.chat_class.freeaiAPI.freeai_max_wait_sec),
-                        "a_model": self.coreai.chat_class.freeaiAPI.freeai_a_model,
-                        "a_use_tools": self.coreai.chat_class.freeaiAPI.freeai_a_use_tools,
-                        "b_model": self.coreai.chat_class.freeaiAPI.freeai_b_model,
-                        "b_use_tools": self.coreai.chat_class.freeaiAPI.freeai_b_use_tools,
-                        "v_model": self.coreai.chat_class.freeaiAPI.freeai_v_model,
-                        "v_use_tools": self.coreai.chat_class.freeaiAPI.freeai_v_use_tools,
-                        "x_model": self.coreai.chat_class.freeaiAPI.freeai_x_model,
-                        "x_use_tools": self.coreai.chat_class.freeaiAPI.freeai_x_use_tools,
+                        "a_nick_name": self.coreai.chat_class.freeaiAPI.a_nick_name,
+                        "b_nick_name": self.coreai.chat_class.freeaiAPI.b_nick_name,
+                        "v_nick_name": self.coreai.chat_class.freeaiAPI.v_nick_name,
+                        "x_nick_name": self.coreai.chat_class.freeaiAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreai.chat_class.freeaiAPI.max_wait_sec),
+                        "a_model": self.coreai.chat_class.freeaiAPI.a_model,
+                        "a_use_tools": self.coreai.chat_class.freeaiAPI.a_use_tools,
+                        "b_model": self.coreai.chat_class.freeaiAPI.b_model,
+                        "b_use_tools": self.coreai.chat_class.freeaiAPI.b_use_tools,
+                        "v_model": self.coreai.chat_class.freeaiAPI.v_model,
+                        "v_use_tools": self.coreai.chat_class.freeaiAPI.v_use_tools,
+                        "x_model": self.coreai.chat_class.freeaiAPI.x_model,
+                        "x_use_tools": self.coreai.chat_class.freeaiAPI.x_use_tools,
                     }
 
                 elif (engine == 'claude'):
                     self.data.engine_setting['claude'] = {
-                        "a_nick_name": self.coreai.chat_class.claudeAPI.claude_a_nick_name,
-                        "b_nick_name": self.coreai.chat_class.claudeAPI.claude_b_nick_name,
-                        "v_nick_name": self.coreai.chat_class.claudeAPI.claude_v_nick_name,
-                        "x_nick_name": self.coreai.chat_class.claudeAPI.claude_x_nick_name,
-                        "max_wait_sec": str(self.coreai.chat_class.claudeAPI.claude_max_wait_sec),
-                        "a_model": self.coreai.chat_class.claudeAPI.claude_a_model,
-                        "a_use_tools": self.coreai.chat_class.claudeAPI.claude_a_use_tools,
-                        "b_model": self.coreai.chat_class.claudeAPI.claude_b_model,
-                        "b_use_tools": self.coreai.chat_class.claudeAPI.claude_b_use_tools,
-                        "v_model": self.coreai.chat_class.claudeAPI.claude_v_model,
-                        "v_use_tools": self.coreai.chat_class.claudeAPI.claude_v_use_tools,
-                        "x_model": self.coreai.chat_class.claudeAPI.claude_x_model,
-                        "x_use_tools": self.coreai.chat_class.claudeAPI.claude_x_use_tools,
+                        "a_nick_name": self.coreai.chat_class.claudeAPI.a_nick_name,
+                        "b_nick_name": self.coreai.chat_class.claudeAPI.b_nick_name,
+                        "v_nick_name": self.coreai.chat_class.claudeAPI.v_nick_name,
+                        "x_nick_name": self.coreai.chat_class.claudeAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreai.chat_class.claudeAPI.max_wait_sec),
+                        "a_model": self.coreai.chat_class.claudeAPI.a_model,
+                        "a_use_tools": self.coreai.chat_class.claudeAPI.a_use_tools,
+                        "b_model": self.coreai.chat_class.claudeAPI.b_model,
+                        "b_use_tools": self.coreai.chat_class.claudeAPI.b_use_tools,
+                        "v_model": self.coreai.chat_class.claudeAPI.v_model,
+                        "v_use_tools": self.coreai.chat_class.claudeAPI.v_use_tools,
+                        "x_model": self.coreai.chat_class.claudeAPI.x_model,
+                        "x_use_tools": self.coreai.chat_class.claudeAPI.x_use_tools,
                     }
 
                 elif (engine == 'openrt'):
                     self.data.engine_setting['openrt'] = {
-                        "a_nick_name": self.coreai.chat_class.openrtAPI.openrt_a_nick_name,
-                        "b_nick_name": self.coreai.chat_class.openrtAPI.openrt_b_nick_name,
-                        "v_nick_name": self.coreai.chat_class.openrtAPI.openrt_v_nick_name,
-                        "x_nick_name": self.coreai.chat_class.openrtAPI.openrt_x_nick_name,
-                        "max_wait_sec": str(self.coreai.chat_class.openrtAPI.openrt_max_wait_sec),
-                        "a_model": self.coreai.chat_class.openrtAPI.openrt_a_model,
-                        "a_use_tools": self.coreai.chat_class.openrtAPI.openrt_a_use_tools,
-                        "b_model": self.coreai.chat_class.openrtAPI.openrt_b_model,
-                        "b_use_tools": self.coreai.chat_class.openrtAPI.openrt_b_use_tools,
-                        "v_model": self.coreai.chat_class.openrtAPI.openrt_v_model,
-                        "v_use_tools": self.coreai.chat_class.openrtAPI.openrt_v_use_tools,
-                        "x_model": self.coreai.chat_class.openrtAPI.openrt_x_model,
-                        "x_use_tools": self.coreai.chat_class.openrtAPI.openrt_x_use_tools,
+                        "a_nick_name": self.coreai.chat_class.openrtAPI.a_nick_name,
+                        "b_nick_name": self.coreai.chat_class.openrtAPI.b_nick_name,
+                        "v_nick_name": self.coreai.chat_class.openrtAPI.v_nick_name,
+                        "x_nick_name": self.coreai.chat_class.openrtAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreai.chat_class.openrtAPI.max_wait_sec),
+                        "a_model": self.coreai.chat_class.openrtAPI.a_model,
+                        "a_use_tools": self.coreai.chat_class.openrtAPI.a_use_tools,
+                        "b_model": self.coreai.chat_class.openrtAPI.b_model,
+                        "b_use_tools": self.coreai.chat_class.openrtAPI.b_use_tools,
+                        "v_model": self.coreai.chat_class.openrtAPI.v_model,
+                        "v_use_tools": self.coreai.chat_class.openrtAPI.v_use_tools,
+                        "x_model": self.coreai.chat_class.openrtAPI.x_model,
+                        "x_use_tools": self.coreai.chat_class.openrtAPI.x_use_tools,
                     }
 
                 elif (engine == 'perplexity'):
                     self.data.engine_setting['perplexity'] = {
-                        "a_nick_name": self.coreai.chat_class.perplexityAPI.perplexity_a_nick_name,
-                        "b_nick_name": self.coreai.chat_class.perplexityAPI.perplexity_b_nick_name,
-                        "v_nick_name": self.coreai.chat_class.perplexityAPI.perplexity_v_nick_name,
-                        "x_nick_name": self.coreai.chat_class.perplexityAPI.perplexity_x_nick_name,
-                        "max_wait_sec": str(self.coreai.chat_class.perplexityAPI.perplexity_max_wait_sec),
-                        "a_model": self.coreai.chat_class.perplexityAPI.perplexity_a_model,
-                        "a_use_tools": self.coreai.chat_class.perplexityAPI.perplexity_a_use_tools,
-                        "b_model": self.coreai.chat_class.perplexityAPI.perplexity_b_model,
-                        "b_use_tools": self.coreai.chat_class.perplexityAPI.perplexity_b_use_tools,
-                        "v_model": self.coreai.chat_class.perplexityAPI.perplexity_v_model,
-                        "v_use_tools": self.coreai.chat_class.perplexityAPI.perplexity_v_use_tools,
-                        "x_model": self.coreai.chat_class.perplexityAPI.perplexity_x_model,
-                        "x_use_tools": self.coreai.chat_class.perplexityAPI.perplexity_x_use_tools,
+                        "a_nick_name": self.coreai.chat_class.perplexityAPI.a_nick_name,
+                        "b_nick_name": self.coreai.chat_class.perplexityAPI.b_nick_name,
+                        "v_nick_name": self.coreai.chat_class.perplexityAPI.v_nick_name,
+                        "x_nick_name": self.coreai.chat_class.perplexityAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreai.chat_class.perplexityAPI.max_wait_sec),
+                        "a_model": self.coreai.chat_class.perplexityAPI.a_model,
+                        "a_use_tools": self.coreai.chat_class.perplexityAPI.a_use_tools,
+                        "b_model": self.coreai.chat_class.perplexityAPI.b_model,
+                        "b_use_tools": self.coreai.chat_class.perplexityAPI.b_use_tools,
+                        "v_model": self.coreai.chat_class.perplexityAPI.v_model,
+                        "v_use_tools": self.coreai.chat_class.perplexityAPI.v_use_tools,
+                        "x_model": self.coreai.chat_class.perplexityAPI.x_model,
+                        "x_use_tools": self.coreai.chat_class.perplexityAPI.x_use_tools,
                     }
 
                 elif (engine == 'grok'):
                     self.data.engine_setting['grok'] = {
-                        "a_nick_name": self.coreai.chat_class.grokAPI.grok_a_nick_name,
-                        "b_nick_name": self.coreai.chat_class.grokAPI.grok_b_nick_name,
-                        "v_nick_name": self.coreai.chat_class.grokAPI.grok_v_nick_name,
-                        "x_nick_name": self.coreai.chat_class.grokAPI.grok_x_nick_name,
-                        "max_wait_sec": str(self.coreai.chat_class.grokAPI.grok_max_wait_sec),
-                        "a_model": self.coreai.chat_class.grokAPI.grok_a_model,
-                        "a_use_tools": self.coreai.chat_class.grokAPI.grok_a_use_tools,
-                        "b_model": self.coreai.chat_class.grokAPI.grok_b_model,
-                        "b_use_tools": self.coreai.chat_class.grokAPI.grok_b_use_tools,
-                        "v_model": self.coreai.chat_class.grokAPI.grok_v_model,
-                        "v_use_tools": self.coreai.chat_class.grokAPI.grok_v_use_tools,
-                        "x_model": self.coreai.chat_class.grokAPI.grok_x_model,
-                        "x_use_tools": self.coreai.chat_class.grokAPI.grok_x_use_tools,
+                        "a_nick_name": self.coreai.chat_class.grokAPI.a_nick_name,
+                        "b_nick_name": self.coreai.chat_class.grokAPI.b_nick_name,
+                        "v_nick_name": self.coreai.chat_class.grokAPI.v_nick_name,
+                        "x_nick_name": self.coreai.chat_class.grokAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreai.chat_class.grokAPI.max_wait_sec),
+                        "a_model": self.coreai.chat_class.grokAPI.a_model,
+                        "a_use_tools": self.coreai.chat_class.grokAPI.a_use_tools,
+                        "b_model": self.coreai.chat_class.grokAPI.b_model,
+                        "b_use_tools": self.coreai.chat_class.grokAPI.b_use_tools,
+                        "v_model": self.coreai.chat_class.grokAPI.v_model,
+                        "v_use_tools": self.coreai.chat_class.grokAPI.v_use_tools,
+                        "x_model": self.coreai.chat_class.grokAPI.x_model,
+                        "x_use_tools": self.coreai.chat_class.grokAPI.x_use_tools,
                     }
 
                 elif (engine == 'groq'):
                     self.data.engine_setting['groq'] = {
-                        "a_nick_name": self.coreai.chat_class.groqAPI.groq_a_nick_name,
-                        "b_nick_name": self.coreai.chat_class.groqAPI.groq_b_nick_name,
-                        "v_nick_name": self.coreai.chat_class.groqAPI.groq_v_nick_name,
-                        "x_nick_name": self.coreai.chat_class.groqAPI.groq_x_nick_name,
-                        "max_wait_sec": str(self.coreai.chat_class.groqAPI.groq_max_wait_sec),
-                        "a_model": self.coreai.chat_class.groqAPI.groq_a_model,
-                        "a_use_tools": self.coreai.chat_class.groqAPI.groq_a_use_tools,
-                        "b_model": self.coreai.chat_class.groqAPI.groq_b_model,
-                        "b_use_tools": self.coreai.chat_class.groqAPI.groq_b_use_tools,
-                        "v_model": self.coreai.chat_class.groqAPI.groq_v_model,
-                        "v_use_tools": self.coreai.chat_class.groqAPI.groq_v_use_tools,
-                        "x_model": self.coreai.chat_class.groqAPI.groq_x_model,
-                        "x_use_tools": self.coreai.chat_class.groqAPI.groq_x_use_tools,
+                        "a_nick_name": self.coreai.chat_class.groqAPI.a_nick_name,
+                        "b_nick_name": self.coreai.chat_class.groqAPI.b_nick_name,
+                        "v_nick_name": self.coreai.chat_class.groqAPI.v_nick_name,
+                        "x_nick_name": self.coreai.chat_class.groqAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreai.chat_class.groqAPI.max_wait_sec),
+                        "a_model": self.coreai.chat_class.groqAPI.a_model,
+                        "a_use_tools": self.coreai.chat_class.groqAPI.a_use_tools,
+                        "b_model": self.coreai.chat_class.groqAPI.b_model,
+                        "b_use_tools": self.coreai.chat_class.groqAPI.b_use_tools,
+                        "v_model": self.coreai.chat_class.groqAPI.v_model,
+                        "v_use_tools": self.coreai.chat_class.groqAPI.v_use_tools,
+                        "x_model": self.coreai.chat_class.groqAPI.x_model,
+                        "x_use_tools": self.coreai.chat_class.groqAPI.x_use_tools,
                     }
 
                 elif (engine == 'ollama'):
                     self.data.engine_setting['ollama'] = {
-                        "a_nick_name": self.coreai.chat_class.ollamaAPI.ollama_a_nick_name,
-                        "b_nick_name": self.coreai.chat_class.ollamaAPI.ollama_b_nick_name,
-                        "v_nick_name": self.coreai.chat_class.ollamaAPI.ollama_v_nick_name,
-                        "x_nick_name": self.coreai.chat_class.ollamaAPI.ollama_x_nick_name,
-                        "max_wait_sec": str(self.coreai.chat_class.ollamaAPI.ollama_max_wait_sec),
-                        "a_model": self.coreai.chat_class.ollamaAPI.ollama_a_model,
-                        "a_use_tools": self.coreai.chat_class.ollamaAPI.ollama_a_use_tools,
-                        "b_model": self.coreai.chat_class.ollamaAPI.ollama_b_model,
-                        "b_use_tools": self.coreai.chat_class.ollamaAPI.ollama_b_use_tools,
-                        "v_model": self.coreai.chat_class.ollamaAPI.ollama_v_model,
-                        "v_use_tools": self.coreai.chat_class.ollamaAPI.ollama_v_use_tools,
-                        "x_model": self.coreai.chat_class.ollamaAPI.ollama_x_model,
-                        "x_use_tools": self.coreai.chat_class.ollamaAPI.ollama_x_use_tools,
+                        "a_nick_name": self.coreai.chat_class.ollamaAPI.a_nick_name,
+                        "b_nick_name": self.coreai.chat_class.ollamaAPI.b_nick_name,
+                        "v_nick_name": self.coreai.chat_class.ollamaAPI.v_nick_name,
+                        "x_nick_name": self.coreai.chat_class.ollamaAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreai.chat_class.ollamaAPI.max_wait_sec),
+                        "a_model": self.coreai.chat_class.ollamaAPI.a_model,
+                        "a_use_tools": self.coreai.chat_class.ollamaAPI.a_use_tools,
+                        "b_model": self.coreai.chat_class.ollamaAPI.b_model,
+                        "b_use_tools": self.coreai.chat_class.ollamaAPI.b_use_tools,
+                        "v_model": self.coreai.chat_class.ollamaAPI.v_model,
+                        "v_use_tools": self.coreai.chat_class.ollamaAPI.v_use_tools,
+                        "x_model": self.coreai.chat_class.ollamaAPI.x_model,
+                        "x_use_tools": self.coreai.chat_class.ollamaAPI.x_use_tools,
                     }
 
                 result = self.data.engine_setting[engine]

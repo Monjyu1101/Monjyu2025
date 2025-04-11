@@ -3,13 +3,23 @@
 
 # ------------------------------------------------
 # COPYRIGHT (C) 2014-2025 Mitsuo KONDOU.
-# This software is released under the not MIT License.
-# Permission from the right holder is required for use.
-# https://github.com/konsan1101
+# This software is released under the MIT License.
+# https://github.com/monjyu1101
 # Thank you for keeping the rules.
 # ------------------------------------------------
 
-# RiKi_Monjyu__subbot.py
+# モジュール名
+MODULE_NAME = 'subbot'
+
+# ロガーの設定
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)-10s - %(levelname)-8s - %(message)s',
+    datefmt='%H:%M:%S'
+)
+logger = logging.getLogger(MODULE_NAME)
+
 
 import sys
 import os
@@ -33,10 +43,6 @@ qPath_temp   = 'temp/'
 qPath_log    = 'temp/_log/'
 qPath_input  = 'temp/input/'
 qPath_output = 'temp/output/'
-
-# 共通ルーチン
-import _v6__qLog
-qLog = _v6__qLog.qLog_class()
 
 # DEBUG
 DEBUG_FLAG = False
@@ -80,7 +86,7 @@ class ChatClass:
     def __init__(self,  runMode: str = 'debug', qLog_fn: str = '',
                         main=None, conf=None, data=None, addin=None, botFunc=None,
                         coreai=None,
-                        core_port: str = '8000', self_port: str = '8001', ):
+                        core_port: str = '8000', self_port: str = '8101', ):
         """
         コンストラクタ
         Args:
@@ -91,16 +97,14 @@ class ChatClass:
         """
         self.runMode = runMode
 
-        # ログ
-        self.proc_name = f"{ self_port }:bot"
-        self.proc_id = '{0:10s}'.format(self.proc_name).replace(' ', '_')
-        if not os.path.isdir(qPath_log):
-            os.makedirs(qPath_log)
+        # ログファイル名の生成
         if qLog_fn == '':
             nowTime = datetime.datetime.now()
             qLog_fn = qPath_log + nowTime.strftime('%Y%m%d.%H%M%S') + '.' + os.path.basename(__file__) + '.log'
-        qLog.init(mode='logger', filename=qLog_fn)
-        qLog.log('info', self.proc_id, 'init')
+        
+        # ログの初期化
+        #qLog.init(mode='logger', filename=qLog_fn)
+        logger.debug(f"init {self_port}")
 
         # 設定
         self.main       = main
@@ -175,53 +179,58 @@ class ChatClass:
 
         # chatgpt 定義
         self.chatgptAPI = speech_bot_chatgpt._chatgptAPI()
-        self.chatgptAPI.init(log_queue=None)
+        self.chatgptAPI.init(stream_queue=None)
+        chatgptKEY = chatgpt_key._conf_class()
+        chatgptKEY.init(runMode=self.runMode)
 
         # chatgpt 認証情報
-        api_type      	= chatgpt_key.getkey('chatgpt','openai_api_type')
-        organization  	= chatgpt_key.getkey('chatgpt','openai_organization')
-        openai_key_id 	= chatgpt_key.getkey('chatgpt','openai_key_id')
-        endpoint      	= chatgpt_key.getkey('chatgpt','azure_endpoint')
-        version       	= chatgpt_key.getkey('chatgpt','azure_version')
-        azure_key_id  	= chatgpt_key.getkey('chatgpt','azure_key_id'),
-        if (self.conf.openai_api_type != ''):
-            api_type = self.conf.openai_api_type
-        if (self.conf.openai_organization not in ['', '< your openai organization >']):
-            organization = self.conf.openai_organization
-        if (self.conf.openai_key_id not in ['', '< your openai key >']):
-            openai_key_id = self.conf.openai_key_id
-        if (self.conf.azure_endpoint not in ['', '< your azure endpoint base >']):
-            endpoint = self.conf.azure_endpoint
-        if (self.conf.azure_version not in ['', 'yyyy-mm-dd']):
-            version = self.conf.azure_version
-        if (self.conf.azure_key_id not in ['', '< your azure key >']):
-            azure_key_id = self.conf.azure_key_id
+        api_type      	= chatgptKEY.api_type
+        organization  	= chatgptKEY.openai_organization
+        openai_key_id 	= chatgptKEY.openai_key_id
+        endpoint      	= chatgptKEY.azure_endpoint
+        version       	= chatgptKEY.azure_version
+        azure_key_id  	= chatgptKEY.azure_key_id
+        if (self.conf is not None):
+            if (self.conf.openai_api_type not in ['', 'auto']):
+                api_type = self.conf.openai_api_type
+            if (self.conf.openai_organization[:1] not in ['', '<']):
+                organization = self.conf.openai_organization
+            if (self.conf.openai_key_id[:1] not in ['', '<']):
+                openai_key_id = self.conf.openai_key_id
+            if (self.conf.azure_endpoint[:1] not in ['', '<']):
+                endpoint = self.conf.azure_endpoint
+            if (self.conf.azure_version not in ['', 'yyyy-mm-dd']):
+                version = self.conf.azure_version
+            if (self.conf.azure_key_id[:1] not in ['', '<']):
+                azure_key_id = self.conf.azure_key_id
 
         # chatgpt 認証実行
         res = self.chatgptAPI.authenticate('chatgpt',
                             api_type,
-                            chatgpt_key.getkey('chatgpt','chatgpt_default_gpt'), chatgpt_key.getkey('chatgpt','chatgpt_default_class'),
-                            chatgpt_key.getkey('chatgpt','chatgpt_auto_continue'),
-                            chatgpt_key.getkey('chatgpt','chatgpt_max_step'), chatgpt_key.getkey('chatgpt','chatgpt_max_session'),
-                            chatgpt_key.getkey('chatgpt','chatgpt_max_wait_sec'),
+                            chatgptKEY.default_gpt, chatgptKEY.default_class,
+                            chatgptKEY.auto_continue,
+                            chatgptKEY.max_step, chatgptKEY.max_session,
+                            chatgptKEY.max_wait_sec,
+
                             organization, openai_key_id,
                             endpoint, version, azure_key_id,
-                            chatgpt_key.getkey('chatgpt','chatgpt_a_nick_name'), chatgpt_key.getkey('chatgpt','chatgpt_a_model'), chatgpt_key.getkey('chatgpt','chatgpt_a_token'),
-                            chatgpt_key.getkey('chatgpt','chatgpt_a_use_tools'),
-                            chatgpt_key.getkey('chatgpt','chatgpt_b_nick_name'), chatgpt_key.getkey('chatgpt','chatgpt_b_model'), chatgpt_key.getkey('chatgpt','chatgpt_b_token'),
-                            chatgpt_key.getkey('chatgpt','chatgpt_b_use_tools'),
-                            chatgpt_key.getkey('chatgpt','chatgpt_v_nick_name'), chatgpt_key.getkey('chatgpt','chatgpt_v_model'), chatgpt_key.getkey('chatgpt','chatgpt_v_token'),
-                            chatgpt_key.getkey('chatgpt','chatgpt_v_use_tools'),
-                            chatgpt_key.getkey('chatgpt','chatgpt_x_nick_name'), chatgpt_key.getkey('chatgpt','chatgpt_x_model'), chatgpt_key.getkey('chatgpt','chatgpt_x_token'),
-                            chatgpt_key.getkey('chatgpt','chatgpt_x_use_tools'),
+
+                            chatgptKEY.a_nick_name, chatgptKEY.a_model, chatgptKEY.a_token,
+                            chatgptKEY.a_use_tools,
+                            chatgptKEY.b_nick_name, chatgptKEY.b_model, chatgptKEY.b_token,
+                            chatgptKEY.b_use_tools,
+                            chatgptKEY.v_nick_name, chatgptKEY.v_model, chatgptKEY.v_token,
+                            chatgptKEY.v_use_tools,
+                            chatgptKEY.x_nick_name, chatgptKEY.x_model, chatgptKEY.x_token,
+                            chatgptKEY.x_use_tools,
                             )
 
         if res == True:
             self.chatgpt_enable = True
-            #qLog.log('info', self.proc_id, 'chatgpt authenticate OK!')
+            #logger.info('chatgpt authenticate OK!')
         else:
             self.chatgpt_enable = False
-            qLog.log('error', self.proc_id, 'chatgpt authenticate NG!')
+            logger.error('chatgpt authenticate NG!')
 
         return self.chatgpt_enable
 
@@ -232,53 +241,58 @@ class ChatClass:
 
         # assist 定義
         self.assistAPI = speech_bot_assist._assistAPI()
-        self.assistAPI.init(log_queue=None)
+        self.assistAPI.init(stream_queue=None)
+        assistKEY = assist_key._conf_class()
+        assistKEY.init(runMode=self.runMode)
 
         # assist 認証情報
-        api_type      	= assist_key.getkey('assist','openai_api_type')
-        organization  	= assist_key.getkey('assist','openai_organization')
-        openai_key_id 	= assist_key.getkey('assist','openai_key_id')
-        endpoint      	= assist_key.getkey('assist','azure_endpoint')
-        version       	= assist_key.getkey('assist','azure_version')
-        azure_key_id  	= assist_key.getkey('assist','azure_key_id'),
-        if (self.conf.openai_api_type != ''):
-            api_type = self.conf.openai_api_type
-        if (self.conf.openai_organization not in ['', '< your openai organization >']):
-            organization = self.conf.openai_organization
-        if (self.conf.openai_key_id not in ['', '< your openai key >']):
-            openai_key_id = self.conf.openai_key_id
-        if (self.conf.azure_endpoint not in ['', '< your azure endpoint base >']):
-            endpoint = self.conf.azure_endpoint
-        if (self.conf.azure_version not in ['', 'yyyy-mm-dd']):
-            version = self.conf.azure_version
-        if (self.conf.azure_key_id not in ['', '< your azure key >']):
-            azure_key_id = self.conf.azure_key_id
+        api_type      	= assistKEY.api_type
+        organization  	= assistKEY.openai_organization
+        openai_key_id 	= assistKEY.openai_key_id
+        endpoint      	= assistKEY.azure_endpoint
+        version       	= assistKEY.azure_version
+        azure_key_id  	= assistKEY.azure_key_id
+        if (self.conf is not None):
+            if (self.conf.openai_api_type not in ['', 'auto']):
+                api_type = self.conf.openai_api_type
+            if (self.conf.openai_organization[:1] not in ['', '<']):
+                organization = self.conf.openai_organization
+            if (self.conf.openai_key_id[:1] not in ['', '<']):
+                openai_key_id = self.conf.openai_key_id
+            if (self.conf.azure_endpoint[:1] not in ['', '<']):
+                endpoint = self.conf.azure_endpoint
+            if (self.conf.azure_version not in ['', 'yyyy-mm-dd']):
+                version = self.conf.azure_version
+            if (self.conf.azure_key_id[:1] not in ['', '<']):
+                azure_key_id = self.conf.azure_key_id
 
         # assist 認証実行
         res = self.assistAPI.authenticate('assist',
                             api_type,
-                            assist_key.getkey('assist','assist_default_gpt'), assist_key.getkey('assist','assist_default_class'),
-                            assist_key.getkey('assist','assist_auto_continue'),
-                            assist_key.getkey('assist','assist_max_step'), assist_key.getkey('assist','assist_max_session'),
-                            assist_key.getkey('assist','assist_max_wait_sec'),
+                            assistKEY.default_gpt, assistKEY.default_class,
+                            assistKEY.auto_continue,
+                            assistKEY.max_step, assistKEY.max_session,
+                            assistKEY.max_wait_sec,
+
                             organization, openai_key_id,
                             endpoint, version, azure_key_id,
-                            assist_key.getkey('assist','assist_a_nick_name'), assist_key.getkey('assist','assist_a_model'), assist_key.getkey('assist','assist_a_token'),
-                            assist_key.getkey('assist','assist_a_use_tools'),
-                            assist_key.getkey('assist','assist_b_nick_name'), assist_key.getkey('assist','assist_b_model'), assist_key.getkey('assist','assist_b_token'),
-                            assist_key.getkey('assist','assist_b_use_tools'),
-                            assist_key.getkey('assist','assist_v_nick_name'), assist_key.getkey('assist','assist_v_model'), assist_key.getkey('assist','assist_v_token'),
-                            assist_key.getkey('assist','assist_v_use_tools'),
-                            assist_key.getkey('assist','assist_x_nick_name'), assist_key.getkey('assist','assist_x_model'), assist_key.getkey('assist','assist_x_token'),
-                            assist_key.getkey('assist','assist_x_use_tools'),
+
+                            assistKEY.a_nick_name, assistKEY.a_model, assistKEY.a_token,
+                            assistKEY.a_use_tools,
+                            assistKEY.b_nick_name, assistKEY.b_model, assistKEY.b_token,
+                            assistKEY.b_use_tools,
+                            assistKEY.v_nick_name, assistKEY.v_model, assistKEY.v_token,
+                            assistKEY.v_use_tools,
+                            assistKEY.x_nick_name, assistKEY.x_model, assistKEY.x_token,
+                            assistKEY.x_use_tools,
                             )
 
         if res == True:
             self.assist_enable = True
-            #qLog.log('info', self.proc_id, 'assist authenticate OK!')
+            #logger.info('assist authenticate OK!')
         else:
             self.assist_enable = False
-            qLog.log('error', self.proc_id, 'assist authenticate NG!')
+            logger.error('assist authenticate NG!')
 
         return self.assist_enable
 
@@ -289,53 +303,58 @@ class ChatClass:
 
         # respo 定義
         self.respoAPI = speech_bot_respo._respoAPI()
-        self.respoAPI.init(log_queue=None)
+        self.respoAPI.init(stream_queue=None)
+        respoKEY = respo_key._conf_class()
+        respoKEY.init(runMode=self.runMode)
 
         # respo 認証情報
-        api_type      	= respo_key.getkey('respo','openai_api_type')
-        organization  	= respo_key.getkey('respo','openai_organization')
-        openai_key_id 	= respo_key.getkey('respo','openai_key_id')
-        endpoint      	= respo_key.getkey('respo','azure_endpoint')
-        version       	= respo_key.getkey('respo','azure_version')
-        azure_key_id  	= respo_key.getkey('respo','azure_key_id'),
-        if (self.conf.openai_api_type != ''):
-            api_type = self.conf.openai_api_type
-        if (self.conf.openai_organization not in ['', '< your openai organization >']):
-            organization = self.conf.openai_organization
-        if (self.conf.openai_key_id not in ['', '< your openai key >']):
-            openai_key_id = self.conf.openai_key_id
-        if (self.conf.azure_endpoint not in ['', '< your azure endpoint base >']):
-            endpoint = self.conf.azure_endpoint
-        if (self.conf.azure_version not in ['', 'yyyy-mm-dd']):
-            version = self.conf.azure_version
-        if (self.conf.azure_key_id not in ['', '< your azure key >']):
-            azure_key_id = self.conf.azure_key_id
+        api_type      	= respoKEY.api_type
+        organization  	= respoKEY.openai_organization
+        openai_key_id 	= respoKEY.openai_key_id
+        endpoint      	= respoKEY.azure_endpoint
+        version       	= respoKEY.azure_version
+        azure_key_id  	= respoKEY.azure_key_id
+        if (self.conf is not None):
+            if (self.conf.openai_api_type not in ['', 'auto']):
+                api_type = self.conf.openai_api_type
+            if (self.conf.openai_organization[:1] not in ['', '<']):
+                organization = self.conf.openai_organization
+            if (self.conf.openai_key_id[:1] not in ['', '<']):
+                openai_key_id = self.conf.openai_key_id
+            if (self.conf.azure_endpoint[:1] not in ['', '<']):
+                endpoint = self.conf.azure_endpoint
+            if (self.conf.azure_version not in ['', 'yyyy-mm-dd']):
+                version = self.conf.azure_version
+            if (self.conf.azure_key_id[:1] not in ['', '<']):
+                azure_key_id = self.conf.azure_key_id
 
         # respo 認証実行
         res = self.respoAPI.authenticate('respo',
                             api_type,
-                            respo_key.getkey('respo','respo_default_gpt'), respo_key.getkey('respo','respo_default_class'),
-                            respo_key.getkey('respo','respo_auto_continue'),
-                            respo_key.getkey('respo','respo_max_step'), respo_key.getkey('respo','respo_max_session'),
-                            respo_key.getkey('respo','respo_max_wait_sec'),
+                            respoKEY.default_gpt, respoKEY.default_class,
+                            respoKEY.auto_continue,
+                            respoKEY.max_step, respoKEY.max_session,
+                            respoKEY.max_wait_sec,
+
                             organization, openai_key_id,
                             endpoint, version, azure_key_id,
-                            respo_key.getkey('respo','respo_a_nick_name'), respo_key.getkey('respo','respo_a_model'), respo_key.getkey('respo','respo_a_token'),
-                            respo_key.getkey('respo','respo_a_use_tools'),
-                            respo_key.getkey('respo','respo_b_nick_name'), respo_key.getkey('respo','respo_b_model'), respo_key.getkey('respo','respo_b_token'),
-                            respo_key.getkey('respo','respo_b_use_tools'),
-                            respo_key.getkey('respo','respo_v_nick_name'), respo_key.getkey('respo','respo_v_model'), respo_key.getkey('respo','respo_v_token'),
-                            respo_key.getkey('respo','respo_v_use_tools'),
-                            respo_key.getkey('respo','respo_x_nick_name'), respo_key.getkey('respo','respo_x_model'), respo_key.getkey('respo','respo_x_token'),
-                            respo_key.getkey('respo','respo_x_use_tools'),
+
+                            respoKEY.a_nick_name, respoKEY.a_model, respoKEY.a_token,
+                            respoKEY.a_use_tools,
+                            respoKEY.b_nick_name, respoKEY.b_model, respoKEY.b_token,
+                            respoKEY.b_use_tools,
+                            respoKEY.v_nick_name, respoKEY.v_model, respoKEY.v_token,
+                            respoKEY.v_use_tools,
+                            respoKEY.x_nick_name, respoKEY.x_model, respoKEY.x_token,
+                            respoKEY.x_use_tools,
                             )
 
         if res == True:
             self.respo_enable = True
-            #qLog.log('info', self.proc_id, 'respo authenticate OK!')
+            #logger.info('respo authenticate OK!')
         else:
             self.respo_enable = False
-            qLog.log('error', self.proc_id, 'respo authenticate NG!')
+            logger.error('respo authenticate NG!')
 
         return self.respo_enable
 
@@ -346,38 +365,42 @@ class ChatClass:
 
         # gemini 定義
         self.geminiAPI = speech_bot_gemini._geminiAPI()
-        self.geminiAPI.init(log_queue=None)
+        self.geminiAPI.init(stream_queue=None)
+        geminiKEY = gemini_key._conf_class()
+        geminiKEY.init(runMode=self.runMode)
 
         # gemini 認証情報
-        api_type = gemini_key.getkey('gemini','gemini_api_type')
-        key_id   = gemini_key.getkey('gemini','gemini_key_id')
-        if (self.conf.gemini_key_id not in ['', '< your gemini key >']):
-            key_id = self.conf.gemini_key_id
+        key_id = geminiKEY.gemini_key_id
+        if (self.conf is not None):
+            if (self.conf.gemini_key_id[:1] not in ['', '<']):
+                key_id = self.conf.gemini_key_id
 
         # gemini 認証実行
-        res = self.geminiAPI.authenticate('gemini',
-                            api_type,
-                            gemini_key.getkey('gemini','gemini_default_gpt'), gemini_key.getkey('gemini','gemini_default_class'),
-                            gemini_key.getkey('gemini','gemini_auto_continue'),
-                            gemini_key.getkey('gemini','gemini_max_step'), gemini_key.getkey('gemini','gemini_max_session'),
-                            gemini_key.getkey('gemini','gemini_max_wait_sec'),
+        res = self.geminiAPI.authenticate('google',
+                            geminiKEY.api_type,
+                            geminiKEY.default_gpt, geminiKEY.default_class,
+                            geminiKEY.auto_continue,
+                            geminiKEY.max_step, geminiKEY.max_session,
+                            geminiKEY.max_wait_sec,
+
                             key_id,
-                            gemini_key.getkey('gemini','gemini_a_nick_name'), gemini_key.getkey('gemini','gemini_a_model'), gemini_key.getkey('gemini','gemini_a_token'),
-                            gemini_key.getkey('gemini','gemini_a_use_tools'),
-                            gemini_key.getkey('gemini','gemini_b_nick_name'), gemini_key.getkey('gemini','gemini_b_model'), gemini_key.getkey('gemini','gemini_b_token'),
-                            gemini_key.getkey('gemini','gemini_b_use_tools'),
-                            gemini_key.getkey('gemini','gemini_v_nick_name'), gemini_key.getkey('gemini','gemini_v_model'), gemini_key.getkey('gemini','gemini_v_token'),
-                            gemini_key.getkey('gemini','gemini_v_use_tools'),
-                            gemini_key.getkey('gemini','gemini_x_nick_name'), gemini_key.getkey('gemini','gemini_x_model'), gemini_key.getkey('gemini','gemini_x_token'),
-                            gemini_key.getkey('gemini','gemini_x_use_tools'),
+
+                            geminiKEY.a_nick_name, geminiKEY.a_model, geminiKEY.a_token,
+                            geminiKEY.a_use_tools,
+                            geminiKEY.b_nick_name, geminiKEY.b_model, geminiKEY.b_token,
+                            geminiKEY.b_use_tools,
+                            geminiKEY.v_nick_name, geminiKEY.v_model, geminiKEY.v_token,
+                            geminiKEY.v_use_tools,
+                            geminiKEY.x_nick_name, geminiKEY.x_model, geminiKEY.x_token,
+                            geminiKEY.x_use_tools,
                             )
 
         if res == True:
             self.gemini_enable = True
-            #qLog.log('info', self.proc_id, 'google (Gemini) authenticate OK!')
+            #logger.info('google (Gemini) authenticate OK!')
         else:
             self.gemini_enable = False
-            qLog.log('error', self.proc_id, 'google (Gemini) authenticate NG!')
+            logger.error('google (Gemini) authenticate NG!')
 
         return self.gemini_enable
 
@@ -388,38 +411,42 @@ class ChatClass:
 
         # freeai 定義
         self.freeaiAPI = speech_bot_freeai._freeaiAPI()
-        self.freeaiAPI.init(log_queue=None)
+        self.freeaiAPI.init(stream_queue=None)
+        freeaiKEY = freeai_key._conf_class()
+        freeaiKEY.init(runMode=self.runMode)
 
         # freeai 認証情報
-        api_type = freeai_key.getkey('freeai','freeai_api_type')
-        key_id   = freeai_key.getkey('freeai','freeai_key_id')
-        if (self.conf.freeai_key_id not in ['', '< your freeai key >']):
-            key_id = self.conf.freeai_key_id
+        key_id = freeaiKEY.freeai_key_id
+        if (self.conf is not None):
+            if (self.conf.freeai_key_id[:1] not in ['', '<']):
+                key_id = self.conf.freeai_key_id
 
         # freeai 認証実行
-        res = self.freeaiAPI.authenticate('freeai',
-                            api_type,
-                            freeai_key.getkey('freeai','freeai_default_gpt'), freeai_key.getkey('freeai','freeai_default_class'),
-                            freeai_key.getkey('freeai','freeai_auto_continue'),
-                            freeai_key.getkey('freeai','freeai_max_step'), freeai_key.getkey('freeai','freeai_max_session'),
-                            freeai_key.getkey('freeai','freeai_max_wait_sec'),
+        res = self.freeaiAPI.authenticate('google',
+                            freeaiKEY.api_type,
+                            freeaiKEY.default_gpt, freeaiKEY.default_class,
+                            freeaiKEY.auto_continue,
+                            freeaiKEY.max_step, freeaiKEY.max_session,
+                            freeaiKEY.max_wait_sec,
+
                             key_id,
-                            freeai_key.getkey('freeai','freeai_a_nick_name'), freeai_key.getkey('freeai','freeai_a_model'), freeai_key.getkey('freeai','freeai_a_token'),
-                            freeai_key.getkey('freeai','freeai_a_use_tools'),
-                            freeai_key.getkey('freeai','freeai_b_nick_name'), freeai_key.getkey('freeai','freeai_b_model'), freeai_key.getkey('freeai','freeai_b_token'),
-                            freeai_key.getkey('freeai','freeai_b_use_tools'),
-                            freeai_key.getkey('freeai','freeai_v_nick_name'), freeai_key.getkey('freeai','freeai_v_model'), freeai_key.getkey('freeai','freeai_v_token'),
-                            freeai_key.getkey('freeai','freeai_v_use_tools'),
-                            freeai_key.getkey('freeai','freeai_x_nick_name'), freeai_key.getkey('freeai','freeai_x_model'), freeai_key.getkey('freeai','freeai_x_token'),
-                            freeai_key.getkey('freeai','freeai_x_use_tools'),
+
+                            freeaiKEY.a_nick_name, freeaiKEY.a_model, freeaiKEY.a_token,
+                            freeaiKEY.a_use_tools,
+                            freeaiKEY.b_nick_name, freeaiKEY.b_model, freeaiKEY.b_token,
+                            freeaiKEY.b_use_tools,
+                            freeaiKEY.v_nick_name, freeaiKEY.v_model, freeaiKEY.v_token,
+                            freeaiKEY.v_use_tools,
+                            freeaiKEY.x_nick_name, freeaiKEY.x_model, freeaiKEY.x_token,
+                            freeaiKEY.x_use_tools,
                             )
 
         if res == True:
             self.freeai_enable = True
-            #qLog.log('info', self.proc_id, 'google (FreeAI) authenticate OK!')
+            #logger.info('google (FreeAI) authenticate OK!')
         else:
             self.freeai_enable = False
-            qLog.log('error', self.proc_id, 'google (FreeAI) authenticate NG!')
+            logger.error('google (FreeAI) authenticate NG!')
 
         return self.freeai_enable
 
@@ -430,38 +457,42 @@ class ChatClass:
 
         # claude 定義
         self.claudeAPI = speech_bot_claude._claudeAPI()
-        self.claudeAPI.init(log_queue=None)
+        self.claudeAPI.init(stream_queue=None)
+        claudeKEY = claude_key._conf_class()
+        claudeKEY.init(runMode=self.runMode)
 
         # claude 認証情報
-        api_type = claude_key.getkey('claude','claude_api_type')
-        key_id   = claude_key.getkey('claude','claude_key_id')
-        if (self.conf.claude_key_id not in ['', '< your claude key >']):
-            key_id = self.conf.claude_key_id
+        key_id = claudeKEY.claude_key_id
+        if (self.conf is not None):
+            if (self.conf.claude_key_id[:1] not in ['', '<']):
+                key_id = self.conf.claude_key_id
 
         # claude 認証実行
-        res = self.claudeAPI.authenticate('claude',
-                            api_type,
-                            claude_key.getkey('claude','claude_default_gpt'), claude_key.getkey('claude','claude_default_class'),
-                            claude_key.getkey('claude','claude_auto_continue'),
-                            claude_key.getkey('claude','claude_max_step'), claude_key.getkey('claude','claude_max_session'),
-                            claude_key.getkey('claude','claude_max_wait_sec'),
+        res = self.claudeAPI.authenticate('anthropic',
+                            claudeKEY.api_type,
+                            claudeKEY.default_gpt, claudeKEY.default_class,
+                            claudeKEY.auto_continue,
+                            claudeKEY.max_step, claudeKEY.max_session,
+                            claudeKEY.max_wait_sec,
+
                             key_id,
-                            claude_key.getkey('claude','claude_a_nick_name'), claude_key.getkey('claude','claude_a_model'), claude_key.getkey('claude','claude_a_token'),
-                            claude_key.getkey('claude','claude_a_use_tools'),
-                            claude_key.getkey('claude','claude_b_nick_name'), claude_key.getkey('claude','claude_b_model'), claude_key.getkey('claude','claude_b_token'),
-                            claude_key.getkey('claude','claude_b_use_tools'),
-                            claude_key.getkey('claude','claude_v_nick_name'), claude_key.getkey('claude','claude_v_model'), claude_key.getkey('claude','claude_v_token'),
-                            claude_key.getkey('claude','claude_v_use_tools'),
-                            claude_key.getkey('claude','claude_x_nick_name'), claude_key.getkey('claude','claude_x_model'), claude_key.getkey('claude','claude_x_token'),
-                            claude_key.getkey('claude','claude_x_use_tools'),
+
+                            claudeKEY.a_nick_name, claudeKEY.a_model, claudeKEY.a_token,
+                            claudeKEY.a_use_tools,
+                            claudeKEY.b_nick_name, claudeKEY.b_model, claudeKEY.b_token,
+                            claudeKEY.b_use_tools,
+                            claudeKEY.v_nick_name, claudeKEY.v_model, claudeKEY.v_token,
+                            claudeKEY.v_use_tools,
+                            claudeKEY.x_nick_name, claudeKEY.x_model, claudeKEY.x_token,
+                            claudeKEY.x_use_tools,
                             )
 
         if res == True:
             self.claude_enable = True
-            #qLog.log('info', self.proc_id, 'anthropic (Claude) authenticate OK!')
+            #logger.info('anthropic (Claude) authenticate OK!')
         else:
             self.claude_enable = False
-            qLog.log('error', self.proc_id, 'anthropic (Claude) authenticate NG!')
+            logger.error('anthropic (Claude) authenticate NG!')
 
         return self.claude_enable
 
@@ -472,38 +503,42 @@ class ChatClass:
 
         # openrt 定義
         self.openrtAPI = speech_bot_openrt._openrtAPI()
-        self.openrtAPI.init(log_queue=None)
+        self.openrtAPI.init(stream_queue=None)
+        openrtKEY = openrt_key._conf_class()
+        openrtKEY.init(runMode=self.runMode)
 
         # openrt 認証情報
-        api_type = openrt_key.getkey('openrt','openrt_api_type')
-        key_id   = openrt_key.getkey('openrt','openrt_key_id')
-        if (self.conf.openrt_key_id not in ['', '< your openrt key >']):
-            key_id = self.conf.openrt_key_id
+        key_id = openrtKEY.openrt_key_id
+        if (self.conf is not None):
+            if (self.conf.openrt_key_id[:1] not in ['', '<']):
+                key_id = self.conf.openrt_key_id
 
         # openrt 認証実行
-        res = self.openrtAPI.authenticate('openrt',
-                            api_type,
-                            openrt_key.getkey('openrt','openrt_default_gpt'), openrt_key.getkey('openrt','openrt_default_class'),
-                            openrt_key.getkey('openrt','openrt_auto_continue'),
-                            openrt_key.getkey('openrt','openrt_max_step'), openrt_key.getkey('openrt','openrt_max_session'),
-                            openrt_key.getkey('openrt','openrt_max_wait_sec'),
+        res = self.openrtAPI.authenticate('openrouter',
+                            openrtKEY.api_type,
+                            openrtKEY.default_gpt, openrtKEY.default_class,
+                            openrtKEY.auto_continue,
+                            openrtKEY.max_step, openrtKEY.max_session,
+                            openrtKEY.max_wait_sec,
+
                             key_id,
-                            openrt_key.getkey('openrt','openrt_a_nick_name'), openrt_key.getkey('openrt','openrt_a_model'), openrt_key.getkey('openrt','openrt_a_token'),
-                            openrt_key.getkey('openrt','openrt_a_use_tools'),
-                            openrt_key.getkey('openrt','openrt_b_nick_name'), openrt_key.getkey('openrt','openrt_b_model'), openrt_key.getkey('openrt','openrt_b_token'),
-                            openrt_key.getkey('openrt','openrt_b_use_tools'),
-                            openrt_key.getkey('openrt','openrt_v_nick_name'), openrt_key.getkey('openrt','openrt_v_model'), openrt_key.getkey('openrt','openrt_v_token'),
-                            openrt_key.getkey('openrt','openrt_v_use_tools'),
-                            openrt_key.getkey('openrt','openrt_x_nick_name'), openrt_key.getkey('openrt','openrt_x_model'), openrt_key.getkey('openrt','openrt_x_token'),
-                            openrt_key.getkey('openrt','openrt_x_use_tools'),
+
+                            openrtKEY.a_nick_name, openrtKEY.a_model, openrtKEY.a_token,
+                            openrtKEY.a_use_tools,
+                            openrtKEY.b_nick_name, openrtKEY.b_model, openrtKEY.b_token,
+                            openrtKEY.b_use_tools,
+                            openrtKEY.v_nick_name, openrtKEY.v_model, openrtKEY.v_token,
+                            openrtKEY.v_use_tools,
+                            openrtKEY.x_nick_name, openrtKEY.x_model, openrtKEY.x_token,
+                            openrtKEY.x_use_tools,
                             )
 
         if res == True:
             self.openrt_enable = True
-            #qLog.log('info', self.proc_id, 'openRouter authenticate OK!')
+            #logger.info('openRouter authenticate OK!')
         else:
             self.openrt_enable = False
-            qLog.log('error', self.proc_id, 'openRouter authenticate NG!')
+            logger.error('openRouter authenticate NG!')
 
         return self.openrt_enable
 
@@ -514,38 +549,42 @@ class ChatClass:
 
         # perplexity 定義
         self.perplexityAPI = speech_bot_perplexity._perplexityAPI()
-        self.perplexityAPI.init(log_queue=None)
+        self.perplexityAPI.init(stream_queue=None)
+        perplexityKEY = perplexity_key._conf_class()
+        perplexityKEY.init(runMode=self.runMode)
 
         # perplexity 認証情報
-        api_type = perplexity_key.getkey('perplexity','perplexity_api_type')
-        key_id   = perplexity_key.getkey('perplexity','perplexity_key_id')
-        if (self.conf.perplexity_key_id not in ['', '< your perplexity key >']):
-            key_id = self.conf.perplexity_key_id
+        key_id = perplexityKEY.perplexity_key_id
+        if (self.conf is not None):
+            if (self.conf.perplexity_key_id[:1] not in ['', '<']):
+                key_id = self.conf.perplexity_key_id
 
         # perplexity 認証実行
         res = self.perplexityAPI.authenticate('perplexity',
-                            api_type,
-                            perplexity_key.getkey('perplexity','perplexity_default_gpt'), perplexity_key.getkey('perplexity','perplexity_default_class'),
-                            perplexity_key.getkey('perplexity','perplexity_auto_continue'),
-                            perplexity_key.getkey('perplexity','perplexity_max_step'), perplexity_key.getkey('perplexity','perplexity_max_session'),
-                            perplexity_key.getkey('perplexity','perplexity_max_wait_sec'),
+                            perplexityKEY.api_type,
+                            perplexityKEY.default_gpt, perplexityKEY.default_class,
+                            perplexityKEY.auto_continue,
+                            perplexityKEY.max_step, perplexityKEY.max_session,
+                            perplexityKEY.max_wait_sec,
+
                             key_id,
-                            perplexity_key.getkey('perplexity','perplexity_a_nick_name'), perplexity_key.getkey('perplexity','perplexity_a_model'), perplexity_key.getkey('perplexity','perplexity_a_token'),
-                            perplexity_key.getkey('perplexity','perplexity_a_use_tools'),
-                            perplexity_key.getkey('perplexity','perplexity_b_nick_name'), perplexity_key.getkey('perplexity','perplexity_b_model'), perplexity_key.getkey('perplexity','perplexity_b_token'),
-                            perplexity_key.getkey('perplexity','perplexity_b_use_tools'),
-                            perplexity_key.getkey('perplexity','perplexity_v_nick_name'), perplexity_key.getkey('perplexity','perplexity_v_model'), perplexity_key.getkey('perplexity','perplexity_v_token'),
-                            perplexity_key.getkey('perplexity','perplexity_v_use_tools'),
-                            perplexity_key.getkey('perplexity','perplexity_x_nick_name'), perplexity_key.getkey('perplexity','perplexity_x_model'), perplexity_key.getkey('perplexity','perplexity_x_token'),
-                            perplexity_key.getkey('perplexity','perplexity_x_use_tools'),
+
+                            perplexityKEY.a_nick_name, perplexityKEY.a_model, perplexityKEY.a_token,
+                            perplexityKEY.a_use_tools,
+                            perplexityKEY.b_nick_name, perplexityKEY.b_model, perplexityKEY.b_token,
+                            perplexityKEY.b_use_tools,
+                            perplexityKEY.v_nick_name, perplexityKEY.v_model, perplexityKEY.v_token,
+                            perplexityKEY.v_use_tools,
+                            perplexityKEY.x_nick_name, perplexityKEY.x_model, perplexityKEY.x_token,
+                            perplexityKEY.x_use_tools,
                             )
 
         if res == True:
             self.perplexity_enable = True
-            #qLog.log('info', self.proc_id, 'perplexity authenticate OK!')
+            #logger.info('perplexity authenticate OK!')
         else:
             self.perplexity_enable = False
-            qLog.log('error', self.proc_id, 'perplexity authenticate NG!')
+            logger.error('perplexity authenticate NG!')
 
         return self.perplexity_enable
 
@@ -556,38 +595,42 @@ class ChatClass:
 
         # grok 定義
         self.grokAPI = speech_bot_grok._grokAPI()
-        self.grokAPI.init(log_queue=None)
+        self.grokAPI.init(stream_queue=None)
+        grokKEY = grok_key._conf_class()
+        grokKEY.init(runMode=self.runMode)
 
         # grok 認証情報
-        api_type = grok_key.getkey('grok','grok_api_type')
-        key_id   = grok_key.getkey('grok','grok_key_id')
-        if (self.conf.grok_key_id not in ['', '< your grok key >']):
-            key_id = self.conf.grok_key_id
+        key_id   = grokKEY.grok_key_id
+        if (self.conf is not None):
+            if (self.conf.grok_key_id[:1] not in ['', '<']):
+                key_id = self.conf.grok_key_id
 
         # grok 認証実行
         res = self.grokAPI.authenticate('grok',
-                            api_type,
-                            grok_key.getkey('grok','grok_default_gpt'), grok_key.getkey('grok','grok_default_class'),
-                            grok_key.getkey('grok','grok_auto_continue'),
-                            grok_key.getkey('grok','grok_max_step'), grok_key.getkey('grok','grok_max_session'),
-                            grok_key.getkey('grok','grok_max_wait_sec'),
+                            grokKEY.api_type,
+                            grokKEY.default_gpt, grokKEY.default_class,
+                            grokKEY.auto_continue,
+                            grokKEY.max_step, grokKEY.max_session,
+                            grokKEY.max_wait_sec,
+
                             key_id,
-                            grok_key.getkey('grok','grok_a_nick_name'), grok_key.getkey('grok','grok_a_model'), grok_key.getkey('grok','grok_a_token'),
-                            grok_key.getkey('grok','grok_a_use_tools'),
-                            grok_key.getkey('grok','grok_b_nick_name'), grok_key.getkey('grok','grok_b_model'), grok_key.getkey('grok','grok_b_token'),
-                            grok_key.getkey('grok','grok_b_use_tools'),
-                            grok_key.getkey('grok','grok_v_nick_name'), grok_key.getkey('grok','grok_v_model'), grok_key.getkey('grok','grok_v_token'),
-                            grok_key.getkey('grok','grok_v_use_tools'),
-                            grok_key.getkey('grok','grok_x_nick_name'), grok_key.getkey('grok','grok_x_model'), grok_key.getkey('grok','grok_x_token'),
-                            grok_key.getkey('grok','grok_x_use_tools'),
+
+                            grokKEY.a_nick_name, grokKEY.a_model, grokKEY.a_token,
+                            grokKEY.a_use_tools,
+                            grokKEY.b_nick_name, grokKEY.b_model, grokKEY.b_token,
+                            grokKEY.b_use_tools,
+                            grokKEY.v_nick_name, grokKEY.v_model, grokKEY.v_token,
+                            grokKEY.v_use_tools,
+                            grokKEY.x_nick_name, grokKEY.x_model, grokKEY.x_token,
+                            grokKEY.x_use_tools,
                             )
 
         if res == True:
             self.grok_enable = True
-            #qLog.log('info', self.proc_id, 'grok authenticate OK!')
+            #logger.info('grok authenticate OK!')
         else:
             self.grok_enable = False
-            qLog.log('error', self.proc_id, 'grok authenticate NG!')
+            logger.error('grok authenticate NG!')
 
         return self.grok_enable
 
@@ -598,38 +641,42 @@ class ChatClass:
 
         # groq 定義
         self.groqAPI = speech_bot_groq._groqAPI()
-        self.groqAPI.init(log_queue=None)
+        self.groqAPI.init(stream_queue=None)
+        groqKEY = groq_key._conf_class()
+        groqKEY.init(runMode=self.runMode)
 
         # groq 認証情報
-        api_type = groq_key.getkey('groq','groq_api_type')
-        key_id   = groq_key.getkey('groq','groq_key_id')
-        if (self.conf.groq_key_id not in ['', '< your groq key >']):
-            key_id = self.conf.groq_key_id
+        key_id = groqKEY.groq_key_id
+        if (self.conf is not None):
+            if (self.conf.groq_key_id[:1] not in ['', '<']):
+                key_id = self.conf.groq_key_id
 
         # groq 認証実行
         res = self.groqAPI.authenticate('groq',
-                            api_type,
-                            groq_key.getkey('groq','groq_default_gpt'), groq_key.getkey('groq','groq_default_class'),
-                            groq_key.getkey('groq','groq_auto_continue'),
-                            groq_key.getkey('groq','groq_max_step'), groq_key.getkey('groq','groq_max_session'),
-                            groq_key.getkey('groq','groq_max_wait_sec'),
+                            groqKEY.api_type,
+                            groqKEY.default_gpt, groqKEY.default_class,
+                            groqKEY.auto_continue,
+                            groqKEY.max_step, groqKEY.max_session,
+                            groqKEY.max_wait_sec,
+
                             key_id,
-                            groq_key.getkey('groq','groq_a_nick_name'), groq_key.getkey('groq','groq_a_model'), groq_key.getkey('groq','groq_a_token'),
-                            groq_key.getkey('groq','groq_a_use_tools'),
-                            groq_key.getkey('groq','groq_b_nick_name'), groq_key.getkey('groq','groq_b_model'), groq_key.getkey('groq','groq_b_token'),
-                            groq_key.getkey('groq','groq_b_use_tools'),
-                            groq_key.getkey('groq','groq_v_nick_name'), groq_key.getkey('groq','groq_v_model'), groq_key.getkey('groq','groq_v_token'),
-                            groq_key.getkey('groq','groq_v_use_tools'),
-                            groq_key.getkey('groq','groq_x_nick_name'), groq_key.getkey('groq','groq_x_model'), groq_key.getkey('groq','groq_x_token'),
-                            groq_key.getkey('groq','groq_x_use_tools'),
+
+                            groqKEY.a_nick_name, groqKEY.a_model, groqKEY.a_token,
+                            groqKEY.a_use_tools,
+                            groqKEY.b_nick_name, groqKEY.b_model, groqKEY.b_token,
+                            groqKEY.b_use_tools,
+                            groqKEY.v_nick_name, groqKEY.v_model, groqKEY.v_token,
+                            groqKEY.v_use_tools,
+                            groqKEY.x_nick_name, groqKEY.x_model, groqKEY.x_token,
+                            groqKEY.x_use_tools,
                             )
 
         if res == True:
             self.groq_enable = True
-            #qLog.log('info', self.proc_id, 'groq authenticate OK!')
+            #logger.info('groq authenticate OK!')
         else:
             self.groq_enable = False
-            qLog.log('error', self.proc_id, 'groq authenticate NG!')
+            logger.error('groq authenticate NG!')
 
         return self.groq_enable
 
@@ -640,41 +687,45 @@ class ChatClass:
 
         # ollama 定義
         self.ollamaAPI = speech_bot_ollama._ollamaAPI()
-        self.ollamaAPI.init(log_queue=None)
+        self.ollamaAPI.init(stream_queue=None)
+        ollamaKEY = ollama_key._conf_class()
+        ollamaKEY.init(runMode=self.runMode)
 
         # ollama 認証情報
-        api_type = ollama_key.getkey('ollama','ollama_api_type')
-        server   = ollama_key.getkey('ollama','ollama_server')
-        port     = ollama_key.getkey('ollama','ollama_port')
-        if (self.conf.ollama_server not in['', 'auto']):
-            server = self.conf.ollama_server
-        if (self.conf.ollama_port not in['', 'auto']):
-            port = self.conf.ollama_port
+        server = ollamaKEY.ollama_server
+        port = ollamaKEY.ollama_port
+        if (self.conf is not None):
+            if (self.conf.ollama_server not in['', 'auto']):
+                server = self.conf.ollama_server
+            if (self.conf.ollama_port not in['', 'auto']):
+                port = self.conf.ollama_port
 
         # ollama 認証実行
         res = self.ollamaAPI.authenticate('ollama',
-                            api_type,
-                            ollama_key.getkey('ollama','ollama_default_gpt'), ollama_key.getkey('ollama','ollama_default_class'),
-                            ollama_key.getkey('ollama','ollama_auto_continue'),
-                            ollama_key.getkey('ollama','ollama_max_step'), ollama_key.getkey('ollama','ollama_max_session'),
-                            ollama_key.getkey('ollama','ollama_max_wait_sec'),
+                            ollamaKEY.api_type,
+                            ollamaKEY.default_gpt, ollamaKEY.default_class,
+                            ollamaKEY.auto_continue,
+                            ollamaKEY.max_step, ollamaKEY.max_session,
+                            ollamaKEY.max_wait_sec,
+
                             server, port,
-                            ollama_key.getkey('ollama','ollama_a_nick_name'), ollama_key.getkey('ollama','ollama_a_model'), ollama_key.getkey('ollama','ollama_a_token'),
-                            ollama_key.getkey('ollama','ollama_a_use_tools'),
-                            ollama_key.getkey('ollama','ollama_b_nick_name'), ollama_key.getkey('ollama','ollama_b_model'), ollama_key.getkey('ollama','ollama_b_token'),
-                            ollama_key.getkey('ollama','ollama_b_use_tools'),
-                            ollama_key.getkey('ollama','ollama_v_nick_name'), ollama_key.getkey('ollama','ollama_v_model'), ollama_key.getkey('ollama','ollama_v_token'),
-                            ollama_key.getkey('ollama','ollama_v_use_tools'),
-                            ollama_key.getkey('ollama','ollama_x_nick_name'), ollama_key.getkey('ollama','ollama_x_model'), ollama_key.getkey('ollama','ollama_x_token'),
-                            ollama_key.getkey('ollama','ollama_x_use_tools'),
+
+                            ollamaKEY.a_nick_name, ollamaKEY.a_model, ollamaKEY.a_token,
+                            ollamaKEY.a_use_tools,
+                            ollamaKEY.b_nick_name, ollamaKEY.b_model, ollamaKEY.b_token,
+                            ollamaKEY.b_use_tools,
+                            ollamaKEY.v_nick_name, ollamaKEY.v_model, ollamaKEY.v_token,
+                            ollamaKEY.v_use_tools,
+                            ollamaKEY.x_nick_name, ollamaKEY.x_model, ollamaKEY.x_token,
+                            ollamaKEY.x_use_tools,
                             )
 
         if res == True:
             self.ollama_enable = True
-            #qLog.log('info', self.proc_id, 'ollama authenticate OK!')
+            #logger.info('ollama authenticate OK!')
         else:
             self.ollama_enable = False
-            qLog.log('error', self.proc_id, 'ollama authenticate NG!')
+            logger.error('ollama authenticate NG!')
 
         return self.ollama_enable
 
@@ -721,9 +772,9 @@ class ChatClass:
             if response.status_code == 200:
                 res_port = str(response.json()['port'])
             else:
-                qLog.log('error', self.proc_id, f"Error response ({self.core_port}/post_req) : {response.status_code} - {response.text}")
+                logger.error(f"Error response ({self.core_port}/post_req) : {response.status_code} - {response.text}")
         except Exception as e:
-            qLog.log('error', self.proc_id, f"Error communicating ({self.core_port}/post_req) : {e}")
+            logger.error(f"Error communicating ({self.core_port}/post_req) : {e}")
         return res_port
 
     def wait_result(self, user_id: str, member_port: Dict[int, str], parent_self=None, ) -> Dict[int, str]:
@@ -760,9 +811,9 @@ class ChatClass:
                                 all_done = False
                                 break
                 else:
-                    qLog.log('error', self.proc_id, f"Error response ({self.core_port}/get_sessions_port) : {response.status_code} - {response.text}")
+                    logger.error(f"Error response ({self.core_port}/get_sessions_port) : {response.status_code} - {response.text}")
             except Exception as e:
-                qLog.log('error', self.proc_id, f"Error communicating ({self.core_port}/get_sessions_port) : {e}")
+                logger.error(f"Error communicating ({self.core_port}/get_sessions_port) : {e}")
             time.sleep(MEMBER_RESULT_INTERVAL)
         return out_text
 
@@ -802,7 +853,7 @@ class ChatClass:
         if (self.ollama_enable is None):
             self.ollama_auth()
 
-        #qLog.log('info', self.proc_id, 'chatBot start')
+        #logger.info('chatBot start')
         print()
 
         # pass 1
@@ -848,10 +899,10 @@ class ChatClass:
                                     filePath=filePath, jsonSchema=jsonSchema, inpLang=inpLang, outLang=outLang, )
 
         if (res_text != '') and (res_text != '!'):
-            #qLog.log('info', self.proc_id, 'chatBot complite!')
+            #logger.info('chatBot complite!')
             print()
         else:
-            #qLog.log('info', self.proc_id, 'chatBot error!')
+            #logger.info('chatBot error!')
             print('!')
             print()
         return res_text, res_data, res_path, res_files, res_engine, res_name, res_api, history
@@ -896,14 +947,14 @@ class ChatClass:
 
             engine_text = ''
             if (engine == '[chatgpt]'):
-                engine_text = self.chatgptAPI.chatgpt_b_nick_name.lower() + ',\n'
+                engine_text = self.chatgptAPI.b_nick_name.lower() + ',\n'
             else:
                 model_nick_name1 = 'chatgpt'
                 model_nick_name2 = 'riki'
-                a_nick_name = self.chatgptAPI.chatgpt_a_nick_name.lower()
-                b_nick_name = self.chatgptAPI.chatgpt_b_nick_name.lower()
-                v_nick_name = self.chatgptAPI.chatgpt_v_nick_name.lower()
-                x_nick_name = self.chatgptAPI.chatgpt_x_nick_name.lower()
+                a_nick_name = self.chatgptAPI.a_nick_name.lower()
+                b_nick_name = self.chatgptAPI.b_nick_name.lower()
+                v_nick_name = self.chatgptAPI.v_nick_name.lower()
+                x_nick_name = self.chatgptAPI.x_nick_name.lower()
                 if (engine != ''):
                     if   ((len(a_nick_name) != 0) and (engine.lower() == a_nick_name)):
                         engine_text = a_nick_name + ',\n'
@@ -959,18 +1010,18 @@ class ChatClass:
                 engine_text = ''
 
                 try:
-                    qLog.log('info', self.proc_id, '### ChatGPT ###')
+                    logger.info('### ChatGPT ###')
 
                     if (self.coreai is not None):
-                        self.chatgptAPI.set_models( max_wait_sec=self.coreai.chat_class.chatgptAPI.chatgpt_max_wait_sec,
-                                                    a_model=self.coreai.chat_class.chatgptAPI.chatgpt_a_model,
-                                                    a_use_tools=self.coreai.chat_class.chatgptAPI.chatgpt_a_use_tools,
-                                                    b_model=self.coreai.chat_class.chatgptAPI.chatgpt_b_model,
-                                                    b_use_tools=self.coreai.chat_class.chatgptAPI.chatgpt_b_use_tools,
-                                                    v_model=self.coreai.chat_class.chatgptAPI.chatgpt_v_model,
-                                                    v_use_tools=self.coreai.chat_class.chatgptAPI.chatgpt_v_use_tools,
-                                                    x_model=self.coreai.chat_class.chatgptAPI.chatgpt_x_model,
-                                                    x_use_tools=self.coreai.chat_class.chatgptAPI.chatgpt_x_use_tools, )
+                        self.chatgptAPI.set_models( max_wait_sec=self.coreai.chat_class.chatgptAPI.max_wait_sec,
+                                                    a_model=self.coreai.chat_class.chatgptAPI.a_model,
+                                                    a_use_tools=self.coreai.chat_class.chatgptAPI.a_use_tools,
+                                                    b_model=self.coreai.chat_class.chatgptAPI.b_model,
+                                                    b_use_tools=self.coreai.chat_class.chatgptAPI.b_use_tools,
+                                                    v_model=self.coreai.chat_class.chatgptAPI.v_model,
+                                                    v_use_tools=self.coreai.chat_class.chatgptAPI.v_use_tools,
+                                                    x_model=self.coreai.chat_class.chatgptAPI.x_model,
+                                                    x_use_tools=self.coreai.chat_class.chatgptAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.chatgptAPI.chatBot(    chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -981,7 +1032,7 @@ class ChatClass:
                         res_engine = 'ChatGPT'
                         res_data = res_text
                 except Exception as e:
-                    qLog.log('error', self.proc_id, str(e))
+                    logger.error(f"Error: {e}")
 
         # assist
         if  ((res_text == '') or (res_text == '!')) \
@@ -994,13 +1045,13 @@ class ChatClass:
 
             engine_text = ''
             if (engine == '[assist]'):
-                engine_text = self.assistAPI.assist_b_nick_name.lower() + ',\n'
+                engine_text = self.assistAPI.b_nick_name.lower() + ',\n'
             else:
                 model_nick_name = 'assist'
-                a_nick_name = self.assistAPI.assist_a_nick_name.lower()
-                b_nick_name = self.assistAPI.assist_b_nick_name.lower()
-                v_nick_name = self.assistAPI.assist_v_nick_name.lower()
-                x_nick_name = self.assistAPI.assist_x_nick_name.lower()
+                a_nick_name = self.assistAPI.a_nick_name.lower()
+                b_nick_name = self.assistAPI.b_nick_name.lower()
+                v_nick_name = self.assistAPI.v_nick_name.lower()
+                x_nick_name = self.assistAPI.x_nick_name.lower()
                 if (engine != ''):
                     if   ((len(a_nick_name) != 0) and (engine.lower() == a_nick_name)):
                         engine_text = a_nick_name + ',\n'
@@ -1053,18 +1104,18 @@ class ChatClass:
                 engine_text = ''
 
                 try:
-                    qLog.log('info', self.proc_id, '### Assist ###')
+                    logger.info('### Assist ###')
 
                     if (self.coreai is not None):
-                        self.assistAPI.set_models(  max_wait_sec=self.coreai.chat_class.assistAPI.assist_max_wait_sec,
-                                                    a_model=self.coreai.chat_class.assistAPI.assist_a_model,
-                                                    a_use_tools=self.coreai.chat_class.assistAPI.assist_a_use_tools,
-                                                    b_model=self.coreai.chat_class.assistAPI.assist_b_model,
-                                                    b_use_tools=self.coreai.chat_class.assistAPI.assist_b_use_tools,
-                                                    v_model=self.coreai.chat_class.assistAPI.assist_v_model,
-                                                    v_use_tools=self.coreai.chat_class.assistAPI.assist_v_use_tools,
-                                                    x_model=self.coreai.chat_class.assistAPI.assist_x_model,
-                                                    x_use_tools=self.coreai.chat_class.assistAPI.assist_x_use_tools, )
+                        self.assistAPI.set_models(  max_wait_sec=self.coreai.chat_class.assistAPI.max_wait_sec,
+                                                    a_model=self.coreai.chat_class.assistAPI.a_model,
+                                                    a_use_tools=self.coreai.chat_class.assistAPI.a_use_tools,
+                                                    b_model=self.coreai.chat_class.assistAPI.b_model,
+                                                    b_use_tools=self.coreai.chat_class.assistAPI.b_use_tools,
+                                                    v_model=self.coreai.chat_class.assistAPI.v_model,
+                                                    v_use_tools=self.coreai.chat_class.assistAPI.v_use_tools,
+                                                    x_model=self.coreai.chat_class.assistAPI.x_model,
+                                                    x_use_tools=self.coreai.chat_class.assistAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.assistAPI.chatBot(     chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1075,7 +1126,7 @@ class ChatClass:
                         res_engine = 'Assist'
                         res_data = res_text
                 except Exception as e:
-                    qLog.log('error', self.proc_id, str(e))
+                    logger.error(f"Error: {e}")
 
         # respo
         if  ((res_text == '') or (res_text == '!')) \
@@ -1088,14 +1139,14 @@ class ChatClass:
 
             engine_text = ''
             if (engine == '[respo]'):
-                engine_text = self.respoAPI.respo_b_nick_name.lower() + ',\n'
+                engine_text = self.respoAPI.b_nick_name.lower() + ',\n'
             else:
                 model_nick_name1 = 'respo'
                 model_nick_name2 = 'vision'
-                a_nick_name = self.respoAPI.respo_a_nick_name.lower()
-                b_nick_name = self.respoAPI.respo_b_nick_name.lower()
-                v_nick_name = self.respoAPI.respo_v_nick_name.lower()
-                x_nick_name = self.respoAPI.respo_x_nick_name.lower()
+                a_nick_name = self.respoAPI.a_nick_name.lower()
+                b_nick_name = self.respoAPI.b_nick_name.lower()
+                v_nick_name = self.respoAPI.v_nick_name.lower()
+                x_nick_name = self.respoAPI.x_nick_name.lower()
                 if (engine != ''):
                     if   ((len(a_nick_name) != 0) and (engine.lower() == a_nick_name)):
                         engine_text = a_nick_name + ',\n'
@@ -1151,18 +1202,18 @@ class ChatClass:
                 engine_text = ''
 
                 try:
-                    qLog.log('info', self.proc_id, '### Respo ###')
+                    logger.info('### Respo ###')
 
                     if (self.coreai is not None):
-                        self.respoAPI.set_models(   max_wait_sec=self.coreai.chat_class.respoAPI.respo_max_wait_sec,
-                                                    a_model=self.coreai.chat_class.respoAPI.respo_a_model,
-                                                    a_use_tools=self.coreai.chat_class.respoAPI.respo_a_use_tools,
-                                                    b_model=self.coreai.chat_class.respoAPI.respo_b_model,
-                                                    b_use_tools=self.coreai.chat_class.respoAPI.respo_b_use_tools,
-                                                    v_model=self.coreai.chat_class.respoAPI.respo_v_model,
-                                                    v_use_tools=self.coreai.chat_class.respoAPI.respo_v_use_tools,
-                                                    x_model=self.coreai.chat_class.respoAPI.respo_x_model,
-                                                    x_use_tools=self.coreai.chat_class.respoAPI.respo_x_use_tools, )
+                        self.respoAPI.set_models(   max_wait_sec=self.coreai.chat_class.respoAPI.max_wait_sec,
+                                                    a_model=self.coreai.chat_class.respoAPI.a_model,
+                                                    a_use_tools=self.coreai.chat_class.respoAPI.a_use_tools,
+                                                    b_model=self.coreai.chat_class.respoAPI.b_model,
+                                                    b_use_tools=self.coreai.chat_class.respoAPI.b_use_tools,
+                                                    v_model=self.coreai.chat_class.respoAPI.v_model,
+                                                    v_use_tools=self.coreai.chat_class.respoAPI.v_use_tools,
+                                                    x_model=self.coreai.chat_class.respoAPI.x_model,
+                                                    x_use_tools=self.coreai.chat_class.respoAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.respoAPI.chatBot(      chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1173,7 +1224,7 @@ class ChatClass:
                         res_engine = 'Respo'
                         res_data = res_text
                 except Exception as e:
-                    qLog.log('error', self.proc_id, str(e))
+                    logger.error(f"Error: {e}")
 
         # gemini
         if  ((res_text == '') or (res_text == '!')) \
@@ -1186,13 +1237,13 @@ class ChatClass:
 
             engine_text = ''
             if (engine == '[gemini]'):
-                engine_text = self.geminiAPI.gemini_b_nick_name.lower() + ',\n'
+                engine_text = self.geminiAPI.b_nick_name.lower() + ',\n'
             else:
                 model_nick_name = 'gemini'
-                a_nick_name = self.geminiAPI.gemini_a_nick_name.lower()
-                b_nick_name = self.geminiAPI.gemini_b_nick_name.lower()
-                v_nick_name = self.geminiAPI.gemini_v_nick_name.lower()
-                x_nick_name = self.geminiAPI.gemini_x_nick_name.lower()
+                a_nick_name = self.geminiAPI.a_nick_name.lower()
+                b_nick_name = self.geminiAPI.b_nick_name.lower()
+                v_nick_name = self.geminiAPI.v_nick_name.lower()
+                x_nick_name = self.geminiAPI.x_nick_name.lower()
                 if (engine != ''):
                     if   ((len(a_nick_name) != 0) and (engine.lower() == a_nick_name)):
                         engine_text = a_nick_name + ',\n'
@@ -1242,18 +1293,18 @@ class ChatClass:
                 engine_text = ''
 
                 try:
-                    qLog.log('info', self.proc_id, '### Gemini ###')
+                    logger.info('### Gemini ###')
 
                     if (self.coreai is not None):
-                        self.geminiAPI.set_models(  max_wait_sec=self.coreai.chat_class.geminiAPI.gemini_max_wait_sec,
-                                                    a_model=self.coreai.chat_class.geminiAPI.gemini_a_model,
-                                                    a_use_tools=self.coreai.chat_class.geminiAPI.gemini_a_use_tools,
-                                                    b_model=self.coreai.chat_class.geminiAPI.gemini_b_model,
-                                                    b_use_tools=self.coreai.chat_class.geminiAPI.gemini_b_use_tools,
-                                                    v_model=self.coreai.chat_class.geminiAPI.gemini_v_model,
-                                                    v_use_tools=self.coreai.chat_class.geminiAPI.gemini_v_use_tools,
-                                                    x_model=self.coreai.chat_class.geminiAPI.gemini_x_model,
-                                                    x_use_tools=self.coreai.chat_class.geminiAPI.gemini_x_use_tools, )
+                        self.geminiAPI.set_models(  max_wait_sec=self.coreai.chat_class.geminiAPI.max_wait_sec,
+                                                    a_model=self.coreai.chat_class.geminiAPI.a_model,
+                                                    a_use_tools=self.coreai.chat_class.geminiAPI.a_use_tools,
+                                                    b_model=self.coreai.chat_class.geminiAPI.b_model,
+                                                    b_use_tools=self.coreai.chat_class.geminiAPI.b_use_tools,
+                                                    v_model=self.coreai.chat_class.geminiAPI.v_model,
+                                                    v_use_tools=self.coreai.chat_class.geminiAPI.v_use_tools,
+                                                    x_model=self.coreai.chat_class.geminiAPI.x_model,
+                                                    x_use_tools=self.coreai.chat_class.geminiAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.geminiAPI.chatBot(     chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1264,7 +1315,7 @@ class ChatClass:
                         res_engine = 'Gemini'
                         res_data = res_text
                 except Exception as e:
-                    qLog.log('error', self.proc_id, str(e))
+                    logger.error(f"Error: {e}")
 
         # freeai
         # 最後の砦処理！
@@ -1280,13 +1331,13 @@ class ChatClass:
 
             engine_text = ''
             if (engine == '[claude]'):
-                engine_text = self.claudeAPI.claude_b_nick_name.lower() + ',\n'
+                engine_text = self.claudeAPI.b_nick_name.lower() + ',\n'
             else:
                 model_nick_name = 'claude'
-                a_nick_name = self.claudeAPI.claude_a_nick_name.lower()
-                b_nick_name = self.claudeAPI.claude_b_nick_name.lower()
-                v_nick_name = self.claudeAPI.claude_v_nick_name.lower()
-                x_nick_name = self.claudeAPI.claude_x_nick_name.lower()
+                a_nick_name = self.claudeAPI.a_nick_name.lower()
+                b_nick_name = self.claudeAPI.b_nick_name.lower()
+                v_nick_name = self.claudeAPI.v_nick_name.lower()
+                x_nick_name = self.claudeAPI.x_nick_name.lower()
                 if (engine != ''):
                     if   ((len(a_nick_name) != 0) and (engine.lower() == a_nick_name)):
                         engine_text = a_nick_name + ',\n'
@@ -1336,18 +1387,18 @@ class ChatClass:
                 engine_text = ''
 
                 try:
-                    qLog.log('info', self.proc_id, '### Claude ###')
+                    logger.info('### Claude ###')
 
                     if (self.coreai is not None):
-                        self.claudeAPI.set_models(  max_wait_sec=self.coreai.chat_class.claudeAPI.claude_max_wait_sec,
-                                                    a_model=self.coreai.chat_class.claudeAPI.claude_a_model,
-                                                    a_use_tools=self.coreai.chat_class.claudeAPI.claude_a_use_tools,
-                                                    b_model=self.coreai.chat_class.claudeAPI.claude_b_model,
-                                                    b_use_tools=self.coreai.chat_class.claudeAPI.claude_b_use_tools,
-                                                    v_model=self.coreai.chat_class.claudeAPI.claude_v_model,
-                                                    v_use_tools=self.coreai.chat_class.claudeAPI.claude_v_use_tools,
-                                                    x_model=self.coreai.chat_class.claudeAPI.claude_x_model,
-                                                    x_use_tools=self.coreai.chat_class.claudeAPI.claude_x_use_tools, )
+                        self.claudeAPI.set_models(  max_wait_sec=self.coreai.chat_class.claudeAPI.max_wait_sec,
+                                                    a_model=self.coreai.chat_class.claudeAPI.a_model,
+                                                    a_use_tools=self.coreai.chat_class.claudeAPI.a_use_tools,
+                                                    b_model=self.coreai.chat_class.claudeAPI.b_model,
+                                                    b_use_tools=self.coreai.chat_class.claudeAPI.b_use_tools,
+                                                    v_model=self.coreai.chat_class.claudeAPI.v_model,
+                                                    v_use_tools=self.coreai.chat_class.claudeAPI.v_use_tools,
+                                                    x_model=self.coreai.chat_class.claudeAPI.x_model,
+                                                    x_use_tools=self.coreai.chat_class.claudeAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.claudeAPI.chatBot(     chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1358,7 +1409,7 @@ class ChatClass:
                         res_engine = 'Claude'
                         res_data = res_text
                 except Exception as e:
-                    qLog.log('error', self.proc_id, str(e))
+                    logger.error(f"Error: {e}")
 
         # openrt
         if  ((res_text == '') or (res_text == '!')) \
@@ -1371,13 +1422,13 @@ class ChatClass:
 
             engine_text = ''
             if (engine == '[openrt]'):
-                engine_text = self.openrtAPI.openrt_b_nick_name.lower() + ',\n'
+                engine_text = self.openrtAPI.b_nick_name.lower() + ',\n'
             else:
                 model_nick_name = 'openrt'
-                a_nick_name = self.openrtAPI.openrt_a_nick_name.lower()
-                b_nick_name = self.openrtAPI.openrt_b_nick_name.lower()
-                v_nick_name = self.openrtAPI.openrt_v_nick_name.lower()
-                x_nick_name = self.openrtAPI.openrt_x_nick_name.lower()
+                a_nick_name = self.openrtAPI.a_nick_name.lower()
+                b_nick_name = self.openrtAPI.b_nick_name.lower()
+                v_nick_name = self.openrtAPI.v_nick_name.lower()
+                x_nick_name = self.openrtAPI.x_nick_name.lower()
                 if (engine != ''):
                     if   ((len(a_nick_name) != 0) and (engine.lower() == a_nick_name)):
                         engine_text = a_nick_name + ',\n'
@@ -1427,18 +1478,18 @@ class ChatClass:
                 engine_text = ''
 
                 try:
-                    qLog.log('info', self.proc_id, '### OpenRouter ###')
+                    logger.info('### OpenRouter ###')
 
                     if (self.coreai is not None):
-                        self.openrtAPI.set_models(  max_wait_sec=self.coreai.chat_class.openrtAPI.openrt_max_wait_sec,
-                                                    a_model=self.coreai.chat_class.openrtAPI.openrt_a_model,
-                                                    a_use_tools=self.coreai.chat_class.openrtAPI.openrt_a_use_tools,
-                                                    b_model=self.coreai.chat_class.openrtAPI.openrt_b_model,
-                                                    b_use_tools=self.coreai.chat_class.openrtAPI.openrt_b_use_tools,
-                                                    v_model=self.coreai.chat_class.openrtAPI.openrt_v_model,
-                                                    v_use_tools=self.coreai.chat_class.openrtAPI.openrt_v_use_tools,
-                                                    x_model=self.coreai.chat_class.openrtAPI.openrt_x_model,
-                                                    x_use_tools=self.coreai.chat_class.openrtAPI.openrt_x_use_tools, )
+                        self.openrtAPI.set_models(  max_wait_sec=self.coreai.chat_class.openrtAPI.max_wait_sec,
+                                                    a_model=self.coreai.chat_class.openrtAPI.a_model,
+                                                    a_use_tools=self.coreai.chat_class.openrtAPI.a_use_tools,
+                                                    b_model=self.coreai.chat_class.openrtAPI.b_model,
+                                                    b_use_tools=self.coreai.chat_class.openrtAPI.b_use_tools,
+                                                    v_model=self.coreai.chat_class.openrtAPI.v_model,
+                                                    v_use_tools=self.coreai.chat_class.openrtAPI.v_use_tools,
+                                                    x_model=self.coreai.chat_class.openrtAPI.x_model,
+                                                    x_use_tools=self.coreai.chat_class.openrtAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.openrtAPI.chatBot(     chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1449,7 +1500,7 @@ class ChatClass:
                         res_engine = 'OpenRouter'
                         res_data = res_text
                 except Exception as e:
-                    qLog.log('error', self.proc_id, str(e))
+                    logger.error(f"Error: {e}")
 
         # perplexity
         if  ((res_text == '') or (res_text == '!')) \
@@ -1462,14 +1513,14 @@ class ChatClass:
 
             engine_text = ''
             if (engine == '[perplexity]'):
-                engine_text = self.perplexityAPI.perplexity_b_nick_name.lower() + ',\n'
+                engine_text = self.perplexityAPI.b_nick_name.lower() + ',\n'
             else:
                 model_nick_name1 = 'perplexity'
                 model_nick_name2 = 'pplx'
-                a_nick_name = self.perplexityAPI.perplexity_a_nick_name.lower()
-                b_nick_name = self.perplexityAPI.perplexity_b_nick_name.lower()
-                v_nick_name = self.perplexityAPI.perplexity_v_nick_name.lower()
-                x_nick_name = self.perplexityAPI.perplexity_x_nick_name.lower()
+                a_nick_name = self.perplexityAPI.a_nick_name.lower()
+                b_nick_name = self.perplexityAPI.b_nick_name.lower()
+                v_nick_name = self.perplexityAPI.v_nick_name.lower()
+                x_nick_name = self.perplexityAPI.x_nick_name.lower()
                 if (engine != ''):
                     if   ((len(a_nick_name) != 0) and (engine.lower() == a_nick_name)):
                         engine_text = a_nick_name + ',\n'
@@ -1525,18 +1576,18 @@ class ChatClass:
                 engine_text = ''
 
                 try:
-                    qLog.log('info', self.proc_id, '### Perplexity ###')
+                    logger.info('### Perplexity ###')
 
                     if (self.coreai is not None):
-                        self.perplexityAPI.set_models(  max_wait_sec=self.coreai.chat_class.perplexityAPI.perplexity_max_wait_sec,
-                                                        a_model=self.coreai.chat_class.perplexityAPI.perplexity_a_model,
-                                                        a_use_tools=self.coreai.chat_class.perplexityAPI.perplexity_a_use_tools,
-                                                        b_model=self.coreai.chat_class.perplexityAPI.perplexity_b_model,
-                                                        b_use_tools=self.coreai.chat_class.perplexityAPI.perplexity_b_use_tools,
-                                                        v_model=self.coreai.chat_class.perplexityAPI.perplexity_v_model,
-                                                        v_use_tools=self.coreai.chat_class.perplexityAPI.perplexity_v_use_tools,
-                                                        x_model=self.coreai.chat_class.perplexityAPI.perplexity_x_model,
-                                                        x_use_tools=self.coreai.chat_class.perplexityAPI.perplexity_x_use_tools, )
+                        self.perplexityAPI.set_models(  max_wait_sec=self.coreai.chat_class.perplexityAPI.max_wait_sec,
+                                                        a_model=self.coreai.chat_class.perplexityAPI.a_model,
+                                                        a_use_tools=self.coreai.chat_class.perplexityAPI.a_use_tools,
+                                                        b_model=self.coreai.chat_class.perplexityAPI.b_model,
+                                                        b_use_tools=self.coreai.chat_class.perplexityAPI.b_use_tools,
+                                                        v_model=self.coreai.chat_class.perplexityAPI.v_model,
+                                                        v_use_tools=self.coreai.chat_class.perplexityAPI.v_use_tools,
+                                                        x_model=self.coreai.chat_class.perplexityAPI.x_model,
+                                                        x_use_tools=self.coreai.chat_class.perplexityAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.perplexityAPI.chatBot(     chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1547,7 +1598,7 @@ class ChatClass:
                         res_engine = 'Perplexity'
                         res_data = res_text
                 except Exception as e:
-                    qLog.log('error', self.proc_id, str(e))
+                    logger.error(f"Error: {e}")
 
         # grok
         if  ((res_text == '') or (res_text == '!')) \
@@ -1560,13 +1611,13 @@ class ChatClass:
 
             engine_text = ''
             if (engine == '[grok]'):
-                engine_text = self.grokAPI.grok_b_nick_name.lower() + ',\n'
+                engine_text = self.grokAPI.b_nick_name.lower() + ',\n'
             else:
                 model_nick_name = 'grok'
-                a_nick_name = self.grokAPI.grok_a_nick_name.lower()
-                b_nick_name = self.grokAPI.grok_b_nick_name.lower()
-                v_nick_name = self.grokAPI.grok_v_nick_name.lower()
-                x_nick_name = self.grokAPI.grok_x_nick_name.lower()
+                a_nick_name = self.grokAPI.a_nick_name.lower()
+                b_nick_name = self.grokAPI.b_nick_name.lower()
+                v_nick_name = self.grokAPI.v_nick_name.lower()
+                x_nick_name = self.grokAPI.x_nick_name.lower()
                 if (engine != ''):
                     if   ((len(a_nick_name) != 0) and (engine.lower() == a_nick_name)):
                         engine_text = a_nick_name + ',\n'
@@ -1616,18 +1667,18 @@ class ChatClass:
                 engine_text = ''
 
                 try:
-                    qLog.log('info', self.proc_id, '### Grok ###')
+                    logger.info('### Grok ###')
 
                     if (self.coreai is not None):
-                        self.grokAPI.set_models(max_wait_sec=self.coreai.chat_class.grokAPI.grok_max_wait_sec,
-                                                a_model=self.coreai.chat_class.grokAPI.grok_a_model,
-                                                a_use_tools=self.coreai.chat_class.grokAPI.grok_a_use_tools,
-                                                b_model=self.coreai.chat_class.grokAPI.grok_b_model,
-                                                b_use_tools=self.coreai.chat_class.grokAPI.grok_b_use_tools,
-                                                v_model=self.coreai.chat_class.grokAPI.grok_v_model,
-                                                v_use_tools=self.coreai.chat_class.grokAPI.grok_v_use_tools,
-                                                x_model=self.coreai.chat_class.grokAPI.grok_x_model,
-                                                x_use_tools=self.coreai.chat_class.grokAPI.grok_x_use_tools, )
+                        self.grokAPI.set_models(max_wait_sec=self.coreai.chat_class.grokAPI.max_wait_sec,
+                                                a_model=self.coreai.chat_class.grokAPI.a_model,
+                                                a_use_tools=self.coreai.chat_class.grokAPI.a_use_tools,
+                                                b_model=self.coreai.chat_class.grokAPI.b_model,
+                                                b_use_tools=self.coreai.chat_class.grokAPI.b_use_tools,
+                                                v_model=self.coreai.chat_class.grokAPI.v_model,
+                                                v_use_tools=self.coreai.chat_class.grokAPI.v_use_tools,
+                                                x_model=self.coreai.chat_class.grokAPI.x_model,
+                                                x_use_tools=self.coreai.chat_class.grokAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.grokAPI.chatBot(   chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1638,7 +1689,7 @@ class ChatClass:
                         res_engine = 'Grok'
                         res_data = res_text
                 except Exception as e:
-                    qLog.log('error', self.proc_id, str(e))
+                    logger.error(f"Error: {e}")
 
         # groq
         if  ((res_text == '') or (res_text == '!')) \
@@ -1651,13 +1702,13 @@ class ChatClass:
 
             engine_text = ''
             if (engine == '[groq]'):
-                engine_text = self.groqAPI.groq_b_nick_name.lower() + ',\n'
+                engine_text = self.groqAPI.b_nick_name.lower() + ',\n'
             else:
                 model_nick_name = 'groq'
-                a_nick_name = self.groqAPI.groq_a_nick_name.lower()
-                b_nick_name = self.groqAPI.groq_b_nick_name.lower()
-                v_nick_name = self.groqAPI.groq_v_nick_name.lower()
-                x_nick_name = self.groqAPI.groq_x_nick_name.lower()
+                a_nick_name = self.groqAPI.a_nick_name.lower()
+                b_nick_name = self.groqAPI.b_nick_name.lower()
+                v_nick_name = self.groqAPI.v_nick_name.lower()
+                x_nick_name = self.groqAPI.x_nick_name.lower()
                 if (engine != ''):
                     if   ((len(a_nick_name) != 0) and (engine.lower() == a_nick_name)):
                         engine_text = a_nick_name + ',\n'
@@ -1707,18 +1758,18 @@ class ChatClass:
                 engine_text = ''
 
                 try:
-                    qLog.log('info', self.proc_id, '### Groq ###')
+                    logger.info('### Groq ###')
 
                     if (self.coreai is not None):
-                        self.groqAPI.set_models(max_wait_sec=self.coreai.chat_class.groqAPI.groq_max_wait_sec,
-                                                a_model=self.coreai.chat_class.groqAPI.groq_a_model,
-                                                a_use_tools=self.coreai.chat_class.groqAPI.groq_a_use_tools,
-                                                b_model=self.coreai.chat_class.groqAPI.groq_b_model,
-                                                b_use_tools=self.coreai.chat_class.groqAPI.groq_b_use_tools,
-                                                v_model=self.coreai.chat_class.groqAPI.groq_v_model,
-                                                v_use_tools=self.coreai.chat_class.groqAPI.groq_v_use_tools,
-                                                x_model=self.coreai.chat_class.groqAPI.groq_x_model,
-                                                x_use_tools=self.coreai.chat_class.groqAPI.groq_x_use_tools, )
+                        self.groqAPI.set_models(max_wait_sec=self.coreai.chat_class.groqAPI.max_wait_sec,
+                                                a_model=self.coreai.chat_class.groqAPI.a_model,
+                                                a_use_tools=self.coreai.chat_class.groqAPI.a_use_tools,
+                                                b_model=self.coreai.chat_class.groqAPI.b_model,
+                                                b_use_tools=self.coreai.chat_class.groqAPI.b_use_tools,
+                                                v_model=self.coreai.chat_class.groqAPI.v_model,
+                                                v_use_tools=self.coreai.chat_class.groqAPI.v_use_tools,
+                                                x_model=self.coreai.chat_class.groqAPI.x_model,
+                                                x_use_tools=self.coreai.chat_class.groqAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.groqAPI.chatBot(   chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1729,7 +1780,7 @@ class ChatClass:
                         res_engine = 'Groq'
                         res_data = res_text
                 except Exception as e:
-                    qLog.log('error', self.proc_id, str(e))
+                    logger.error(f"Error: {e}")
 
         # ollama
         if  ((res_text == '') or (res_text == '!')) \
@@ -1742,14 +1793,14 @@ class ChatClass:
 
             engine_text = ''
             if (engine == '[ollama]'):
-                engine_text = self.ollamaAPI.ollama_b_nick_name.lower() + ',\n'
+                engine_text = self.ollamaAPI.b_nick_name.lower() + ',\n'
             else:
                 model_nick_name1 = 'local'
                 model_nick_name2 = 'ollama'
-                a_nick_name = self.ollamaAPI.ollama_a_nick_name.lower()
-                b_nick_name = self.ollamaAPI.ollama_b_nick_name.lower()
-                v_nick_name = self.ollamaAPI.ollama_v_nick_name.lower()
-                x_nick_name = self.ollamaAPI.ollama_x_nick_name.lower()
+                a_nick_name = self.ollamaAPI.a_nick_name.lower()
+                b_nick_name = self.ollamaAPI.b_nick_name.lower()
+                v_nick_name = self.ollamaAPI.v_nick_name.lower()
+                x_nick_name = self.ollamaAPI.x_nick_name.lower()
                 if (engine != ''):
                     if   ((len(a_nick_name) != 0) and (engine.lower() == a_nick_name)):
                         engine_text = a_nick_name + ',\n'
@@ -1805,18 +1856,18 @@ class ChatClass:
                 engine_text = ''
 
                 try:
-                    qLog.log('info', self.proc_id, '### Ollama ###')
+                    logger.info('### Ollama ###')
 
                     if (self.coreai is not None):
-                        self.ollamaAPI.set_models(  max_wait_sec=self.coreai.chat_class.ollamaAPI.ollama_max_wait_sec,
-                                                    a_model=self.coreai.chat_class.ollamaAPI.ollama_a_model,
-                                                    a_use_tools=self.coreai.chat_class.ollamaAPI.ollama_a_use_tools,
-                                                    b_model=self.coreai.chat_class.ollamaAPI.ollama_b_model,
-                                                    b_use_tools=self.coreai.chat_class.ollamaAPI.ollama_b_use_tools,
-                                                    v_model=self.coreai.chat_class.ollamaAPI.ollama_v_model,
-                                                    v_use_tools=self.coreai.chat_class.ollamaAPI.ollama_v_use_tools,
-                                                    x_model=self.coreai.chat_class.ollamaAPI.ollama_x_model,
-                                                    x_use_tools=self.coreai.chat_class.ollamaAPI.ollama_x_use_tools, )
+                        self.ollamaAPI.set_models(  max_wait_sec=self.coreai.chat_class.ollamaAPI.max_wait_sec,
+                                                    a_model=self.coreai.chat_class.ollamaAPI.a_model,
+                                                    a_use_tools=self.coreai.chat_class.ollamaAPI.a_use_tools,
+                                                    b_model=self.coreai.chat_class.ollamaAPI.b_model,
+                                                    b_use_tools=self.coreai.chat_class.ollamaAPI.b_use_tools,
+                                                    v_model=self.coreai.chat_class.ollamaAPI.v_model,
+                                                    v_use_tools=self.coreai.chat_class.ollamaAPI.v_use_tools,
+                                                    x_model=self.coreai.chat_class.ollamaAPI.x_model,
+                                                    x_use_tools=self.coreai.chat_class.ollamaAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.ollamaAPI.chatBot(     chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1827,7 +1878,7 @@ class ChatClass:
                         res_engine = 'Ollama'
                         res_data = res_text
                 except Exception as e:
-                    qLog.log('error', self.proc_id, str(e))
+                    logger.error(f"Error: {e}")
 
         # freeai
         if  ((res_text == '') or (res_text == '!')) \
@@ -1840,14 +1891,14 @@ class ChatClass:
 
             engine_text = ''
             if (engine == '[freeai]'):
-                engine_text = self.freeaiAPI.freeai_b_nick_name.lower() + ',\n'
+                engine_text = self.freeaiAPI.b_nick_name.lower() + ',\n'
             else:
                 model_nick_name1 = 'free'
                 model_nick_name2 = 'freeai'
-                a_nick_name = self.freeaiAPI.freeai_a_nick_name.lower()
-                b_nick_name = self.freeaiAPI.freeai_b_nick_name.lower()
-                v_nick_name = self.freeaiAPI.freeai_v_nick_name.lower()
-                x_nick_name = self.freeaiAPI.freeai_x_nick_name.lower()
+                a_nick_name = self.freeaiAPI.a_nick_name.lower()
+                b_nick_name = self.freeaiAPI.b_nick_name.lower()
+                v_nick_name = self.freeaiAPI.v_nick_name.lower()
+                x_nick_name = self.freeaiAPI.x_nick_name.lower()
                 if (engine != ''):
                     if   ((len(a_nick_name) != 0) and (engine.lower() == a_nick_name)):
                         engine_text = a_nick_name + ',\n'
@@ -1896,7 +1947,7 @@ class ChatClass:
                         inpText = inpText[len(x_nick_name)+1:].strip()
 
             #if (engine_text == ''):
-            #    #engine_text = self.freeaiAPI.freeai_b_nick_name.lower() + ',\n'
+            #    #engine_text = self.freeaiAPI.b_nick_name.lower() + ',\n'
             #    if (req_mode == 'session'):
             #        engine_text = a_nick_name + ',\n'
             #    else:
@@ -1915,21 +1966,21 @@ class ChatClass:
 
                     try:
                         if (n == 1):
-                            qLog.log('info', self.proc_id, '### FreeAI ###')
+                            logger.info('### FreeAI ###')
 
                             if (self.coreai is not None):
-                                self.freeaiAPI.set_models(  max_wait_sec=self.coreai.chat_class.freeaiAPI.freeai_max_wait_sec,
-                                                            a_model=self.coreai.chat_class.freeaiAPI.freeai_a_model,
-                                                            a_use_tools=self.coreai.chat_class.freeaiAPI.freeai_a_use_tools,
-                                                            b_model=self.coreai.chat_class.freeaiAPI.freeai_b_model,
-                                                            b_use_tools=self.coreai.chat_class.freeaiAPI.freeai_b_use_tools,
-                                                            v_model=self.coreai.chat_class.freeaiAPI.freeai_v_model,
-                                                            v_use_tools=self.coreai.chat_class.freeaiAPI.freeai_v_use_tools,
-                                                            x_model=self.coreai.chat_class.freeaiAPI.freeai_x_model,
-                                                            x_use_tools=self.coreai.chat_class.freeaiAPI.freeai_x_use_tools, )
+                                self.freeaiAPI.set_models(  max_wait_sec=self.coreai.chat_class.freeaiAPI.max_wait_sec,
+                                                            a_model=self.coreai.chat_class.freeaiAPI.a_model,
+                                                            a_use_tools=self.coreai.chat_class.freeaiAPI.a_use_tools,
+                                                            b_model=self.coreai.chat_class.freeaiAPI.b_model,
+                                                            b_use_tools=self.coreai.chat_class.freeaiAPI.b_use_tools,
+                                                            v_model=self.coreai.chat_class.freeaiAPI.v_model,
+                                                            v_use_tools=self.coreai.chat_class.freeaiAPI.v_use_tools,
+                                                            x_model=self.coreai.chat_class.freeaiAPI.x_model,
+                                                            x_use_tools=self.coreai.chat_class.freeaiAPI.x_use_tools, )
 
                         else:
-                            qLog.log('warning', self.proc_id, f'freeai retry = { n }/{ n_max },')
+                            logger.warning(f"freeai retry = { n }/{ n_max },")
 
                         res_text, res_path, res_files, res_name, res_api, res_history = \
                                 self.freeaiAPI.chatBot(     chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1940,13 +1991,13 @@ class ChatClass:
                             res_engine = 'FreeAI'
                             res_data = res_text
                     except Exception as e:
-                        qLog.log('error', self.proc_id, str(e))
+                        logger.error(f"Error: {e}")
                         if (n >= n_max):
                             break
 
                         # n*20 + 40～60秒待機
                         wait_sec = n*20 + random.uniform(40, 60)
-                        qLog.log('warning', self.proc_id, f'freeai retry waitting { float(wait_sec) :.1f}s ...')
+                        logger.warning(f"freeai retry waitting { float(wait_sec) :.1f}s ...")
                         chkTime = time.time()
                         while ((time.time() - chkTime) < wait_sec):
                             time.sleep(0.25)
@@ -2699,9 +2750,9 @@ $$$ inpBase2 $$$
                     if (member_prompt[n].strip() == system_text.strip()):
                         member_prompt[n] = ''
                 else:
-                    qLog.log('error', self.proc_id, f"Error response ({member_port[n]}/get_info) : {response.status_code} - {response.text}")
+                    logger.error(f"Error response ({member_port[n]}/get_info) : {response.status_code} - {response.text}")
             except Exception as e:
-                qLog.log('error', self.proc_id, f"Error communicating ({member_port[n]}/get_info) : {e}")
+                logger.error(f"Error communicating ({member_port[n]}/get_info) : {e}")
 
 
         members_list = ''
@@ -3134,19 +3185,18 @@ $$$ inpBase2 $$$
 
 if __name__ == '__main__':
     core_port = '8000'
-    self_port = '8001'
+    self_port = '8101'
 
     chat_class = ChatClass(runMode='debug', qLog_fn='', core_port=core_port, self_port=self_port)
 
     input_text = 'おはよう'
-    output_text, _, _, _, _ = chat_class.proc_chat(user_id='debug', from_port='debug', to_port='8001',
-                                       req_mode='chat', req_engine='',
-                                       req_functions='', req_reset='',
-                                       max_retry='', max_ai_count='', 
-                                       before_proc='', before_engine='', 
-                                       after_proc='', after_engine='',
-                                       check_proc='', check_engine='',
-                                       system_text='', request_text='', input_text=input_text,
-                                       filePath=[], result_schema='', )
-
+    output_text, _, _, _ = chat_class.proc_chat(    user_id='debug', from_port='debug', to_port='8001',
+                                                    req_mode='chat', req_engine='',
+                                                    req_functions='', req_reset='',
+                                                    max_retry='', max_ai_count='', 
+                                                    before_proc='', before_engine='', 
+                                                    after_proc='', after_engine='',
+                                                    check_proc='', check_engine='',
+                                                    system_text='', request_text='', input_text=input_text,
+                                                    file_names=[], result_savepath='', result_schema='', parent_self=None, )
     print(output_text)

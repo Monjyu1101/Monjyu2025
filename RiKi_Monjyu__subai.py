@@ -3,13 +3,23 @@
 
 # ------------------------------------------------
 # COPYRIGHT (C) 2014-2025 Mitsuo KONDOU.
-# This software is released under the not MIT License.
-# Permission from the right holder is required for use.
-# https://github.com/konsan1101
+# This software is released under the MIT License.
+# https://github.com/monjyu1101
 # Thank you for keeping the rules.
 # ------------------------------------------------
 
-# RiKi_Monjyu__subai.py
+# モジュール名
+MODULE_NAME = 'subai'
+
+# ロガーの設定
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)-10s - %(levelname)-8s - %(message)s',
+    datefmt='%H:%M:%S'
+)
+logger = logging.getLogger(MODULE_NAME)
+
 
 import sys
 import os
@@ -43,8 +53,6 @@ qPath_input  = 'temp/input/'
 qPath_output = 'temp/output/'
 
 # 共通ルーチンインポート
-import _v6__qLog
-qLog = _v6__qLog.qLog_class()
 import RiKi_Monjyu__subbot
 
 # 定数の定義
@@ -83,17 +91,6 @@ class SubAiProcess:
                  coreai=None,
                  core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48'):
 
-        # ログ設定
-        self.proc_name = 'subai'
-        self.proc_id = '{0:10s}'.format(self.proc_name).replace(' ', '_')
-        if not os.path.isdir(qPath_log):
-            os.makedirs(qPath_log)
-        if qLog_fn == '':
-            nowTime = datetime.datetime.now()
-            qLog_fn = qPath_log + nowTime.strftime('%Y%m%d.%H%M%S') + '.' + os.path.basename(__file__) + '.log'
-        qLog.init(mode='logger', filename=qLog_fn)
-        qLog.log('info', self.proc_id, 'init')
-
         # 各種設定の初期化
         self.main      = main
         self.conf      = conf
@@ -128,19 +125,17 @@ class SubAiClass:
                  main=None, conf=None, data=None, addin=None, botFunc=None,
                  coreai=None,
                  core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48',
-                 self_port: str = '8011', profile_number: Optional[int] = None):
+                 self_port: str = '8101', profile_number: Optional[int] = None):
         self.runMode = runMode
 
-        # ログ設定
-        self.proc_name = f"{self_port}:ai"
-        self.proc_id = f'{self.proc_name:10s}'.replace(' ', '_')
-        if not os.path.isdir(qPath_log):
-            os.makedirs(qPath_log)
+        # ログファイル名の生成
         if qLog_fn == '':
             nowTime = datetime.datetime.now()
             qLog_fn = qPath_log + nowTime.strftime('%Y%m%d.%H%M%S') + '.' + os.path.basename(__file__) + '.log'
-        qLog.init(mode='logger', filename=qLog_fn)
-        qLog.log('info', self.proc_id, 'init')
+        
+        # ログの初期化
+        #qLog.init(mode='logger', filename=qLog_fn)
+        logger.debug(f"init {self_port}")
 
         # 設定
         self.main       = main
@@ -210,7 +205,7 @@ class SubAiClass:
                 info_text += '　' + row["性格"] + '\n'
             self.info['info_text'] = info_text
         except Exception as e:
-            qLog.log('error', self.proc_id, f"Error retrieving profile info: {e}")
+            logger.error(f"Error retrieving profile info: {e}")
 
     async def root(self, request: Request):
         """ ルートエンドポイントのリダイレクト """
@@ -229,7 +224,7 @@ class SubAiClass:
 
     async def post_cancel(self, request: Request):
         """ キャンセルリクエストを処理 """
-        qLog.log('warning', self.proc_id, 'Cancel request received!')
+        logger.warning('Cancel request received!')
         # キャンセル要求
         self.cancel_request = True
         self.chat_class.bot_cancel_request = True
@@ -271,11 +266,11 @@ class SubAiClass:
         self.cancel_request = False
         # ログ出力
         if   request_text.lower()[:6] == 'begin,':
-            qLog.log('info', self.proc_id, f"{ user_id } : { from_port } -> { to_port } (begin)")
+            logger.info(f"{ user_id } : { from_port } -> { to_port } (begin)")
         elif request_text.lower()[:4] == 'bye,':
-            qLog.log('info', self.proc_id, f"{ user_id } : { from_port } -> { to_port } (bye)")
+            logger.info(f"{ user_id } : { from_port } -> { to_port } (bye)")
         else:
-            qLog.log('info', self.proc_id, f"{ user_id } : { from_port } -> { to_port } ({ req_mode })")
+            logger.info(f"{ user_id } : { from_port } -> { to_port } ({ req_mode })")
         # ファンクション設定
         self.function_modules = {}
         if self.botFunc is not None:
@@ -321,13 +316,13 @@ class SubAiClass:
         # ログ出力
         if not self.cancel_request:
             if   request_text.lower()[:6] == 'begin,':
-                qLog.log('info', self.proc_id, f"{ user_id } : { from_port } <- { to_port } (begin)")
+                logger.info(f"{ user_id } : { from_port } <- { to_port } (begin)")
             elif request_text.lower()[:4] == 'bye,':
-                qLog.log('info', self.proc_id, f"{ user_id } : { from_port } <- { to_port } (bye)")
+                logger.info(f"{ user_id } : { from_port } <- { to_port } (bye)")
             else:
-                qLog.log('info', self.proc_id, f"{ user_id } : { from_port } <- { to_port } ({ req_mode })")
+                logger.info(f"{ user_id } : { from_port } <- { to_port } ({ req_mode })")
         else:
-            qLog.log('warning', self.proc_id, f"{ user_id } : { from_port } <- { to_port } (cancel!)")
+            logger.warning(f"{ user_id } : { from_port } <- { to_port } (cancel!)")
 
         try:
             response = requests.post(
@@ -342,10 +337,10 @@ class SubAiClass:
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )
             if response.status_code != 200:
-                qLog.log('error', self.proc_id, f"Error response ({self.core_port}/post_complete) : {response.status_code}")
+                logger.error(f"Error response ({self.core_port}/post_complete) : {response.status_code}")
                 status = 'ERROR'
         except Exception as e:
-            qLog.log('error', self.proc_id, f"Error communicating ({self.core_port}/post_complete) : {e}")
+            logger.error(f"Error communicating ({self.core_port}/post_complete) : {e}")
             status = 'ERROR'
 
         # ステータスを更新
@@ -360,7 +355,7 @@ class SubAiClass:
                             status: str) -> str:
         """ チャットとアシスタントのデバッグログ """
         # ログ出力
-        qLog.log('info', self.proc_id, f"{ user_id } : { from_port } <- { to_port } (debug_log)")
+        logger.info(f"{ user_id } : { from_port } <- { to_port } (debug_log)")
         self.last_proc_time = time.time()
         try:
             response = requests.post(
@@ -375,10 +370,10 @@ class SubAiClass:
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )
             if response.status_code != 200:
-                qLog.log('error', self.proc_id, f"Error response ({self.core_port}/post_debug_log) : {response.status_code}")
+                logger.error(f"Error response ({self.core_port}/post_debug_log) : {response.status_code}")
                 status = 'ERROR'
         except Exception as e:
-            qLog.log('error', self.proc_id, f"Error communicating ({self.core_port}/post_debug_log) : {e}")
+            logger.error(f"Error communicating ({self.core_port}/post_debug_log) : {e}")
             status = 'ERROR'
         return status
 
@@ -428,7 +423,7 @@ class SubAiClass:
         # 会話処理
         else:
             if request_text.lower()[:6] == 'debug,':
-                qLog.log('warning', self.proc_id, 'debug, ...')
+                logger.warning('debug, ...')
             if self.chat_class is not None:
                 if req_reset == 'yes,':
                     self.chat_class.history = []
@@ -486,7 +481,7 @@ class SubAiClass:
                             file_names: list[str], result_savepath: str, result_schema: str, ) -> str:
         """ アシスタント処理 """
         if request_text.lower()[:6] == 'debug,':
-            qLog.log('warning', self.proc_id, 'debug, ...')
+            logger.warning('debug, ...')
         if self.chat_class is not None:
             if req_reset == 'yes,':
                 self.chat_class.history = []

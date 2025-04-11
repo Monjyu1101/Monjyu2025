@@ -3,13 +3,23 @@
 
 # ------------------------------------------------
 # COPYRIGHT (C) 2014-2025 Mitsuo KONDOU.
-# This software is released under the not MIT License.
-# Permission from the right holder is required for use.
-# https://github.com/konsan1101
+# This software is released under the MIT License.
+# https://github.com/monjyu1101
 # Thank you for keeping the rules.
 # ------------------------------------------------
 
-# RiKi_Monjyu__coreai.py
+# モジュール名
+MODULE_NAME = 'coreai'
+
+# ロガーの設定
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)-10s - %(levelname)-8s - %(message)s',
+    datefmt='%H:%M:%S'
+)
+logger = logging.getLogger(MODULE_NAME)
+
 
 import sys
 import os
@@ -47,8 +57,6 @@ qPath_sandbox = 'temp/sandbox/'
 qIO_agent2live  = 'temp/monjyu_io_agent2live.txt'
 
 # 共通ルーチン
-import  _v6__qLog
-qLog  = _v6__qLog.qLog_class()
 import  _v6__qFunc
 qFunc = _v6__qFunc.qFunc_class()
 import RiKi_Monjyu__subbot
@@ -175,16 +183,14 @@ class CoreAiClass:
         self.runMode = runMode
         self_port = core_port
 
-        # ログ設定
-        self.proc_name = f"{ self_port }:core"
-        self.proc_id = '{0:10s}'.format(self.proc_name).replace(' ', '_')
-        if not os.path.isdir(qPath_log):
-            os.makedirs(qPath_log)
+        # ログファイル名の生成
         if qLog_fn == '':
             nowTime = datetime.datetime.now()
             qLog_fn = qPath_log + nowTime.strftime('%Y%m%d.%H%M%S') + '.' + os.path.basename(__file__) + '.log'
-        qLog.init(mode='logger', filename=qLog_fn)
-        qLog.log('info', self.proc_id, 'init')
+        
+        # ログの初期化
+        #qLog.init(mode='logger', filename=qLog_fn)
+        logger.debug('init')
 
         # 設定
         self.main       = main
@@ -283,189 +289,189 @@ class CoreAiClass:
         if self.chat_class.chatgpt_enable is None:
             self.chat_class.chatgpt_auth()
             if self.chat_class.chatgpt_enable:
-                qLog.log('info', self.proc_id, f" ChatGPT    : Ready, (Models count={ len(self.chat_class.chatgptAPI.models) })")
+                logger.info(f"ChatGPT    : Ready, (Models count={ len(self.chat_class.chatgptAPI.models) })")
         if self.chat_class.chatgpt_enable:
             if (req_mode == 'chat'):
                 models['[chatgpt]'] = '[ChatGPT]'
-                if self.chat_class.chatgptAPI.chatgpt_a_nick_name:
-                    models[self.chat_class.chatgptAPI.chatgpt_a_nick_name.lower()] = ' ' + self.chat_class.chatgptAPI.chatgpt_a_nick_name
-                if self.chat_class.chatgptAPI.chatgpt_b_nick_name:
-                    models[self.chat_class.chatgptAPI.chatgpt_b_nick_name.lower()] = ' ' + self.chat_class.chatgptAPI.chatgpt_b_nick_name
-                if self.chat_class.chatgptAPI.chatgpt_v_nick_name:
-                    models[self.chat_class.chatgptAPI.chatgpt_v_nick_name.lower()] = ' ' + self.chat_class.chatgptAPI.chatgpt_v_nick_name
-                if self.chat_class.chatgptAPI.chatgpt_x_nick_name:
-                    models[self.chat_class.chatgptAPI.chatgpt_x_nick_name.lower()] = ' ' + self.chat_class.chatgptAPI.chatgpt_x_nick_name
+                if self.chat_class.chatgptAPI.a_nick_name:
+                    models[self.chat_class.chatgptAPI.a_nick_name.lower()] = ' ' + self.chat_class.chatgptAPI.a_nick_name
+                if self.chat_class.chatgptAPI.b_nick_name:
+                    models[self.chat_class.chatgptAPI.b_nick_name.lower()] = ' ' + self.chat_class.chatgptAPI.b_nick_name
+                if self.chat_class.chatgptAPI.v_nick_name:
+                    models[self.chat_class.chatgptAPI.v_nick_name.lower()] = ' ' + self.chat_class.chatgptAPI.v_nick_name
+                if self.chat_class.chatgptAPI.x_nick_name:
+                    models[self.chat_class.chatgptAPI.x_nick_name.lower()] = ' ' + self.chat_class.chatgptAPI.x_nick_name
 
         # Assist
         if self.chat_class.assist_enable is None:
             self.chat_class.assist_auth()
             if self.chat_class.assist_enable:
-                qLog.log('info', self.proc_id, f" Assist     : Ready, (Models count={ len(self.chat_class.assistAPI.models) })")
+                logger.info(f"Assist     : Ready, (Models count={ len(self.chat_class.assistAPI.models) })")
         if self.chat_class.assist_enable:
             if (req_mode == 'chat'):
                 models['[assist]'] = '[Assist]'
-                if self.chat_class.assistAPI.assist_a_nick_name:
-                    models[self.chat_class.assistAPI.assist_a_nick_name.lower()] = ' ' + self.chat_class.assistAPI.assist_a_nick_name
-                if self.chat_class.assistAPI.assist_b_nick_name:
-                    models[self.chat_class.assistAPI.assist_b_nick_name.lower()] = ' ' + self.chat_class.assistAPI.assist_b_nick_name
-                if self.chat_class.assistAPI.assist_v_nick_name:
-                    models[self.chat_class.assistAPI.assist_v_nick_name.lower()] = ' ' + self.chat_class.assistAPI.assist_v_nick_name
-                if self.chat_class.assistAPI.assist_x_nick_name:
-                    models[self.chat_class.assistAPI.assist_x_nick_name.lower()] = ' ' + self.chat_class.assistAPI.assist_x_nick_name
+                if self.chat_class.assistAPI.a_nick_name:
+                    models[self.chat_class.assistAPI.a_nick_name.lower()] = ' ' + self.chat_class.assistAPI.a_nick_name
+                if self.chat_class.assistAPI.b_nick_name:
+                    models[self.chat_class.assistAPI.b_nick_name.lower()] = ' ' + self.chat_class.assistAPI.b_nick_name
+                if self.chat_class.assistAPI.v_nick_name:
+                    models[self.chat_class.assistAPI.v_nick_name.lower()] = ' ' + self.chat_class.assistAPI.v_nick_name
+                if self.chat_class.assistAPI.x_nick_name:
+                    models[self.chat_class.assistAPI.x_nick_name.lower()] = ' ' + self.chat_class.assistAPI.x_nick_name
 
         # Respo
         if self.chat_class.respo_enable is None:
             self.chat_class.respo_auth()
             if self.chat_class.respo_enable:
-                qLog.log('info', self.proc_id, f" Respo      : Ready, (Models count={ len(self.chat_class.respoAPI.models) })")
+                logger.info(f"Respo      : Ready, (Models count={ len(self.chat_class.respoAPI.models) })")
         if self.chat_class.respo_enable:
             if (req_mode == 'chat'):
                 models['[respo]'] = '[Respo]'
-                if self.chat_class.respoAPI.respo_a_nick_name:
-                    models[self.chat_class.respoAPI.respo_a_nick_name.lower()] = ' ' + self.chat_class.respoAPI.respo_a_nick_name
-                if self.chat_class.respoAPI.respo_b_nick_name:
-                    models[self.chat_class.respoAPI.respo_b_nick_name.lower()] = ' ' + self.chat_class.respoAPI.respo_b_nick_name
-                if self.chat_class.respoAPI.respo_v_nick_name:
-                    models[self.chat_class.respoAPI.respo_v_nick_name.lower()] = ' ' + self.chat_class.respoAPI.respo_v_nick_name
-                if self.chat_class.respoAPI.respo_x_nick_name:
-                    models[self.chat_class.respoAPI.respo_x_nick_name.lower()] = ' ' + self.chat_class.respoAPI.respo_x_nick_name
+                if self.chat_class.respoAPI.a_nick_name:
+                    models[self.chat_class.respoAPI.a_nick_name.lower()] = ' ' + self.chat_class.respoAPI.a_nick_name
+                if self.chat_class.respoAPI.b_nick_name:
+                    models[self.chat_class.respoAPI.b_nick_name.lower()] = ' ' + self.chat_class.respoAPI.b_nick_name
+                if self.chat_class.respoAPI.v_nick_name:
+                    models[self.chat_class.respoAPI.v_nick_name.lower()] = ' ' + self.chat_class.respoAPI.v_nick_name
+                if self.chat_class.respoAPI.x_nick_name:
+                    models[self.chat_class.respoAPI.x_nick_name.lower()] = ' ' + self.chat_class.respoAPI.x_nick_name
 
         # Gemini
         if self.chat_class.gemini_enable is None:
             self.chat_class.gemini_auth()
             if self.chat_class.gemini_enable:
-                qLog.log('info', self.proc_id, f" Gemini     : Ready, (Models count={ len(self.chat_class.geminiAPI.models) })")
+                logger.info(f"Gemini     : Ready, (Models count={ len(self.chat_class.geminiAPI.models) })")
         if self.chat_class.gemini_enable:
             if (req_mode == 'chat'):
                 models['[gemini]'] = '[Gemini]'
-                if self.chat_class.geminiAPI.gemini_a_enable and self.chat_class.geminiAPI.gemini_a_nick_name:
-                    models[self.chat_class.geminiAPI.gemini_a_nick_name.lower()] = ' ' + self.chat_class.geminiAPI.gemini_a_nick_name
-                if self.chat_class.geminiAPI.gemini_b_enable and self.chat_class.geminiAPI.gemini_b_nick_name:
-                    models[self.chat_class.geminiAPI.gemini_b_nick_name.lower()] = ' ' + self.chat_class.geminiAPI.gemini_b_nick_name
-                if self.chat_class.geminiAPI.gemini_v_enable and self.chat_class.geminiAPI.gemini_v_nick_name:
-                    models[self.chat_class.geminiAPI.gemini_v_nick_name.lower()] = ' ' + self.chat_class.geminiAPI.gemini_v_nick_name
-                if self.chat_class.geminiAPI.gemini_x_enable and self.chat_class.geminiAPI.gemini_x_nick_name:
-                    models[self.chat_class.geminiAPI.gemini_x_nick_name.lower()] = ' ' + self.chat_class.geminiAPI.gemini_x_nick_name
+                if self.chat_class.geminiAPI.a_enable and self.chat_class.geminiAPI.a_nick_name:
+                    models[self.chat_class.geminiAPI.a_nick_name.lower()] = ' ' + self.chat_class.geminiAPI.a_nick_name
+                if self.chat_class.geminiAPI.b_enable and self.chat_class.geminiAPI.b_nick_name:
+                    models[self.chat_class.geminiAPI.b_nick_name.lower()] = ' ' + self.chat_class.geminiAPI.b_nick_name
+                if self.chat_class.geminiAPI.v_enable and self.chat_class.geminiAPI.v_nick_name:
+                    models[self.chat_class.geminiAPI.v_nick_name.lower()] = ' ' + self.chat_class.geminiAPI.v_nick_name
+                if self.chat_class.geminiAPI.x_enable and self.chat_class.geminiAPI.x_nick_name:
+                    models[self.chat_class.geminiAPI.x_nick_name.lower()] = ' ' + self.chat_class.geminiAPI.x_nick_name
 
         # FreeAI
         if self.chat_class.freeai_enable is None:
             self.chat_class.freeai_auth()
             if self.chat_class.freeai_enable:
-                qLog.log('info', self.proc_id, f" FreeAI     : Ready, (Models count={ len(self.chat_class.freeaiAPI.models) })")
+                logger.info(f"FreeAI     : Ready, (Models count={ len(self.chat_class.freeaiAPI.models) })")
         if self.chat_class.freeai_enable:
             if True:
                 models['[freeai]'] = '[FreeAI]'
-                if self.chat_class.freeaiAPI.freeai_a_enable and self.chat_class.freeaiAPI.freeai_a_nick_name:
-                    models[self.chat_class.freeaiAPI.freeai_a_nick_name.lower()] = ' ' + self.chat_class.freeaiAPI.freeai_a_nick_name
-                if self.chat_class.freeaiAPI.freeai_b_enable and self.chat_class.freeaiAPI.freeai_b_nick_name:
-                    models[self.chat_class.freeaiAPI.freeai_b_nick_name.lower()] = ' ' + self.chat_class.freeaiAPI.freeai_b_nick_name
-                if self.chat_class.freeaiAPI.freeai_v_enable and self.chat_class.freeaiAPI.freeai_v_nick_name:
-                    models[self.chat_class.freeaiAPI.freeai_v_nick_name.lower()] = ' ' + self.chat_class.freeaiAPI.freeai_v_nick_name
-                if self.chat_class.freeaiAPI.freeai_x_enable and self.chat_class.freeaiAPI.freeai_x_nick_name:
-                    models[self.chat_class.freeaiAPI.freeai_x_nick_name.lower()] = ' ' + self.chat_class.freeaiAPI.freeai_x_nick_name
+                if self.chat_class.freeaiAPI.a_enable and self.chat_class.freeaiAPI.a_nick_name:
+                    models[self.chat_class.freeaiAPI.a_nick_name.lower()] = ' ' + self.chat_class.freeaiAPI.a_nick_name
+                if self.chat_class.freeaiAPI.b_enable and self.chat_class.freeaiAPI.b_nick_name:
+                    models[self.chat_class.freeaiAPI.b_nick_name.lower()] = ' ' + self.chat_class.freeaiAPI.b_nick_name
+                if self.chat_class.freeaiAPI.v_enable and self.chat_class.freeaiAPI.v_nick_name:
+                    models[self.chat_class.freeaiAPI.v_nick_name.lower()] = ' ' + self.chat_class.freeaiAPI.v_nick_name
+                if self.chat_class.freeaiAPI.x_enable and self.chat_class.freeaiAPI.x_nick_name:
+                    models[self.chat_class.freeaiAPI.x_nick_name.lower()] = ' ' + self.chat_class.freeaiAPI.x_nick_name
 
         # Claude
         if self.chat_class.claude_enable is None:
             self.chat_class.claude_auth()
             if self.chat_class.claude_enable:
-                qLog.log('info', self.proc_id, f" Claude     : Ready, (Models count={ len(self.chat_class.claudeAPI.models) })")
+                logger.info(f"Claude     : Ready, (Models count={ len(self.chat_class.claudeAPI.models) })")
         if self.chat_class.claude_enable:
             if (req_mode == 'chat'):
                 models['[claude]'] = '[Claude]'
-                if self.chat_class.claudeAPI.claude_a_enable and self.chat_class.claudeAPI.claude_a_nick_name:
-                    models[self.chat_class.claudeAPI.claude_a_nick_name.lower()] = ' ' + self.chat_class.claudeAPI.claude_a_nick_name
-                if self.chat_class.claudeAPI.claude_b_enable and self.chat_class.claudeAPI.claude_b_nick_name:
-                    models[self.chat_class.claudeAPI.claude_b_nick_name.lower()] = ' ' + self.chat_class.claudeAPI.claude_b_nick_name
-                if self.chat_class.claudeAPI.claude_v_enable and self.chat_class.claudeAPI.claude_v_nick_name:
-                    models[self.chat_class.claudeAPI.claude_v_nick_name.lower()] = ' ' + self.chat_class.claudeAPI.claude_v_nick_name
-                if self.chat_class.claudeAPI.claude_x_enable and self.chat_class.claudeAPI.claude_x_nick_name:
-                    models[self.chat_class.claudeAPI.claude_x_nick_name.lower()] = ' ' + self.chat_class.claudeAPI.claude_x_nick_name
+                if self.chat_class.claudeAPI.a_enable and self.chat_class.claudeAPI.a_nick_name:
+                    models[self.chat_class.claudeAPI.a_nick_name.lower()] = ' ' + self.chat_class.claudeAPI.a_nick_name
+                if self.chat_class.claudeAPI.b_enable and self.chat_class.claudeAPI.b_nick_name:
+                    models[self.chat_class.claudeAPI.b_nick_name.lower()] = ' ' + self.chat_class.claudeAPI.b_nick_name
+                if self.chat_class.claudeAPI.v_enable and self.chat_class.claudeAPI.v_nick_name:
+                    models[self.chat_class.claudeAPI.v_nick_name.lower()] = ' ' + self.chat_class.claudeAPI.v_nick_name
+                if self.chat_class.claudeAPI.x_enable and self.chat_class.claudeAPI.x_nick_name:
+                    models[self.chat_class.claudeAPI.x_nick_name.lower()] = ' ' + self.chat_class.claudeAPI.x_nick_name
 
         # OpenRouter
         if self.chat_class.openrt_enable is None:
             self.chat_class.openrt_auth()
             if self.chat_class.openrt_enable:
-                qLog.log('info', self.proc_id, f" OpenRouter : Ready, (Models count={ len(self.chat_class.openrtAPI.models) })")
+                logger.info(f"OpenRouter : Ready, (Models count={ len(self.chat_class.openrtAPI.models) })")
                 openrt_first_auth = True
         if self.chat_class.openrt_enable:
             if True:
                 models['[openrt]'] = '[OpenRouter]'
-                if self.chat_class.openrtAPI.openrt_a_enable and self.chat_class.openrtAPI.openrt_a_nick_name:
-                    models[self.chat_class.openrtAPI.openrt_a_nick_name.lower()] = ' ' + self.chat_class.openrtAPI.openrt_a_nick_name
-                if self.chat_class.openrtAPI.openrt_b_enable and self.chat_class.openrtAPI.openrt_b_nick_name:
-                    models[self.chat_class.openrtAPI.openrt_b_nick_name.lower()] = ' ' + self.chat_class.openrtAPI.openrt_b_nick_name
-                if self.chat_class.openrtAPI.openrt_v_enable and self.chat_class.openrtAPI.openrt_v_nick_name:
-                    models[self.chat_class.openrtAPI.openrt_v_nick_name.lower()] = ' ' + self.chat_class.openrtAPI.openrt_v_nick_name
-                if self.chat_class.openrtAPI.openrt_x_enable and self.chat_class.openrtAPI.openrt_x_nick_name:
-                    models[self.chat_class.openrtAPI.openrt_x_nick_name.lower()] = ' ' + self.chat_class.openrtAPI.openrt_x_nick_name
+                if self.chat_class.openrtAPI.a_enable and self.chat_class.openrtAPI.a_nick_name:
+                    models[self.chat_class.openrtAPI.a_nick_name.lower()] = ' ' + self.chat_class.openrtAPI.a_nick_name
+                if self.chat_class.openrtAPI.b_enable and self.chat_class.openrtAPI.b_nick_name:
+                    models[self.chat_class.openrtAPI.b_nick_name.lower()] = ' ' + self.chat_class.openrtAPI.b_nick_name
+                if self.chat_class.openrtAPI.v_enable and self.chat_class.openrtAPI.v_nick_name:
+                    models[self.chat_class.openrtAPI.v_nick_name.lower()] = ' ' + self.chat_class.openrtAPI.v_nick_name
+                if self.chat_class.openrtAPI.x_enable and self.chat_class.openrtAPI.x_nick_name:
+                    models[self.chat_class.openrtAPI.x_nick_name.lower()] = ' ' + self.chat_class.openrtAPI.x_nick_name
 
         # Perplexity
         if self.chat_class.perplexity_enable is None:
             self.chat_class.perplexity_auth()
             if self.chat_class.perplexity_enable:
-                qLog.log('info', self.proc_id, f" Perplexity : Ready, (Models count={ len(self.chat_class.perplexityAPI.models) })")
+                logger.info(f"Perplexity : Ready, (Models count={ len(self.chat_class.perplexityAPI.models) })")
         if self.chat_class.perplexity_enable:
             if (req_mode == 'chat'):
                 models['[perplexity]'] = '[Perplexity]'
-                if self.chat_class.perplexityAPI.perplexity_a_enable and self.chat_class.perplexityAPI.perplexity_a_nick_name:
-                    models[self.chat_class.perplexityAPI.perplexity_a_nick_name.lower()] = ' ' + self.chat_class.perplexityAPI.perplexity_a_nick_name
-                if self.chat_class.perplexityAPI.perplexity_b_enable and self.chat_class.perplexityAPI.perplexity_b_nick_name:
-                    models[self.chat_class.perplexityAPI.perplexity_b_nick_name.lower()] = ' ' + self.chat_class.perplexityAPI.perplexity_b_nick_name
-                if self.chat_class.perplexityAPI.perplexity_v_enable and self.chat_class.perplexityAPI.perplexity_v_nick_name:
-                    models[self.chat_class.perplexityAPI.perplexity_v_nick_name.lower()] = ' ' + self.chat_class.perplexityAPI.perplexity_v_nick_name
-                if self.chat_class.perplexityAPI.perplexity_x_enable and self.chat_class.perplexityAPI.perplexity_x_nick_name:
-                    models[self.chat_class.perplexityAPI.perplexity_x_nick_name.lower()] = ' ' + self.chat_class.perplexityAPI.perplexity_x_nick_name
+                if self.chat_class.perplexityAPI.a_enable and self.chat_class.perplexityAPI.a_nick_name:
+                    models[self.chat_class.perplexityAPI.a_nick_name.lower()] = ' ' + self.chat_class.perplexityAPI.a_nick_name
+                if self.chat_class.perplexityAPI.b_enable and self.chat_class.perplexityAPI.b_nick_name:
+                    models[self.chat_class.perplexityAPI.b_nick_name.lower()] = ' ' + self.chat_class.perplexityAPI.b_nick_name
+                if self.chat_class.perplexityAPI.v_enable and self.chat_class.perplexityAPI.v_nick_name:
+                    models[self.chat_class.perplexityAPI.v_nick_name.lower()] = ' ' + self.chat_class.perplexityAPI.v_nick_name
+                if self.chat_class.perplexityAPI.x_enable and self.chat_class.perplexityAPI.x_nick_name:
+                    models[self.chat_class.perplexityAPI.x_nick_name.lower()] = ' ' + self.chat_class.perplexityAPI.x_nick_name
 
         # Grok
         if self.chat_class.grok_enable is None:
             self.chat_class.grok_auth()
             if self.chat_class.grok_enable:
-                qLog.log('info', self.proc_id, f" Grok       : Ready, (Models count={ len(self.chat_class.grokAPI.models) })")
+                logger.info(f"Grok       : Ready, (Models count={ len(self.chat_class.grokAPI.models) })")
         if self.chat_class.grok_enable:
             if (req_mode == 'chat'):
                 models['[grok]'] = '[Grok]'
-                if self.chat_class.grokAPI.grok_a_enable and self.chat_class.grokAPI.grok_a_nick_name:
-                    models[self.chat_class.grokAPI.grok_a_nick_name.lower()] = ' ' + self.chat_class.grokAPI.grok_a_nick_name
-                if self.chat_class.grokAPI.grok_b_enable and self.chat_class.grokAPI.grok_b_nick_name:
-                    models[self.chat_class.grokAPI.grok_b_nick_name.lower()] = ' ' + self.chat_class.grokAPI.grok_b_nick_name
-                if self.chat_class.grokAPI.grok_v_enable and self.chat_class.grokAPI.grok_v_nick_name:
-                    models[self.chat_class.grokAPI.grok_v_nick_name.lower()] = ' ' + self.chat_class.grokAPI.grok_v_nick_name
-                if self.chat_class.grokAPI.grok_x_enable and self.chat_class.grokAPI.grok_x_nick_name:
-                    models[self.chat_class.grokAPI.grok_x_nick_name.lower()] = ' ' + self.chat_class.grokAPI.grok_x_nick_name
+                if self.chat_class.grokAPI.a_enable and self.chat_class.grokAPI.a_nick_name:
+                    models[self.chat_class.grokAPI.a_nick_name.lower()] = ' ' + self.chat_class.grokAPI.a_nick_name
+                if self.chat_class.grokAPI.b_enable and self.chat_class.grokAPI.b_nick_name:
+                    models[self.chat_class.grokAPI.b_nick_name.lower()] = ' ' + self.chat_class.grokAPI.b_nick_name
+                if self.chat_class.grokAPI.v_enable and self.chat_class.grokAPI.v_nick_name:
+                    models[self.chat_class.grokAPI.v_nick_name.lower()] = ' ' + self.chat_class.grokAPI.v_nick_name
+                if self.chat_class.grokAPI.x_enable and self.chat_class.grokAPI.x_nick_name:
+                    models[self.chat_class.grokAPI.x_nick_name.lower()] = ' ' + self.chat_class.grokAPI.x_nick_name
 
         # Groq
         if self.chat_class.groq_enable is None:
             self.chat_class.groq_auth()
             if self.chat_class.groq_enable:
-                qLog.log('info', self.proc_id, f" Groq       : Ready, (Models count={ len(self.chat_class.groqAPI.models) })")
+                logger.info(f"Groq       : Ready, (Models count={ len(self.chat_class.groqAPI.models) })")
         if self.chat_class.groq_enable:
             if (req_mode == 'chat'):
                 models['[groq]'] = '[Groq]'
-                if self.chat_class.groqAPI.groq_a_enable and self.chat_class.groqAPI.groq_a_nick_name:
-                    models[self.chat_class.groqAPI.groq_a_nick_name.lower()] = ' ' + self.chat_class.groqAPI.groq_a_nick_name
-                if self.chat_class.groqAPI.groq_b_enable and self.chat_class.groqAPI.groq_b_nick_name:
-                    models[self.chat_class.groqAPI.groq_b_nick_name.lower()] = ' ' + self.chat_class.groqAPI.groq_b_nick_name
-                if self.chat_class.groqAPI.groq_v_enable and self.chat_class.groqAPI.groq_v_nick_name:
-                    models[self.chat_class.groqAPI.groq_v_nick_name.lower()] = ' ' + self.chat_class.groqAPI.groq_v_nick_name
-                if self.chat_class.groqAPI.groq_x_enable and self.chat_class.groqAPI.groq_x_nick_name:
-                    models[self.chat_class.groqAPI.groq_x_nick_name.lower()] = ' ' + self.chat_class.groqAPI.groq_x_nick_name
+                if self.chat_class.groqAPI.a_enable and self.chat_class.groqAPI.a_nick_name:
+                    models[self.chat_class.groqAPI.a_nick_name.lower()] = ' ' + self.chat_class.groqAPI.a_nick_name
+                if self.chat_class.groqAPI.b_enable and self.chat_class.groqAPI.b_nick_name:
+                    models[self.chat_class.groqAPI.b_nick_name.lower()] = ' ' + self.chat_class.groqAPI.b_nick_name
+                if self.chat_class.groqAPI.v_enable and self.chat_class.groqAPI.v_nick_name:
+                    models[self.chat_class.groqAPI.v_nick_name.lower()] = ' ' + self.chat_class.groqAPI.v_nick_name
+                if self.chat_class.groqAPI.x_enable and self.chat_class.groqAPI.x_nick_name:
+                    models[self.chat_class.groqAPI.x_nick_name.lower()] = ' ' + self.chat_class.groqAPI.x_nick_name
 
         # Ollama
         if self.chat_class.ollama_enable is None:
             self.chat_class.ollama_auth()
             if self.chat_class.ollama_enable:
-                qLog.log('info', self.proc_id, f" Ollama     : Ready, (Models count={ len(self.chat_class.ollamaAPI.models) })")
+                logger.info(f"Ollama     : Ready, (Models count={ len(self.chat_class.ollamaAPI.models) })")
         if self.chat_class.ollama_enable:
             if True:
                 models['[ollama]'] = '[Ollama]'
-                if self.chat_class.ollamaAPI.ollama_a_enable and self.chat_class.ollamaAPI.ollama_a_nick_name:
-                    models[self.chat_class.ollamaAPI.ollama_a_nick_name.lower()] = ' ' + self.chat_class.ollamaAPI.ollama_a_nick_name
-                if self.chat_class.ollamaAPI.ollama_b_enable and self.chat_class.ollamaAPI.ollama_b_nick_name:
-                    models[self.chat_class.ollamaAPI.ollama_b_nick_name.lower()] = ' ' + self.chat_class.ollamaAPI.ollama_b_nick_name
-                if self.chat_class.ollamaAPI.ollama_v_enable and self.chat_class.ollamaAPI.ollama_v_nick_name:
-                    models[self.chat_class.ollamaAPI.ollama_v_nick_name.lower()] = ' ' + self.chat_class.ollamaAPI.ollama_v_nick_name
-                if self.chat_class.ollamaAPI.ollama_x_enable and self.chat_class.ollamaAPI.ollama_x_nick_name:
-                    models[self.chat_class.ollamaAPI.ollama_x_nick_name.lower()] = ' ' + self.chat_class.ollamaAPI.ollama_x_nick_name
+                if self.chat_class.ollamaAPI.a_enable and self.chat_class.ollamaAPI.a_nick_name:
+                    models[self.chat_class.ollamaAPI.a_nick_name.lower()] = ' ' + self.chat_class.ollamaAPI.a_nick_name
+                if self.chat_class.ollamaAPI.b_enable and self.chat_class.ollamaAPI.b_nick_name:
+                    models[self.chat_class.ollamaAPI.b_nick_name.lower()] = ' ' + self.chat_class.ollamaAPI.b_nick_name
+                if self.chat_class.ollamaAPI.v_enable and self.chat_class.ollamaAPI.v_nick_name:
+                    models[self.chat_class.ollamaAPI.v_nick_name.lower()] = ' ' + self.chat_class.ollamaAPI.v_nick_name
+                if self.chat_class.ollamaAPI.x_enable and self.chat_class.ollamaAPI.x_nick_name:
+                    models[self.chat_class.ollamaAPI.x_nick_name.lower()] = ' ' + self.chat_class.ollamaAPI.x_nick_name
 
         # openrtの情報でmodel情報を更新
         if (openrt_first_auth == True):
@@ -1049,12 +1055,12 @@ class CoreAiClass:
                             "upd_time": now_time, "dsp_time": None, }
                 return JSONResponse(content={'message': f'Processing started on port {to_port} with request text: {request_text}', 'port': to_port})
             else:
-                qLog.log('error', self.proc_id, f"Error response ({ to_port }/post_request) : {response.status_code} - {response.text}")
+                logger.error(f"Error response ({ to_port }/post_request) : {response.status_code} - {response.text}")
                 with self.thread_lock:
                     self.data.subai_info[to_port]['status'] = 'NONE'
                 raise HTTPException(status_code=response.status_code, detail=response.text)
         except Exception as e:
-            qLog.log('error', self.proc_id, f"Error communicating ({ to_port }/post_request) : {e}")
+            logger.error(f"Error communicating ({ to_port }/post_request) : {e}")
             if (to_port in self.data.subai_info.keys()):
                 with self.thread_lock:
                     self.data.subai_info[to_port]['status'] = 'NONE'

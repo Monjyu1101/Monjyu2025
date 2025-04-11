@@ -3,13 +3,23 @@
 
 # ------------------------------------------------
 # COPYRIGHT (C) 2014-2025 Mitsuo KONDOU.
-# This software is released under the not MIT License.
-# Permission from the right holder is required for use.
-# https://github.com/konsan1101
+# This software is released under the MIT License.
+# https://github.com/monjyu1101
 # Thank you for keeping the rules.
 # ------------------------------------------------
 
-# RiKi_Monjyu__addin.py
+# モジュール名
+MODULE_NAME = 'addin'
+
+# ロガーの設定
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)-10s - %(levelname)-8s - %(message)s',
+    datefmt='%H:%M:%S'
+)
+logger = logging.getLogger(MODULE_NAME)
+
 
 import sys
 import os
@@ -20,15 +30,14 @@ import shutil
 import glob
 import importlib
 
+
 # インターフェースのパス設定
 qPath_temp   = 'temp/'
 qPath_log    = 'temp/_log/'
 
 # 共通ルーチンのインポート
-import _v6__qLog
-qLog = _v6__qLog.qLog_class()
-import _v6__qRiKi_key
-qRiKi_key = _v6__qRiKi_key.qRiKi_key_class()
+import _v7__qRiKi_key
+qRiKi_key = _v7__qRiKi_key.qRiKi_key_class()
 
 # アドイン管理クラス
 class _addin_class:
@@ -55,16 +64,14 @@ class _addin_class:
              organization_auth=''):
         self.runMode = runMode
         
-        # ログ設定
-        self.proc_name = 'addin'
-        self.proc_id = '{0:10s}'.format(self.proc_name).replace(' ', '_')
-        if not os.path.isdir(qPath_log):
-            os.makedirs(qPath_log)
+        # ログファイル名の生成
         if qLog_fn == '':
             nowTime = datetime.datetime.now()
             qLog_fn = qPath_log + nowTime.strftime('%Y%m%d.%H%M%S') + '.' + os.path.basename(__file__) + '.log'
-        qLog.init(mode='logger', filename=qLog_fn)
-        qLog.log('info', self.proc_id, 'init')
+
+        # ログの初期化
+        #qLog.init(mode='logger', filename=qLog_fn)
+        logger.debug('init')
 
         # パラメータ設定
         self.addins_path = addins_path
@@ -91,7 +98,7 @@ class _addin_class:
                     try:
                         # モジュールのロード
                         file_name = os.path.splitext(base_name)[0]
-                        print('Addins    Loading ... "' + file_name + '" ...')
+                        logger.info('Addins    Loading ... "' + file_name + '" ...')
                         loader = importlib.machinery.SourceFileLoader(file_name, f)
                         addin_script = file_name
                         addin_module = loader.load_module()
@@ -152,7 +159,7 @@ class _addin_class:
                                 'func_proc': addin_func_proc
                             }
                             self.addin_modules[addin_script] = module_dic
-                            print('Addins    Loading ... "' + addin_script + '" (' + addin_class.func_name + ') ' + addin_onoff + '. ')
+                            logger.info('Addins    Loading ... "' + addin_script + '" (' + addin_class.func_name + ') ' + addin_onoff + '. ')
                             # 特定アドインのプロシージャを設定
                             if addin_script == 'addin_directive':
                                 self.addin_directive = addin_func_proc
@@ -180,7 +187,7 @@ class _addin_class:
             addin_func_reset = module_dic['func_reset']
             try:
                 res = addin_func_reset()
-                print('Addins    Reset   ... "' + addin_script + '" (' + addin_func_name + ') OK. ')
+                logger.info('Addins    Reset   ... "' + addin_script + '" (' + addin_func_name + ') OK. ')
             except:
                 res = False
             if not res:
@@ -203,7 +210,7 @@ class _addin_class:
                 # クラスとモジュールの削除
                 del addin_class
                 del addin_module
-                print('Addins    Unload  ... "' + addin_script + '" (' + addin_func_name + ') OK. ')
+                logger.info('Addins    Unload  ... "' + addin_script + '" (' + addin_func_name + ') OK. ')
             except:
                 res_unload_all = False
                 res_unload_msg += addin_func_name + 'の開放中にエラーがありました。' + '\n'
@@ -214,6 +221,7 @@ class _addin_class:
 
 # メイン処理
 if __name__ == '__main__':
+    print()
     addin = _addin_class()
 
     # addin 初期化

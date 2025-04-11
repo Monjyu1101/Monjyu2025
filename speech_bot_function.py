@@ -3,27 +3,30 @@
 
 # ------------------------------------------------
 # COPYRIGHT (C) 2014-2025 Mitsuo KONDOU.
-# This software is released under the not MIT License.
-# Permission from the right holder is required for use.
-# https://github.com/konsan1101
+# This software is released under the MIT License.
+# https://github.com/monjyu1101
 # Thank you for keeping the rules.
 # ------------------------------------------------
 
-import sys
-import os
-import time
-import datetime
-import codecs
-import shutil
+# モジュール名
+MODULE_NAME = 'botFunc'
 
+# ロガーの設定
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)-10s - %(levelname)-8s - %(message)s',
+    datefmt='%H:%M:%S'
+)
+logger = logging.getLogger(MODULE_NAME)
+
+
+import os
 import glob
 import importlib
 
-
-
-import _v6__qRiKi_key
-qRiKi_key = _v6__qRiKi_key.qRiKi_key_class()
-
+import _v7__qRiKi_key
+qRiKi_key = _v7__qRiKi_key.qRiKi_key_class()
 
 
 class botFunction:
@@ -38,7 +41,7 @@ class botFunction:
         res_load_all = True
         res_load_msg = ''
         self.functions_unload()
-        #print('Load functions ... ')
+        #logger.info('Load functions ... ')
 
         path = functions_path
         path_files = glob.glob(path + '*.py')
@@ -53,7 +56,7 @@ class botFunction:
 
                     try:
                         file_name   = os.path.splitext(base_name)[0]
-                        print('Functions Loading ... "' + file_name + '" ...')
+                        logger.info('Functions Loading ... "' + file_name + '" ...')
                         loader = importlib.machinery.SourceFileLoader(file_name, f)
                         ext_script = file_name
                         ext_module = loader.load_module()
@@ -66,7 +69,7 @@ class botFunction:
                         ext_function    = ext_class.function
                         ext_func_reset  = ext_class.func_reset
                         ext_func_proc   = ext_class.func_proc
-                        #print(ext_version, ext_func_auth, )
+                        #logger.info(ext_version, ext_func_auth, )
 
                         # コード認証
                         auth = False
@@ -78,7 +81,7 @@ class botFunction:
                             else:
                                 auth = qRiKi_key.decryptText(text=ext_func_auth)
                                 if  (auth != ext_func_name + '-' + ext_func_ver):
-                                    #print(ext_func_auth, auth)
+                                    #logger.info(ext_func_auth, auth)
                                     if (secure_level == 'low'):
                                         auth = '1' #注意
                                         res_load_msg += '"' + ext_script + '"は改ざんされたコードです。(Warning!)' + '\n'
@@ -95,7 +98,7 @@ class botFunction:
                             else:
                                 auth = qRiKi_key.decryptText(text=ext_func_auth)
                                 if  (auth != ext_func_name + '-' + ext_func_ver):
-                                    #print(ext_func_auth, auth)
+                                    #logger.info(ext_func_auth, auth)
                                     res_load_msg += '"' + ext_script + '"は改ざんされたコードです。Loadingはキャンセルされます。' + '\n'
                                     res_load_all = False
                                 else:
@@ -115,17 +118,17 @@ class botFunction:
                             module_dic['func_reset'] = ext_func_reset
                             module_dic['func_proc']  = ext_func_proc
                             self.function_modules[ext_script] = module_dic
-                            print('Functions Loading ... "' + ext_script + '" (' + ext_class.func_name + ') ' + ext_onoff + '. ')
+                            logger.info('Functions Loading ... "' + ext_script + '" (' + ext_class.func_name + ') ' + ext_onoff + '. ')
 
                     except Exception as e:
-                        print(e)
+                        logger.info(e)
 
         return res_load_all, res_load_msg
 
     def functions_reset(self, ):
         res_reset_all = True
         res_reset_msg = ''
-        #print('Reset functions ... ')
+        #logger.info('Reset functions ... ')
 
         for module_dic in self.function_modules.values():
             ext_script     = module_dic['script']
@@ -134,7 +137,7 @@ class botFunction:
             try:
                 res = False
                 res = ext_func_reset()
-                print('Functions Reset   ... "' + ext_script + '" (' + ext_func_name + ') OK. ')
+                logger.info('Functions Reset   ... "' + ext_script + '" (' + ext_func_name + ') OK. ')
             except:
                 pass
             if (res == False):
@@ -147,7 +150,7 @@ class botFunction:
     def functions_unload(self, ):
         res_unload_all = True
         res_unload_msg = ''
-        #print('Unload functions ... ')
+        #logger.info('Unload functions ... ')
 
         for module_dic in self.function_modules.values():
             ext_script    = module_dic['script']
@@ -159,7 +162,7 @@ class botFunction:
                 #del ext_func_proc
                 del ext_class
                 del ext_module
-                print('Functions Unload  ... "' + ext_script + '" (' + ext_func_name + ') OK. ')
+                logger.info('Functions Unload  ... "' + ext_script + '" (' + ext_func_name + ') OK. ')
             except:
                 res_unload_all = False
                 res_unload_msg += ext_func_name + 'の開放中にエラーがありました。' + '\n'
@@ -172,29 +175,29 @@ class botFunction:
 
 if __name__ == '__main__':
 
-        #botFunc = speech_bot_function.botFunction()
-        botFunc = botFunction()
+    #botFunc = speech_bot_function.botFunction()
+    botFunc = botFunction()
 
-        if (True):
-            
-            if True:
-                #res, msg = openaiAPI.functions_load(functions_path='_extensions/function/', secure_level='medium', )
-                res, msg = botFunc.functions_load(
-                    functions_path='_extensions/function/', secure_level='low', )
-                if (res != True) or (msg != ''):
-                    print(msg)
-                    print()
- 
-            if True:
-                res, msg = botFunc.functions_reset()
-                if (res != True) or (msg != ''):
-                    print(msg)
-                    print()
+    if (True):
+        
+        if True:
+            #res, msg = openaiAPI.functions_load(functions_path='_extensions/function/', secure_level='medium', )
+            res, msg = botFunc.functions_load(
+                functions_path='_extensions/function/', secure_level='low', )
+            if (res != True) or (msg != ''):
+                print(msg)
+                print()
 
-            if True:
-                res, msg = botFunc.functions_unload()
-                if (res != True) or (msg != ''):
-                    print(msg)
-                    print()
+        if True:
+            res, msg = botFunc.functions_reset()
+            if (res != True) or (msg != ''):
+                print(msg)
+                print()
+
+        if True:
+            res, msg = botFunc.functions_unload()
+            if (res != True) or (msg != ''):
+                print(msg)
+                print()
 
 

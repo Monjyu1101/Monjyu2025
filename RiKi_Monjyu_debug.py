@@ -1,4 +1,4 @@
-# RiKi_Monjyu_test.py
+# RiKi_Monjyu_debug.py
 
 import sys
 import os
@@ -10,12 +10,9 @@ import shutil
 
 import requests
 
-
-
 # 定数の定義
 CONNECTION_TIMEOUT = 15
 REQUEST_TIMEOUT = 30
-
 
 
 def post_request(req_mode='chat'):
@@ -37,7 +34,6 @@ def post_request(req_mode='chat'):
         print(f"Error sending debug request: {e}")
     except Exception as e:
         print(f"Unexpected error in debug request: {e}")
-
 
 
 if __name__ == '__main__':

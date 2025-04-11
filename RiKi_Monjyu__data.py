@@ -3,13 +3,23 @@
 
 # ------------------------------------------------
 # COPYRIGHT (C) 2014-2025 Mitsuo KONDOU.
-# This software is released under the not MIT License.
-# Permission from the right holder is required for use.
-# https://github.com/konsan1101
+# This software is released under the MIT License.
+# https://github.com/monjyu1101
 # Thank you for keeping the rules.
 # ------------------------------------------------
 
-# RiKi_Monjyu__data.py
+# モジュール名
+MODULE_NAME = 'data'
+
+# ロガーの設定
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)-10s - %(levelname)-8s - %(message)s',
+    datefmt='%H:%M:%S'
+)
+logger = logging.getLogger(MODULE_NAME)
+
 
 import sys
 import os
@@ -31,10 +41,6 @@ qHOSTNAME = socket.gethostname().lower()
 qPath_temp   = 'temp/'
 qPath_log    = 'temp/_log/'
 
-# ログクラスのインポートとインスタンス生成
-import _v6__qLog
-qLog = _v6__qLog.qLog_class()
-
 # 定数の定義
 CONNECTION_TIMEOUT = 15
 REQUEST_TIMEOUT = 30
@@ -47,16 +53,14 @@ class _data_class:
                         core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', ):
         self.runMode = runMode
 
-        # ログ設定
-        self.proc_name = 'data'
-        self.proc_id = '{0:10s}'.format(self.proc_name).replace(' ', '_')
-        if not os.path.isdir(qPath_log):
-            os.makedirs(qPath_log)
+        # ログファイル名の生成
         if qLog_fn == '':
             nowTime = datetime.datetime.now()
             qLog_fn = qPath_log + nowTime.strftime('%Y%m%d.%H%M%S') + '.' + os.path.basename(__file__) + '.log'
-        qLog.init(mode='logger', filename=qLog_fn)
-        qLog.log('info', self.proc_id, 'init')
+        
+        # ログの初期化
+        #qLog.init(mode='logger', filename=qLog_fn)
+        logger.debug('init')
 
         # 各種設定の初期化
         self.main      = main
@@ -253,12 +257,12 @@ class _data_class:
                                 'info_text': info_text, 
                                 'upd_time': upd_time, }
                     else:
-                        qLog.log('error', self.proc_id, f"Error response ({ port }/get_info) : {response.status_code}")
+                        logger.error(f"Error response ({ port }/get_info) : {response.status_code}")
                         with self.thread_lock:
                             self.subai_info[port]['status'] = 'NONE'
                             self.subai_info[port]['upd_time'] = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
                 except Exception as e:
-                    qLog.log('error', self.proc_id, f"Error communicating ({ port }/get_info) : {e}")
+                    logger.error(f"Error communicating ({ port }/get_info) : {e}")
                     with self.thread_lock:
                         self.subai_info[port]['status'] = 'NONE'
                         self.subai_info[port]['upd_time'] = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
@@ -272,7 +276,7 @@ class _data_class:
                 thread = threading.Thread(target=self.update_subai_status, args=(port,), daemon=True, )
                 thread.start()
             except Exception as e:
-                qLog.log('error', self.proc_id, f"Failed to start subai on port {port}: {e}")
+                logger.error(f"Failed to start subai on port {port}: {e}")
 
     def reset(self, user_id: str, ):
         # 設定リセット
@@ -312,7 +316,7 @@ class _data_class:
                     self.subai_info[to_port]['status'] = 'ERROR'
                 return False
         except Exception as e:
-            qLog.log('error', self.proc_id, f"Error communicating ({ to_port }/post_cancel) : {e}")
+            logger.error(f"Error communicating ({ to_port }/post_cancel) : {e}")
             with self.thread_lock:
                 self.subai_info[to_port]['status'] = 'NONE'
         return False

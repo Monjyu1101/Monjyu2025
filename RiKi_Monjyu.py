@@ -3,13 +3,25 @@
 
 # ------------------------------------------------
 # COPYRIGHT (C) 2014-2025 Mitsuo KONDOU.
-# This software is released under the not MIT License.
-# Permission from the right holder is required for use.
-# https://github.com/konsan1101
+# This software is released under the MIT License.
+# https://github.com/monjyu1101
 # Thank you for keeping the rules.
 # ------------------------------------------------
 
-# RiKi_Monjyu.py
+# モジュール名
+MODULE_NAME = 'main'
+
+# ロガーの設定
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)-10s - %(levelname)-8s - %(message)s',
+    datefmt='%H:%M:%S'
+)
+logger = logging.getLogger(MODULE_NAME)
+logging.getLogger('httpx').setLevel(logging.WARNING)
+logging.getLogger('google_genai').setLevel(logging.WARNING)
+
 
 import sys
 import os
@@ -23,6 +35,7 @@ import threading
 import multiprocessing
 
 import asyncio
+
 
 # ダミーインポート(pyinstaller用)
 #import pip
@@ -87,7 +100,6 @@ import pyaudio
 import speech_recognition as sr
 
 
-
 # パス設定
 qPath_base = os.path.dirname(sys.argv[0]) + '/'
 if (qPath_base == '/'):
@@ -110,8 +122,6 @@ SUB_BASE  = 8100
 # 共通ルーチンのインポート
 import _v6__qFunc
 qFunc = _v6__qFunc.qFunc_class()
-import _v6__qLog
-qLog = _v6__qLog.qLog_class()
 
 # 処理ルーチンのインポート
 import RiKi_Monjyu__conf
@@ -147,21 +157,10 @@ class _main_class:
 
     def init(self, runMode='debug', qLog_fn=''):
         self.runMode = runMode
-        # ログ設定
-        self.proc_name = 'main'
-        self.proc_id = '{0:10s}'.format(self.proc_name).replace(' ', '_')
-        if not os.path.isdir(qPath_log):
-            os.makedirs(qPath_log)
-        if qLog_fn == '':
-            nowTime = datetime.datetime.now()
-            qLog_fn = qPath_log + nowTime.strftime('%Y%m%d.%H%M%S') + '.' + os.path.basename(__file__) + '.log'
-        qLog.init(mode='logger', filename=qLog_fn)
-        qLog.log('info', self.proc_id, 'init')
+        logger.debug('init')
         return True
 
 if __name__ == '__main__':
-    main_name = 'Monjyu'
-    main_id = '{0:10s}'.format(main_name).replace(' ', '_')
 
     # 制限日設定
     limit_date = '{:1d}{:1d}'.format(int(float(3.0)), int(float(1.0)))
@@ -188,9 +187,9 @@ if __name__ == '__main__':
     basename = os.path.basename(__file__)
     basename = basename.replace('.py', '')
     qLog_fn = qPath_log + nowTime.strftime('%Y%m%d.%H%M%S') + '.' + basename + '.log'
-    qLog.init(mode='logger', filename=qLog_fn)
-    qLog.log('info', main_id, 'init')
-    qLog.log('info', main_id, basename + ' runMode, ... ')
+    #qLog.init(mode='logger', filename=qLog_fn)
+    logger.info('init')
+    logger.info(f'{basename} runMode, ... ')
 
     # パラメータの取得
     if True:
@@ -198,14 +197,14 @@ if __name__ == '__main__':
             runMode = str(sys.argv[1]).lower()
         if len(sys.argv) >= 3:
             numSubAIs = str(sys.argv[2])
-        qLog.log('info', main_id, 'runMode   = ' + str(runMode))
-        qLog.log('info', main_id, 'numSubAIs = ' + str(numSubAIs))
+        logger.info(f'runMode   = {runMode}')
+        logger.info(f'numSubAIs = {numSubAIs}')
 
     # 初期設定
     if True:
          # ライセンス制限
         if (dateinfo_today >= dateinfo_start):
-            qLog.log('warning', main_id, '利用ライセンスは、 ' + limit_date + ' まで有効です。')
+            logger.warning(f'利用ライセンスは、 {limit_date} まで有効です。')
         if (dateinfo_today > limit_date):
             time.sleep(60)
             sys.exit(0)
@@ -426,16 +425,16 @@ if __name__ == '__main__':
 
     # 起動メッセージ
     print()
-    qLog.log('info', main_id, "================================================================================================")
-    qLog.log('info', main_id, " Thank you for using our systems.")
-    qLog.log('info', main_id, " To use [ Assistant AI 文殊/Monjyu(もんじゅ) ], Access 'http://localhost:8008/' in your browser.")
+    logger.info("================================================================================================")
+    logger.info(" Thank you for using our systems.")
+    logger.info(" To use [ Assistant AI 文殊/Monjyu(もんじゅ) ], Access 'http://localhost:8008/' in your browser.")
     if (liveai_enable == True):
-        qLog.log('info', main_id, " To use [ Live AI 力/RiKi(りき) ], Press ctrl-l or ctrl-r three times.")
+        logger.info(" To use [ Live AI 力/RiKi(りき) ], Press ctrl-l or ctrl-r three times.")
     if (webOperator_enable == True):
-        qLog.log('info', main_id, " To use [ Agentic AI Web-Operator(ウェブオペレーター) ], Specify use at the prompt.")
+        logger.info(" To use [ Agentic AI Web-Operator(ウェブオペレーター) ], Specify use at the prompt.")
     if (researchAgent_enable == True):
-        qLog.log('info', main_id, " To use [ Agentic AI Research-Agent(リサーチエージェント) ], Specify use at the prompt.")
-    qLog.log('info', main_id, "================================================================================================")
+        logger.info(" To use [ Agentic AI Research-Agent(リサーチエージェント) ], Specify use at the prompt.")
+    logger.info("================================================================================================")
     print()
     main.main_all_ready = True
 
