@@ -10,7 +10,7 @@ function get_ready_count() {
     var isReady = -1;
     var isBusy = -1;
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_ready_count',
+        url: $('#core_endpoint0').val() + '/get_ready_count',
         method: 'GET',
         async: false, // 同期処理
         dataType: 'json',
@@ -58,7 +58,7 @@ async function waitForIdol() {
 function get_output_log_user() {
     // サーバーからユーザーの出力履歴を取得するAJAXリクエスト
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_output_log_user',
+        url: $('#core_endpoint2').val() + '/get_output_log_user',
         type: 'GET',
         async: false, // 同期処理
         data: { user_id: $('#user_id').val() },
@@ -101,7 +101,7 @@ function post_request(req_mode, system_text, request_text, input_text, result_sa
     };
     // サーバーにリクエストを送信
     $.ajax({
-        url: $('#core_endpoint').val() + '/post_req',
+        url: $('#core_endpoint0').val() + '/post_req',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData), // フォームデータをJSON形式に変換

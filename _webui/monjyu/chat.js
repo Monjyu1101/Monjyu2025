@@ -77,7 +77,7 @@ function displayChatHistory(histories) {
 // 履歴を取得して表示する関数
 function getAndDisplayChatHistory() {
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_histories_all',
+        url: $('#core_endpoint5').val() + '/get_histories_all',
         type: 'GET',
         data: { user_id: $('#user_id').val() },
         success: function(data) {
@@ -133,7 +133,7 @@ function post_request(req_mode, system_text, request_text, input_text, result_sa
     
     // サーバーにリクエストを送信
     $.ajax({
-        url: $('#core_endpoint').val() + '/post_req',
+        url: $('#core_endpoint0').val() + '/post_req',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData),
@@ -158,7 +158,7 @@ function post_request(req_mode, system_text, request_text, input_text, result_sa
 // サーバーから応答を取得するポーリング関数
 function pollForResponse() {
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_output_log_user',
+        url: $('#core_endpoint2').val() + '/get_output_log_user',
         method: 'GET',
         data: { user_id: $('#user_id').val() },
         success: function(data) {
@@ -238,7 +238,7 @@ function post_drop_files(files) {
 // サーバーから入力ファイルリストを取得し、更新する関数
 function get_input_list() {
     $.ajax({
-        url: '/get_input_list',
+        url: $('#core_endpoint0').val() + '/get_input_list',
         method: 'GET',
         success: function(data) {
             if (JSON.stringify(data.files) !== JSON.stringify(currentInputFiles)) {
@@ -283,7 +283,7 @@ function post_text_files(files, dropArea) {
 // subai コンボ設定
 function get_subai_info_all() {
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_subai_info_all',
+        url: $('#core_endpoint0').val() + '/get_subai_info_all',
         method: 'GET',
         async: false,
         success: function(data) {
@@ -304,7 +304,7 @@ function clearChat() {
     
     // クリア通知をサーバーに送信
     $.ajax({
-        url: $('#core_endpoint').val() + '/post_clear',
+        url: $('#core_endpoint1').val() + '/post_clear',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ user_id: $('#user_id').val() }),
@@ -422,7 +422,7 @@ $(document).ready(function() {
         $('#input_text').val('');
         // クリア通知をサーバーに送信
         $.ajax({
-            url: $('#core_endpoint').val() + '/post_clear',
+            url: $('#core_endpoint1').val() + '/post_clear',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ user_id: $('#user_id').val() }), // ユーザーIDを送信

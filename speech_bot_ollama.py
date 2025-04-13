@@ -9,7 +9,7 @@
 # ------------------------------------------------
 
 # モジュール名
-MODULE_NAME = 'bot_ollama'
+MODULE_NAME = 'ollama'
 
 # ロガーの設定
 import logging
@@ -692,7 +692,8 @@ class _ollamaAPI:
 
     def run_gpt(self, chat_class='chat', model_select='auto',
                 nick_name=None, model_name=None,
-                session_id='admin', history=[], function_modules={},
+                session_id='admin', history=[],
+                function_modules={},
                 sysText=None, reqText=None, inpText='こんにちは',
                 upload_files=[], image_urls=[],
                 temperature=0.8, max_step=10, jsonSchema=None):
@@ -890,6 +891,10 @@ class _ollamaAPI:
         # ストリーミングモード無効
         stream = False
 
+        # ツール（関数）設定
+        functions = []
+        # 2025/04/09時点 ツールに未対応です！
+
         # 実行ループ
         try:
             n = 0
@@ -1016,7 +1021,8 @@ class _ollamaAPI:
 
 
     def chatBot(self, chat_class='auto', model_select='auto',
-                session_id='admin', history=[], function_modules={},
+                session_id='admin', history=[],
+                function_modules={},
                 sysText=None, reqText=None, inpText='こんにちは', 
                 filePath=[],
                 temperature=0.8, max_step=10, jsonSchema=None,
@@ -1057,7 +1063,8 @@ class _ollamaAPI:
         res_text, res_path, res_files, nick_name, model_name, res_history = \
             self.run_gpt(chat_class=chat_class, model_select=model_select,
                         nick_name=nick_name, model_name=model_name,
-                        session_id=session_id, history=res_history, function_modules=function_modules,
+                        session_id=session_id, history=res_history,
+                        function_modules=function_modules,
                         sysText=sysText, reqText=reqText, inpText=inpText,
                         upload_files=upload_files, image_urls=image_urls,
                         temperature=temperature, max_step=max_step, jsonSchema=jsonSchema)
@@ -1136,7 +1143,8 @@ if __name__ == '__main__':
                 logger.info(f"inpText : {inpText.rstrip()}")
             res_text, res_path, res_files, res_name, res_api, ollamaAPI.history = \
                 ollamaAPI.chatBot(  chat_class='auto', model_select='auto', 
-                                    session_id=session_id, history=ollamaAPI.history, function_modules=function_modules,
+                                    session_id=session_id, history=ollamaAPI.history,
+                                    function_modules=function_modules,
                                     sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
                                     inpLang='ja', outLang='ja', )
             print(f"----------------------------")
@@ -1159,7 +1167,8 @@ if __name__ == '__main__':
                 logger.info(f"inpText : {inpText.rstrip()}")
             res_text, res_path, res_files, res_name, res_api, ollamaAPI.history = \
                 ollamaAPI.chatBot(  chat_class='auto', model_select='auto', 
-                                    session_id=session_id, history=ollamaAPI.history, function_modules=function_modules,
+                                    session_id=session_id, history=ollamaAPI.history,
+                                    function_modules=function_modules,
                                     sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
                                     inpLang='ja', outLang='ja', )
             print(f"----------------------------")
@@ -1189,7 +1198,8 @@ if __name__ == '__main__':
                 logger.info(f"inpText : {inpText.rstrip()}")
             res_text, res_path, res_files, res_name, res_api, ollamaAPI.history = \
                 ollamaAPI.chatBot(  chat_class='auto', model_select='auto', 
-                                    session_id=session_id, history=ollamaAPI.history, function_modules=function_modules,
+                                    session_id=session_id, history=ollamaAPI.history,
+                                    function_modules=function_modules,
                                     sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
                                     inpLang='ja', outLang='ja', )
             print(f"----------------------------")

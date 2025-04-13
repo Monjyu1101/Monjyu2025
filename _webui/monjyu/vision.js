@@ -46,7 +46,7 @@ function post_drop_files(files) {
 // サーバーから入力ファイルリストを取得し、更新する関数
 function get_input_list() {
     $.ajax({
-        url: '/get_input_list', // ファイルリスト取得のエンドポイント
+        url: $('#core_endpoint0').val() + '/get_input_list', // ファイルリスト取得のエンドポイント
         method: 'GET',
         success: function(data) {
             // ファイルリストが更新された場合のみ、リストを更新
@@ -141,7 +141,7 @@ function post_request(req_mode, system_text, request_text, input_text, result_sa
     };
     // サーバーにリクエストを送信
     $.ajax({
-        url: $('#core_endpoint').val() + '/post_req',
+        url: $('#core_endpoint0').val() + '/post_req',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData), // フォームデータをJSON形式に変換
@@ -160,7 +160,7 @@ let lastOutputData = {};
 function get_output_log_user() {
     // サーバーからユーザーの出力履歴を取得するAJAXリクエスト
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_output_log_user',
+        url: $('#core_endpoint2').val() + '/get_output_log_user',
         type: 'GET',
         data: { user_id: $('#user_id').val() },
         success: function(data) {
@@ -510,7 +510,7 @@ $(document).ready(function() {
         $('#vision_request').val('');
         // クリア通知をサーバーに送信
         $.ajax({
-            url: $('#core_endpoint').val() + '/post_clear',
+            url: $('#core_endpoint1').val() + '/post_clear',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ user_id: $('#user_id').val() }), // ユーザーIDを送信

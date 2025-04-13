@@ -4,7 +4,7 @@
 function getSubAiInfo() {
     // AJAXを使ってサブAIの情報を取得
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_subai_info_all',
+        url: $('#core_endpoint0').val() + '/get_subai_info_all',
         type: 'GET',
         success: function(data) {
             // 取得したデータの各ポートに対して処理を行う
@@ -38,7 +38,7 @@ function getSubAiStatuses() {
 
     // AJAXを使ってサブAIのステータスを取得
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_subai_statuses_all',
+        url: $('#core_endpoint0').val() + '/get_subai_statuses_all',
         type: 'GET',
         success: function(data) {
 

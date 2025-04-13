@@ -379,41 +379,40 @@ class _worker_class:
         # AI要求送信
         try:
             if self.botFunc is not None:
-                for module_dic in self.botFunc.function_modules.values():
+                module_dic = self.botFunc.function_modules.get('execute_monjyu_request', None)
+                if (module_dic is not None):
 
-                    # Monjyu 実行
-                    if (module_dic['func_name'] == 'execute_monjyu_request'):
-                        # function 実行
-                        dic = {}
-                        dic['runMode'] = 'chat' #ここは'chat'で内部的に問い合わせる
-                        dic['userId'] = 'live'
-                        dic['reqText'] = reqText
-                        f_kwargs = json.dumps(dic, ensure_ascii=False, )
-                        try:
-                            ext_func_proc = module_dic['func_proc']
-                            res_json = ext_func_proc( f_kwargs )
-                            res_dic = json.loads(res_json)
-                            res_text = res_dic.get('result_text','')
-                            res_text = res_text.replace('`', '"')
-                            print(res_text)
-                        except Exception as e:
-                            print(e)
-                            return False
+                    # Monjyu function 実行
+                    dic = {}
+                    dic['runMode'] = 'chat' #ここは'chat'で内部的に問い合わせる
+                    dic['userId'] = 'live'
+                    dic['reqText'] = reqText
+                    f_kwargs = json.dumps(dic, ensure_ascii=False, )
+                    try:
+                        ext_func_proc = module_dic['func_proc']
+                        res_json = ext_func_proc( f_kwargs )
+                        res_dic = json.loads(res_json)
+                        res_text = res_dic.get('result_text','')
+                        res_text = res_text.replace('`', '"')
+                        print(res_text)
+                    except Exception as e:
+                        print(e)
+                        return False
 
-                        # Live 連携
-                        if (os.path.isfile(qIO_liveAiRun)):
-                            text = f"[TASK Worker] \n"
-                            text += input_text.rstrip() + '\n'
-                            text += "について、以下が結果報告です。要約して日本語で報告してください。\n"
-                            text += res_text.rstrip() + '\n\n'
-                            res = io_text_write(qIO_agent2live, text)
+                    # Live 連携
+                    if (os.path.isfile(qIO_liveAiRun)):
+                        text = f"[TASK Worker] \n"
+                        text += input_text.rstrip() + '\n'
+                        text += "について、以下が結果報告です。要約して日本語で報告してください。\n"
+                        text += res_text.rstrip() + '\n\n'
+                        res = io_text_write(qIO_agent2live, text)
 
-                        # Monjyu 連携 (tts指示)
-                        #else:
-                        #    # 音声合成
-                        #    self.play_tts(input_text=res_text, )
-        
-                        return True
+                    # Monjyu 連携 (tts指示)
+                    #else:
+                    #    # 音声合成
+                    #    self.play_tts(input_text=res_text, )
+    
+                    return True
 
         except Exception as e:
             print(e)

@@ -9,7 +9,7 @@
 # ------------------------------------------------
 
 # モジュール名
-MODULE_NAME = 'bot_chatgpt'
+MODULE_NAME = 'chatgpt'
 
 # ロガーの設定
 import logging
@@ -522,8 +522,8 @@ class _chatgptAPI:
 
             # function_call以外の通常メッセージを変換
             if (role != 'function_call'):
-                if (role not in ['system', 'user', 'assistant']):
-                    role = 'user'
+                #if (role not in ['system', 'user', 'assistant']):
+                #    role = 'user'
                 if (name == ''):
                     dic = {'role': role, 'content': content}
                     res_msg.append(dic)
@@ -576,7 +576,8 @@ class _chatgptAPI:
 
     def run_gpt(self, chat_class='chat', model_select='auto',
                 nick_name=None, model_name=None,
-                session_id='admin', history=[], function_modules={},
+                session_id='admin', history=[],
+                function_modules={},
                 sysText=None, reqText=None, inpText='こんにちは',
                 upload_files=[], image_urls=[],
                 temperature=0.8, max_step=10, jsonSchema=None):
@@ -935,63 +936,60 @@ class _chatgptAPI:
                         f_name = tc['function']['name']
                         f_kwargs = tc['function']['arguments']
 
-                        hit = False
-
                         # 登録された関数モジュールを検索
-                        for module_dic in function_modules.values():
-                            if (f_name == module_dic['func_name']):
-                                hit = True
-                                logger.info(f"//ChatGPT//   function_call '{module_dic['script']}' ({f_name})")
-                                logger.info(f"//ChatGPT//   → {f_kwargs}")
-
-                                # メッセージ追加格納
-                                self.seq += 1
-                                dic = {'seq': self.seq, 'time': time.time(), 'role': 'function_call', 'name': f_name, 'content': f_kwargs}
-                                res_history.append(dic)
-
-                                # ツール実行
-                                try:
-                                    ext_func_proc = module_dic['func_proc']
-                                    res_json = ext_func_proc(f_kwargs)
-                                except Exception as e:
-                                    logger.error(f"ツール実行エラー: {e}")
-                                    # エラーメッセージ作成
-                                    dic = {}
-                                    dic['error'] = str(e)
-                                    res_json = json.dumps(dic, ensure_ascii=False)
-
-                                # 実行結果を表示
-                                logger.info(f"//ChatGPT//   → {res_json}")
-
-                                # メッセージ追加格納
-                                dic = {'role': 'user', 'name': f_name, 'content': res_json}
-                                msg.append(dic)
-
-                                # 履歴に関数結果を追加
-                                self.seq += 1
-                                dic = {'seq': self.seq, 'time': time.time(), 'role': 'function', 'name': f_name, 'content': res_json}
-                                res_history.append(dic)
-
-                                # パス情報の抽出（画像やExcelなど）
-                                try:
-                                    dic = json.loads(res_json)
-                                    path = dic.get('image_path')
-                                    if (path is None):
-                                        path = dic.get('excel_path')
-                                    if (path is not None):
-                                        res_path = path
-                                        res_files.append(path)
-                                        res_files = list(set(res_files))
-                                        logger.debug(f"ファイルパスを検出: {path}")
-                                except Exception as e:
-                                    logger.error(f"パス情報エラー: {e}")
-
-                                break
-
-                        # 関数が見つからない場合
-                        if (hit == False):
+                        module_dic = function_modules.get(f_name)
+                        if (module_dic is None):
                             logger.error(f"//ChatGPT//   function not found Error ! ({f_name})")
                             break
+
+                        else:
+                            logger.info(f"//ChatGPT//   function_call '{module_dic['script']}' ({f_name})")
+                            logger.info(f"//ChatGPT//   → {f_kwargs}")
+
+                            # メッセージ追加格納
+                            self.seq += 1
+                            dic = {'seq': self.seq, 'time': time.time(), 'role': 'function_call', 'name': f_name, 'content': f_kwargs}
+                            res_history.append(dic)
+
+                            # ツール実行
+                            try:
+                                ext_func_proc = module_dic['func_proc']
+                                if (module_dic['script'] != 'mcp'):
+                                    res_json = ext_func_proc(f_kwargs)
+                                else:
+                                    res_json = ext_func_proc(f_name, f_kwargs)
+                            except Exception as e:
+                                logger.error(f"ツール実行エラー: {e}")
+                                # エラーメッセージ作成
+                                dic = {}
+                                dic['error'] = str(e)
+                                res_json = json.dumps(dic, ensure_ascii=False)
+
+                            # 実行結果を表示
+                            logger.info(f"//ChatGPT//   → {res_json}")
+
+                            # メッセージ追加格納
+                            dic = {'role': 'user', 'name': f_name, 'content': res_json}
+                            msg.append(dic)
+
+                            # 履歴に関数結果を追加
+                            self.seq += 1
+                            dic = {'seq': self.seq, 'time': time.time(), 'role': 'function', 'name': f_name, 'content': res_json}
+                            res_history.append(dic)
+
+                            # パス情報の抽出（画像やExcelなど）
+                            try:
+                                dic = json.loads(res_json)
+                                path = dic.get('image_path')
+                                if (path is None):
+                                    path = dic.get('excel_path')
+                                if (path is not None):
+                                    res_path = path
+                                    res_files.append(path)
+                                    res_files = list(set(res_files))
+                                    logger.debug(f"ファイルパスを検出: {path}")
+                            except Exception as e:
+                                logger.error(f"パス情報エラー: {e}")
 
                 # 応答結果の確認
                 elif (res_role == 'assistant') and (res_content != ''):
@@ -1066,7 +1064,8 @@ class _chatgptAPI:
 
 
     def chatBot(self, chat_class='auto', model_select='auto',
-                session_id='admin', history=[], function_modules={},
+                session_id='admin', history=[],
+                function_modules={},
                 sysText=None, reqText=None, inpText='こんにちは', 
                 filePath=[],
                 temperature=0.8, max_step=10, jsonSchema=None,
@@ -1107,7 +1106,8 @@ class _chatgptAPI:
         res_text, res_path, res_files, nick_name, model_name, res_history = \
             self.run_gpt(chat_class=chat_class, model_select=model_select,
                         nick_name=nick_name, model_name=model_name,
-                        session_id=session_id, history=res_history, function_modules=function_modules,
+                        session_id=session_id, history=res_history,
+                        function_modules=function_modules,
                         sysText=sysText, reqText=reqText, inpText=inpText,
                         upload_files=upload_files, image_urls=image_urls,
                         temperature=temperature, max_step=max_step, jsonSchema=jsonSchema)
@@ -1187,7 +1187,8 @@ if __name__ == '__main__':
                 logger.info(f"inpText : {inpText.rstrip()}")
             res_text, res_path, res_files, res_name, res_api, chatgptAPI.history = \
                 chatgptAPI.chatBot(chat_class='auto', model_select='auto', 
-                                    session_id=session_id, history=chatgptAPI.history, function_modules=function_modules,
+                                    session_id=session_id, history=chatgptAPI.history,
+                                    function_modules=function_modules,
                                     sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
                                     inpLang='ja', outLang='ja')
             print(f"----------------------------")
@@ -1208,7 +1209,8 @@ if __name__ == '__main__':
                 logger.info(f"inpText : {inpText.rstrip()}")
             res_text, res_path, res_files, res_name, res_api, chatgptAPI.history = \
                 chatgptAPI.chatBot(chat_class='auto', model_select='auto', 
-                                    session_id=session_id, history=chatgptAPI.history, function_modules=function_modules,
+                                    session_id=session_id, history=chatgptAPI.history,
+                                    function_modules=function_modules,
                                     sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
                                     inpLang='ja', outLang='ja')
             print(f"----------------------------")
@@ -1237,7 +1239,8 @@ if __name__ == '__main__':
                 logger.info(f"inpText : {inpText.rstrip()}")
             res_text, res_path, res_files, res_name, res_api, chatgptAPI.history = \
                 chatgptAPI.chatBot(chat_class='auto', model_select='auto', 
-                                    session_id=session_id, history=chatgptAPI.history, function_modules=function_modules,
+                                    session_id=session_id, history=chatgptAPI.history,
+                                    function_modules=function_modules,
                                     sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
                                     inpLang='ja', outLang='ja')
             print(f"----------------------------")

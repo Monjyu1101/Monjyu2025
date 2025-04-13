@@ -453,23 +453,24 @@ class _monjyu_class:
         self.runMode = runMode
 
         # ポート設定等
-        self.local_endpoint = f'http://localhost:{ CORE_PORT }'
+        self.local_endpoint0 = f'http://localhost:{ int(CORE_PORT) + 0 }'
+        self.local_endpoint2 = f'http://localhost:{ int(CORE_PORT) + 2 }'
         self.user_id = 'admin'
 
     def post_output_log(self, outText='', outData=''):
         # AI要求送信
         try:
             response = requests.post(
-                self.local_endpoint + '/post_output_log',
+                self.local_endpoint2 + '/post_output_log',
                 json={'user_id': self.user_id, 
                       'output_text': outText,
                       'output_data': outData, },
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )
             if response.status_code != 200:
-                print('error', f"Error response ({ CORE_PORT }/post_output_log) : {response.status_code} - {response.text}")
+                print('error', f"Error response (/post_output_log) : {response.status_code} - {response.text}")
         except Exception as e:
-            print('error', f"Error communicating ({ CORE_PORT }/post_output_log) : {e}")
+            print('error', f"Error communicating (/post_output_log) : {e}")
             return False
         return True
 
@@ -477,7 +478,7 @@ class _monjyu_class:
         # AI要求送信
         try:
             response = requests.post(
-                self.local_endpoint + '/post_histories',
+                self.local_endpoint2 + '/post_histories',
                 json={'user_id': self.user_id, 'from_port': "web", 'to_port': "web",
                       'req_mode': "agent",
                       'system_text': "", 'request_text': reqText, 'input_text': inpText,
@@ -488,9 +489,9 @@ class _monjyu_class:
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )
             if response.status_code != 200:
-                print('error', f"Error response ({ CORE_PORT }/post_histories) : {response.status_code} - {response.text}")
+                print('error', f"Error response (/post_histories) : {response.status_code} - {response.text}")
         except Exception as e:
-            print('error', f"Error communicating ({ CORE_PORT }/post_histories) : {e}")
+            print('error', f"Error communicating (/post_histories) : {e}")
             return False
         return True
 
@@ -503,7 +504,7 @@ class _monjyu_class:
         # AI要求送信
         try:
             response = requests.post(
-                self.local_endpoint + '/post_req',
+                self.local_endpoint0 + '/post_req',
                 json={'user_id': user_id, 'from_port': CORE_PORT, 'to_port': '',
                     'req_mode': req_mode,
                     'system_text': sysText, 'request_text': reqText, 'input_text': inpText,
@@ -513,9 +514,9 @@ class _monjyu_class:
             if response.status_code == 200:
                 res_port = str(response.json()['port'])
             else:
-                print('Research-Agent :', f"Error response ({ CORE_PORT }/post_req) : {response.status_code}")
+                print('Research-Agent :', f"Error response (/post_req) : {response.status_code}")
         except Exception as e:
-            print('Research-Agent :', f"Error communicating ({ CORE_PORT }/post_req) : {e}")
+            print('Research-Agent :', f"Error communicating (/post_req) : {e}")
         return res_port
 
 

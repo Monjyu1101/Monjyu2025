@@ -161,7 +161,7 @@ function post_live_setting(engine) {
 // Live出力(text)
 function post_live_request(live_req, live_text) {
     $.ajax({
-        url: $('#core_endpoint').val() + '/post_live_request',
+        url: $('#core_endpoint5').val() + '/post_live_request',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ live_req: live_req, live_text: live_text }),
@@ -243,7 +243,7 @@ $(document).ready(function() {
         if (confirm("全ての設定をリセットしますか?")) {
             // リセット処理を実行
             $.ajax({
-                url: $('#core_endpoint').val() + '/post_reset',
+                url: $('#core_endpoint1').val() + '/post_reset',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({ user_id: $('#user_id').val() }),

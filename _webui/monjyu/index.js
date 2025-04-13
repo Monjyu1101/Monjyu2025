@@ -7,7 +7,7 @@ let isBusy = -1;
 // 処理中の状態を取得する
 function get_ready_count() {
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_ready_count',
+        url: $('#core_endpoint0').val() + '/get_ready_count',
         method: 'GET',
         dataType: 'json',
         success: function(data) {

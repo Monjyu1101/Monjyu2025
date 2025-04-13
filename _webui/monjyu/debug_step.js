@@ -6,7 +6,7 @@ function get_debug_log_user() {
 
     // ajaxでデバッグログを取得
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_debug_log_user',
+        url: $('#core_endpoint2').val() + '/get_debug_log_user',
         type: 'GET',
         data: { user_id: $('#user_id').val() },
         success: function(data) {

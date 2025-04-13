@@ -71,8 +71,6 @@ class _data_class:
         self.sub_base  = sub_base
         self.num_subais = int(num_subais)
         self.local_endpoint = f'http://localhost:{ self.core_port }'
-        self.core_endpoint = self.local_endpoint.replace('localhost', qHOSTNAME)
-        self.webui_endpoint = self.core_endpoint.replace( f':{ self.core_port }', f':{ int(self.core_port) + 8 }' )
 
         # サブAIの情報
         self.subai_ports = [str(port) for port in range(int(self.sub_base) + 1, int(self.sub_base) + 1 + self.num_subais)]

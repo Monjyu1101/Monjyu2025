@@ -158,7 +158,7 @@ class _addin_class:
                                 'func_reset': addin_func_reset,
                                 'func_proc': addin_func_proc
                             }
-                            self.addin_modules[addin_script] = module_dic
+                            self.addin_modules[addin_func_name] = module_dic
                             logger.info('Addins    Loading ... "' + addin_script + '" (' + addin_class.func_name + ') ' + addin_onoff + '. ')
                             # 特定アドインのプロシージャを設定
                             if addin_script == 'addin_directive':

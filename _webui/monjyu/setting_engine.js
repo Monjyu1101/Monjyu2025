@@ -3,7 +3,7 @@
 // サブAI設定のコンボボックスを取得する関数
 function get_subai_info_all() {
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_subai_info_all',
+        url: $('#core_endpoint0').val() + '/get_subai_info_all',
         method: 'GET',
         async: false, // 同期処理
         success: function(data) {
@@ -26,7 +26,7 @@ function get_subai_info_all() {
 function get_models() {
     // serial
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_models',
+        url: $('#core_endpoint0').val() + '/get_models',
         method: 'GET',
         data: { req_mode: 'serial' },
         dataType: 'json',
@@ -46,7 +46,7 @@ function get_models() {
     });
     // parallel, session
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_models',
+        url: $('#core_endpoint0').val() + '/get_models',
         method: 'GET',
         data: { req_mode: 'parallel' },
         dataType: 'json',
@@ -70,7 +70,7 @@ function get_models() {
     });
     // chat, vision, websearch, clip, voice
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_models',
+        url: $('#core_endpoint0').val() + '/get_models',
         method: 'GET',
         data: { req_mode: 'chat' },
         dataType: 'json',
@@ -611,7 +611,7 @@ $(document).ready(function() {
         if (confirm("全ての設定をリセットしますか?")) {
             // リセット処理を実行
             $.ajax({
-                url: $('#core_endpoint').val() + '/post_reset',
+                url: $('#core_endpoint1').val() + '/post_reset',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({ user_id: $('#user_id').val() }),

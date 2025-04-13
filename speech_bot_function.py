@@ -117,7 +117,7 @@ class botFunction:
                             module_dic['function']   = ext_function
                             module_dic['func_reset'] = ext_func_reset
                             module_dic['func_proc']  = ext_func_proc
-                            self.function_modules[ext_script] = module_dic
+                            self.function_modules[ext_func_name] = module_dic
                             logger.info('Functions Loading ... "' + ext_script + '" (' + ext_class.func_name + ') ' + ext_onoff + '. ')
 
                     except Exception as e:

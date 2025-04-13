@@ -45,7 +45,7 @@ function get_ready_count() {
     var isReady = -1;
     var isBusy = -1;
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_ready_count',
+        url: $('#core_endpoint0').val() + '/get_ready_count',
         method: 'GET',
         async: false, // 同期処理
         dataType: 'json',
@@ -94,9 +94,13 @@ async function allPyRequest() {
     get_source_request('RiKi_Monjyu__conf.py');
     get_source_request('RiKi_Monjyu__data.py');
     get_source_request('RiKi_Monjyu__addin.py');
-    get_source_request('RiKi_Monjyu__coreai.py');
+    get_source_request('RiKi_Monjyu__coreai0.py');
+    get_source_request('RiKi_Monjyu__coreai1.py');
+    get_source_request('RiKi_Monjyu__coreai2.py');
+    get_source_request('RiKi_Monjyu__coreai5.py');
     get_source_request('RiKi_Monjyu__subai.py');
     get_source_request('RiKi_Monjyu__subbot.py');
+    get_source_request('RiKi_Monjyu__llm.py');
     get_source_request('RiKi_Monjyu__webui.py');
 
     // 実行待機
@@ -225,9 +229,13 @@ $(document).ready(function() {
         get_source_input('RiKi_Monjyu__conf.py');
         get_source_input('RiKi_Monjyu__data.py');
         get_source_input('RiKi_Monjyu__addin.py');
-        get_source_input('RiKi_Monjyu__coreai.py');
+        get_source_input('RiKi_Monjyu__coreai0.py');
+        get_source_input('RiKi_Monjyu__coreai1.py');
+        get_source_input('RiKi_Monjyu__coreai2.py');
+        get_source_input('RiKi_Monjyu__coreai5.py');
         get_source_input('RiKi_Monjyu__subai.py');
         get_source_input('RiKi_Monjyu__subbot.py');
+        get_source_input('RiKi_Monjyu__llm.py');
         get_source_input('RiKi_Monjyu__webui.py');
     });
     $('#btnSource_allPyRequest').click(function() {
@@ -308,14 +316,26 @@ $(document).ready(function() {
     $('#btnSource_addin').click(function() {
         get_source_input('RiKi_Monjyu__addin.py');
     });
-    $('#btnSource_coreai').click(function() {
-        get_source_input('RiKi_Monjyu__coreai.py');
+    $('#btnSource_coreai0').click(function() {
+        get_source_input('RiKi_Monjyu__coreai0.py');
+    });
+    $('#btnSource_coreai1').click(function() {
+        get_source_input('RiKi_Monjyu__coreai1.py');
+    });
+    $('#btnSource_coreai2').click(function() {
+        get_source_input('RiKi_Monjyu__coreai2.py');
+    });
+    $('#btnSource_coreai5').click(function() {
+        get_source_input('RiKi_Monjyu__coreai5.py');
     });
     $('#btnSource_subai').click(function() {
         get_source_input('RiKi_Monjyu__subai.py');
     });
     $('#btnSource_subbot').click(function() {
         get_source_input('RiKi_Monjyu__subbot.py');
+    });
+    $('#btnSource_llm').click(function() {
+        get_source_input('RiKi_Monjyu__llm.py');
     });
     $('#btnSource_webui').click(function() {
         get_source_input('RiKi_Monjyu__webui.py');

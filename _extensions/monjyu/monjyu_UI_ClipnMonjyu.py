@@ -350,9 +350,8 @@ class _monjyu_class:
         self.chat_models = {}
 
         # ポート設定等
-        self.local_endpoint = f'http://localhost:{ CORE_PORT }'
-        self.webui_port = str(int(CORE_PORT) + 8)
-        self.webui_endpoint = self.local_endpoint.replace(CORE_PORT, self.webui_port)
+        self.local_endpoint0 = f'http://localhost:{ int(CORE_PORT) + 0 }'
+        self.local_endpoint5 = f'http://localhost:{ int(CORE_PORT) + 5 }'
 
         # subai デーモン起動
         get_models_thread = threading.Thread(target=self.get_models, args=(), daemon=True, )
@@ -371,7 +370,7 @@ class _monjyu_class:
                 try:
                     params = {"req_mode": "chat"}
                     response = requests.get(
-                        self.local_endpoint + '/get_models',
+                        self.local_endpoint0 + '/get_models',
                         params=params,
                         timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
                     )
@@ -397,7 +396,7 @@ class _monjyu_class:
         file_names = []
         try:
             response = requests.get(
-                self.webui_endpoint + '/get_input_list',
+                self.local_endpoint0 + '/get_input_list',
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )
             if response.status_code == 200:
@@ -406,14 +405,14 @@ class _monjyu_class:
                     if (f['checked'] == True):
                         file_names.append(f['file_name'])
             else:
-                print('Clip&Monjyu :', f"Error response ({self.webui_port}/get_input_list) : {response.status_code}")
+                print('Clip&Monjyu :', f"Error response (webui/get_input_list) : {response.status_code}")
         except Exception as e:
-            print('Clip&Monjyu :', f"Error communicating ({self.webui_port}/get_input_list) : {e}")
+            print('Clip&Monjyu :', f"Error communicating (webui/get_input_list) : {e}")
 
         # AI要求送信
         try:
             response = requests.post(
-                self.local_endpoint + '/post_req',
+                self.local_endpoint0 + '/post_req',
                 json={'user_id': user_id, 'from_port': CORE_PORT, 'to_port': CORE_PORT,
                     'req_mode': req_mode,
                     'system_text': sysText, 'request_text': reqText, 'input_text': inpText,
@@ -431,7 +430,7 @@ class _monjyu_class:
     def post_clip_names(self, user_id='admin', clip_names=[], ):
         try:
             response = requests.post(
-                self.local_endpoint + '/post_clip_names',
+                self.local_endpoint5 + '/post_clip_names',
                 json={'user_id': user_id, 'clip_names': clip_names, },
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )
@@ -446,7 +445,7 @@ class _monjyu_class:
     def post_clip_text(self, user_id='admin', clip_text='', ):
         try:
             response = requests.post(
-                self.local_endpoint + '/post_clip_text',
+                self.local_endpoint5 + '/post_clip_text',
                 json={'user_id': user_id, 'clip_text': clip_text, },
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )

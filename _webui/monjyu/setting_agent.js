@@ -177,7 +177,7 @@ function post_agent_setting(agent) {
 // Agent出力(text)
 function post_webOperator_request(request_text) {
     $.ajax({
-        url: $('#core_endpoint').val() + '/post_webOperator_request',
+        url: $('#core_endpoint5').val() + '/post_webOperator_request',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ request_text: request_text }),
@@ -191,7 +191,7 @@ function post_webOperator_request(request_text) {
 }
 function post_researchAgent_request(request_text) {
     $.ajax({
-        url: $('#core_endpoint').val() + '/post_researchAgent_request',
+        url: $('#core_endpoint5').val() + '/post_researchAgent_request',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ request_text: request_text }),
@@ -272,7 +272,7 @@ $(document).ready(function() {
         if (confirm("全ての設定をリセットしますか?")) {
             // リセット処理を実行
             $.ajax({
-                url: $('#core_endpoint').val() + '/post_reset',
+                url: $('#core_endpoint1').val() + '/post_reset',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({ user_id: $('#user_id').val() }),

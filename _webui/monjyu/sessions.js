@@ -19,7 +19,7 @@ let lastMaxUpdTime = null;
 function get_sessions_all() {
     // サーバーから結果データを取得し、テーブルに表示する
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_sessions_all',
+        url: $('#core_endpoint0').val() + '/get_sessions_all',
         type: 'GET',
         data: { user_id: $('#user_id').val() },
         success: function(data) {

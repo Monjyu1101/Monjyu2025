@@ -75,7 +75,7 @@ let lastOutputData = {};
 function get_output_log_user() {
     // サーバーからユーザーの出力履歴を取得するAJAXリクエスト
     $.ajax({
-        url: $('#core_endpoint').val() + '/get_output_log_user',
+        url: $('#core_endpoint2').val() + '/get_output_log_user',
         type: 'GET',
         data: { user_id: $('#user_id').val() },
         success: function(data) {
@@ -155,7 +155,7 @@ function updateOutputFileList(files) {
 function get_output_list() {
     // サーバーから出力ファイルリストを取得するAJAXリクエスト
     $.ajax({
-        url: '/get_output_list',
+        url: $('#core_endpoint2').val() + '/get_output_list',
         method: 'GET',
         success: function(data) {
             // ファイルリストが更新された場合

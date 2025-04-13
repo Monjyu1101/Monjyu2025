@@ -975,7 +975,7 @@ $(document).ready(function() {
         if (confirm("全ての設定をリセットしますか?")) {
             // リセット処理を実行
             $.ajax({
-                url: $('#core_endpoint').val() + '/post_reset',
+                url: $('#core_endpoint1').val() + '/post_reset',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({ user_id: $('#user_id').val() }),

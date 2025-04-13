@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\_共有\\_MCP\\_sandbox"
+      ]
+    }
+
+  }
+}

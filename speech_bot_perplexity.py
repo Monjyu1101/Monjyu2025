@@ -9,7 +9,7 @@
 # ------------------------------------------------
 
 # モジュール名
-MODULE_NAME = 'bot_pplx'
+MODULE_NAME = 'perplexity'
 
 # ロガーの設定
 import logging
@@ -530,7 +530,8 @@ class _perplexityAPI:
 
     def run_gpt(self, chat_class='chat', model_select='auto',
                 nick_name=None, model_name=None,
-                session_id='admin', history=[], function_modules={},
+                session_id='admin', history=[],
+                function_modules={},
                 sysText=None, reqText=None, inpText='こんにちは',
                 upload_files=[], image_urls=[],
                 temperature=0.8, max_step=10, jsonSchema=None):
@@ -702,14 +703,8 @@ class _perplexityAPI:
         stream = False
 
         # ツール（関数）設定
-        tools = []
-        # 2025/04/08時点perplexityでは利用不可
-        #if (use_tools.lower().find('yes') >= 0):
-        #    functions = []
-        #    for module_dic in function_modules.values():
-        #        functions.append(module_dic['function'])
-        #    for f in range(len(functions)):
-        #        tools.append({"type": "function", "function": functions[f]})
+        functions = []
+        # 2025/04/09時点 ツールに未対応です！
 
         # 実行ループ
         if True:
@@ -751,22 +746,7 @@ class _perplexityAPI:
                                 res_content += content
                                 self.stream(session_id, content)
 
-                            # ツール呼び出しの処理
-                            elif (delta.tool_calls is not None):
-                                res_role = 'assistant'
-                                tcchunklist = delta.tool_calls
-                                for tcchunk in tcchunklist:
-                                    if len(tool_calls) <= tcchunk.index:
-                                        tool_calls.append({"id": "", "type": "function", "function": {"name": "", "arguments": ""}})
-                                    tc = tool_calls[tcchunk.index]
-                                    if tcchunk.id:
-                                        tc["id"] += tcchunk.id
-                                    if tcchunk.function.name:
-                                        tc["function"]["name"] += tcchunk.function.name
-                                    if tcchunk.function.arguments:
-                                        tc["function"]["arguments"] += tcchunk.function.arguments
-
-                    # 改行処理
+                     # 改行処理
                     if (res_content != ''):
                         self.print(session_id)
 
@@ -778,102 +758,11 @@ class _perplexityAPI:
                         res_role = str(response.choices[0].message.role)
                         res_content = str(response.choices[0].message.content)
 
-                        # 関数呼び出しの処理
-                        if (response.choices[0].finish_reason == 'tool_calls'):
-                            for tool_call in response.choices[0].message.tool_calls:
-                                t_id = str(tool_call.id)
-                                f_name = str(tool_call.function.name)
-                                f_kwargs = str(tool_call.function.arguments)
-
-                                # 引数のJSON整形
-                                try:
-                                    wk_dic = json.loads(f_kwargs)
-                                    wk_text = json.dumps(wk_dic, ensure_ascii=False)
-                                    f_kwargs = wk_text
-                                except Exception as e:
-                                    #logger.warning(f"run_gpt() 関数引数のJSON整形に失敗: {e}")
-                                    f_kwargs ="{}"
-
-                                # ツールコール追加
-                                tool_calls.append({
-                                    "id": f_id, 
-                                    "type": "function", 
-                                    "function": {
-                                        "name": f_name, 
-                                        "arguments": f_kwargs
-                                    }
-                                })
-
                     except Exception as e:
                         logger.error(f"応答処理エラー: {e}")
 
-                # ツール実行処理
-                if (len(tool_calls) > 0):
-                    for tc in tool_calls:
-                        f_id = tc['id']
-                        f_name = tc['function'].get('name')
-                        f_kwargs = tc['function'].get('arguments')
-
-                        hit = False
-
-                        # 登録された関数モジュールを検索
-                        for module_dic in function_modules.values():
-                            if (f_name == module_dic['func_name']):
-                                hit = True
-                                logger.info(f"//Perplexity//   function_call '{module_dic['script']}' ({f_name})")
-                                logger.info(f"//Perplexity//   → {f_kwargs}")
-
-                                # メッセージ追加格納
-                                self.seq += 1
-                                dic = {'seq': self.seq, 'time': time.time(), 'role': 'function_call', 'name': f_name, 'content': f_kwargs}
-                                res_history.append(dic)
-
-                                # ツール実行
-                                try:
-                                    ext_func_proc = module_dic['func_proc']
-                                    res_json = ext_func_proc(f_kwargs)
-                                except Exception as e:
-                                    logger.error(f"ツール実行エラー: {e}")
-                                    # エラーメッセージ作成
-                                    dic = {}
-                                    dic['error'] = str(e)
-                                    res_json = json.dumps(dic, ensure_ascii=False)
-
-                                # 実行結果を表示
-                                logger.info(f"//Perplexity//   → {res_json}")
-
-                                # メッセージ追加格納
-                                dic = {'role': 'user', 'name': f_name, 'content': res_json}
-                                msg.append(dic)
-
-                                # 履歴に関数結果を追加
-                                self.seq += 1
-                                dic = {'seq': self.seq, 'time': time.time(), 'role': 'function', 'name': f_name, 'content': res_json}
-                                res_history.append(dic)
-
-                                # パス情報の抽出（画像やExcelなど）
-                                try:
-                                    dic = json.loads(res_json)
-                                    path = dic.get('image_path')
-                                    if (path is None):
-                                        path = dic.get('excel_path')
-                                    if (path is not None):
-                                        res_path = path
-                                        res_files.append(path)
-                                        res_files = list(set(res_files))
-                                        logger.debug(f"ファイルパスを検出: {path}")
-                                except Exception as e:
-                                    logger.error(f"パス情報エラー: {e}")
-
-                                break
-
-                        # 関数が見つからない場合
-                        if (hit == False):
-                            logger.error(f"//Perplexity//   function not found Error ! ({f_name})")
-                            break
-
                 # 応答結果の確認
-                elif (res_role == 'assistant') and (res_content != ''):
+                if (res_role == 'assistant') and (res_content != ''):
                     function_name = 'exit'
                     if (res_content.strip() != ''):
                         res_text += res_content.rstrip() + '\n'
@@ -945,7 +834,8 @@ class _perplexityAPI:
 
 
     def chatBot(self, chat_class='auto', model_select='auto',
-                session_id='admin', history=[], function_modules={},
+                session_id='admin', history=[],
+                function_modules={},
                 sysText=None, reqText=None, inpText='こんにちは', 
                 filePath=[],
                 temperature=0.8, max_step=10, jsonSchema=None,
@@ -986,7 +876,8 @@ class _perplexityAPI:
         res_text, res_path, res_files, nick_name, model_name, res_history = \
             self.run_gpt(chat_class=chat_class, model_select=model_select,
                         nick_name=nick_name, model_name=model_name,
-                        session_id=session_id, history=res_history, function_modules=function_modules,
+                        session_id=session_id, history=res_history,
+                        function_modules=function_modules,
                         sysText=sysText, reqText=reqText, inpText=inpText,
                         upload_files=upload_files, image_urls=image_urls,
                         temperature=temperature, max_step=max_step, jsonSchema=jsonSchema)
@@ -1065,7 +956,8 @@ if __name__ == '__main__':
                 logger.info(f"inpText : {inpText.rstrip()}")
             res_text, res_path, res_files, res_name, res_api, perplexityAPI.history = \
                 perplexityAPI.chatBot(chat_class='auto', model_select='auto', 
-                                    session_id=session_id, history=perplexityAPI.history, function_modules=function_modules,
+                                    session_id=session_id, history=perplexityAPI.history,
+                                    function_modules=function_modules,
                                     sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
                                     inpLang='ja', outLang='ja')
             print(f"----------------------------")
@@ -1086,7 +978,8 @@ if __name__ == '__main__':
                 logger.info(f"inpText : {inpText.rstrip()}")
             res_text, res_path, res_files, res_name, res_api, perplexityAPI.history = \
                 perplexityAPI.chatBot(chat_class='auto', model_select='auto', 
-                                    session_id=session_id, history=perplexityAPI.history, function_modules=function_modules,
+                                    session_id=session_id, history=perplexityAPI.history,
+                                    function_modules=function_modules,
                                     sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
                                     inpLang='ja', outLang='ja')
             print(f"----------------------------")
@@ -1116,7 +1009,8 @@ if __name__ == '__main__':
                 logger.info(f"inpText : {inpText.rstrip()}")
             res_text, res_path, res_files, res_name, res_api, perplexityAPI.history = \
                 perplexityAPI.chatBot(chat_class='auto', model_select='auto', 
-                                    session_id=session_id, history=perplexityAPI.history, function_modules=function_modules,
+                                    session_id=session_id, history=perplexityAPI.history,
+                                    function_modules=function_modules,
                                     sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
                                     inpLang='ja', outLang='ja')
             print(f"----------------------------")

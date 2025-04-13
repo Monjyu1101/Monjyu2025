@@ -9,13 +9,19 @@
 # Thank you for keeping the rules.
 # ------------------------------------------------
 
-import sys
-import os
+# モジュール名
+MODULE_NAME = 'func_monjyu'
+
+# ロガーの設定
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)-10s - %(levelname)-8s - %(message)s',
+    datefmt='%H:%M:%S'
+)
+logger = logging.getLogger(MODULE_NAME)
+
 import time
-import datetime
-import codecs
-import glob
-import shutil
 
 import json
 import requests
@@ -34,9 +40,28 @@ class _monjyu_class:
         self.runMode   = runMode
 
         # ポート設定等
-        self.local_endpoint = f'http://localhost:{ CORE_PORT }'
-        self.webui_port = str(int(CORE_PORT) + 8)
-        self.webui_endpoint = self.local_endpoint.replace(CORE_PORT, self.webui_port)
+        self.local_endpoint0 = f'http://localhost:{ int(CORE_PORT) + 0 }'
+
+    def get_ready(self):
+        # ファイル添付
+        try:
+            response = requests.get(
+                self.local_endpoint0 + '/get_ready_count',
+                timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
+            )
+            if response.status_code == 200:
+                results = response.json()
+                isReady = results.get('ready_count',0)
+                isBusy = results.get('busy_count',0)
+                if isReady > 0:
+                    return True
+                else:
+                    return False
+            else:
+                logger.error(f"Monjyu_Request : Error response (/get_input_list) : {response.status_code}")
+        except Exception as e:
+            logger.error(f"Monjyu_Request : Error communicating (/get_input_list) : {e}")
+        return False
 
     def request(self, req_mode='chat', user_id='admin', sysText='', reqText='', inpText='', ):
         res_port = ''
@@ -45,7 +70,7 @@ class _monjyu_class:
         file_names = []
         try:
             response = requests.get(
-                self.webui_endpoint + '/get_input_list',
+                self.local_endpoint0 + '/get_input_list',
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )
             if response.status_code == 200:
@@ -59,9 +84,9 @@ class _monjyu_class:
                     if checked == 'yes':
                         file_names.append(file_name)
             else:
-                print('Monjyu_Request :', f"Error response ({self.webui_port}/get_input_list) : {response.status_code}")
+                logger.error(f"Monjyu_Request : Error response (/get_input_list) : {response.status_code}")
         except Exception as e:
-            print('Monjyu_Request :', f"Error communicating ({self.webui_port}/get_input_list) : {e}")
+            logger.error(f"Monjyu_Request : Error communicating (/get_input_list) : {e}")
 
         # AI要求送信
         try:
@@ -69,7 +94,7 @@ class _monjyu_class:
             if (req_mode in ['clip', 'voice']):
                 res_port = CORE_PORT
             response = requests.post(
-                self.local_endpoint + '/post_req',
+                self.local_endpoint0 + '/post_req',
                 json={'user_id': user_id, 'from_port': CORE_PORT, 'to_port': res_port,
                     'req_mode': req_mode,
                     'system_text': sysText, 'request_text': reqText, 'input_text': inpText,
@@ -80,9 +105,9 @@ class _monjyu_class:
                 if (res_port == ''):
                     res_port = str(response.json()['port'])
             else:
-                print('Monjyu_Request :', f"Error response ({ CORE_PORT }/post_req) : {response.status_code}")
+                logger.error(f"Monjyu_Request : Error response (/post_req) : {response.status_code}")
         except Exception as e:
-            print('Monjyu_Request :', f"Error communicating ({ CORE_PORT }/post_req) : {e}")
+            logger.error(f"Monjyu_Request : Error communicating (/post_req) : {e}")
 
         # AI結果受信
         res_text = ''
@@ -94,7 +119,7 @@ class _monjyu_class:
                 while time.time() < timeout:
 
                     response = requests.get(
-                        self.local_endpoint + '/get_sessions_port?user_id=' + user_id + '&from_port=' + CORE_PORT,
+                        self.local_endpoint0 + '/get_sessions_port?user_id=' + user_id + '&from_port=' + CORE_PORT,
                         timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
                     )
                     if response.status_code == 200:
@@ -107,10 +132,10 @@ class _monjyu_class:
                         else:
                             time.sleep(1.00)
                     else:
-                        print('Monjyu_Request :', f"Error response ({ CORE_PORT }/get_sessions_port) : {response.status_code} - {response.text}")
+                        logger.error(f"Monjyu_Request : Error response (/get_sessions_port) : {response.status_code} - {response.text}")
 
             except Exception as e:
-                print('Monjyu_Request :', f"Error communicating ({ CORE_PORT }/get_sessions_port) : {e}")
+                logger.error(f"'Monjyu_Request : Error communicating (/get_sessions_port) : {e}")
 
         return res_text
 

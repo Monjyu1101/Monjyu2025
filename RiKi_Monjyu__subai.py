@@ -87,17 +87,18 @@ class RequestDataModel(BaseModel):
 # サブAIプロセスクラス
 class SubAiProcess:
     def __init__(self, runMode: str = 'debug', qLog_fn: str = '', 
-                 main=None, conf=None, data=None, addin=None, botFunc=None,
+                 main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
                  coreai=None,
                  core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48'):
 
         # 各種設定の初期化
-        self.main      = main
-        self.conf      = conf
-        self.data      = data
-        self.addin     = addin
-        self.botFunc   = botFunc
-        self.coreai    = coreai
+        self.main       = main
+        self.conf       = conf
+        self.data       = data
+        self.addin      = addin
+        self.botFunc    = botFunc
+        self.mcpHost    = mcpHost
+        self.coreai     = coreai
 
         """ サブAIプロセスの初期化 """
         self.num_subais = int(num_subais)
@@ -108,7 +109,7 @@ class SubAiProcess:
         for n in range(self.num_subais):
             self_port = str(int(sub_base) + n + 1)
             subai_class[n] = SubAiClass(runMode=runMode, qLog_fn=qLog_fn, 
-                                        main=main, conf=conf, data=data, addin=addin, botFunc=botFunc,
+                                        main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
                                         coreai=coreai,
                                         core_port=core_port, sub_base=sub_base, num_subais=str(num_subais),
                                         self_port=self_port, profile_number=random_profile[n])
@@ -122,7 +123,7 @@ class SubAiProcess:
 class SubAiClass:
     """ サブAIクラス """
     def __init__(self, runMode: str = 'debug', qLog_fn: str = '', 
-                 main=None, conf=None, data=None, addin=None, botFunc=None,
+                 main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
                  coreai=None,
                  core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48',
                  self_port: str = '8101', profile_number: Optional[int] = None):
@@ -143,16 +144,16 @@ class SubAiClass:
         self.data       = data
         self.addin      = addin
         self.botFunc    = botFunc
+        self.mcpHost    = mcpHost
         self.coreai     = coreai
         self.core_port  = core_port
         self.sub_base   = sub_base
         self.self_port  = self_port
-        self.local_endpoint = f'http://localhost:{self.core_port}'
-        self.core_endpoint = self.local_endpoint.replace('localhost', qHOSTNAME)
-        self.webui_endpoint = self.core_endpoint.replace(f':{self.core_port}', f':{int(self.core_port) + 8}')
+        self.local_endpoint2 = f'http://localhost:{ int(self.core_port) + 2 }'
+        self.webui_endpoint8 = f'http://{ qHOSTNAME }:{ int(self.core_port) + 8 }'
         self.profile_number = profile_number
         self.chat_class = RiKi_Monjyu__subbot.ChatClass(runMode=runMode, qLog_fn=qLog_fn, 
-                                                        main=main, conf=conf, data=data, addin=addin, botFunc=botFunc,
+                                                        main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
                                                         coreai=coreai,
                                                         core_port=core_port, self_port=self_port)
         # スレッドロック
@@ -209,7 +210,7 @@ class SubAiClass:
 
     async def root(self, request: Request):
         """ ルートエンドポイントのリダイレクト """
-        return RedirectResponse(url=self.webui_endpoint + '/')
+        return RedirectResponse(url=self.webui_endpoint8 + '/')
 
     async def get_info(self) -> Dict[str, str]:
         """ サブAIの情報取得(応答) """
@@ -271,12 +272,35 @@ class SubAiClass:
             logger.info(f"{ user_id } : { from_port } -> { to_port } (bye)")
         else:
             logger.info(f"{ user_id } : { from_port } -> { to_port } ({ req_mode })")
+
+        logger.debug(f"req_engine : {req_engine}")
+        logger.debug(f"req_functions : {req_functions}")
+        logger.debug(f"req_reset : {req_reset}")
+        logger.debug(f"max_retry : {max_retry}")
+        logger.debug(f"max_ai_count : {max_ai_count}")
+        logger.debug(f"before_proc : {before_proc}")
+        logger.debug(f"before_engine : {before_engine}")
+        logger.debug(f"after_proc : {after_proc}")
+        logger.debug(f"after_engine : {after_engine}")
+        logger.debug(f"check_proc : {check_proc}")
+        logger.debug(f"check_engine : {check_engine}")
+        logger.debug(f"system_text : {system_text}")
+        logger.debug(f"request_text : {request_text}")
+        logger.debug(f"input_text : {input_text}")
+
         # ファンクション設定
         self.function_modules = {}
         if self.botFunc is not None:
             for key, module_dic in self.botFunc.function_modules.items():
                 if module_dic['onoff'] == 'on':
                     self.function_modules[key] = module_dic
+
+        # mcp tools 設定
+        if (self.mcpHost is not None):
+            mcp_modules = self.mcpHost.get_mcp_modules()
+            for key, mcp_module in mcp_modules.items():
+                self.function_modules[key] = mcp_module
+
         # チャット処理開始
         if req_mode not in ['serial', 'parallel']:
             thread = threading.Thread(target=self.chat_proc, 
@@ -326,7 +350,7 @@ class SubAiClass:
 
         try:
             response = requests.post(
-                self.local_endpoint + '/post_complete', 
+                self.local_endpoint2 + '/post_complete', 
                 json={'user_id': user_id, 'from_port': from_port, 'to_port': to_port,
                       'req_mode': req_mode,
                       'system_text': system_text, 'request_text': request_text, 'input_text': input_text,
@@ -359,7 +383,7 @@ class SubAiClass:
         self.last_proc_time = time.time()
         try:
             response = requests.post(
-                self.local_endpoint + '/post_debug_log', 
+                self.local_endpoint2 + '/post_debug_log', 
                 json={'user_id': user_id, 'from_port': from_port, 'to_port': to_port,
                       'req_mode': req_mode,
                       'system_text': system_text, 'request_text': request_text, 'input_text': input_text,

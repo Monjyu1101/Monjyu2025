@@ -9,7 +9,7 @@
 # ------------------------------------------------
 
 # モジュール名
-MODULE_NAME = 'bot_assist'
+MODULE_NAME = 'assist'
 
 # ロガーの設定
 import logging
@@ -818,7 +818,8 @@ class _assistAPI:
 
     def run_assist(self, chat_class='assist', model_select='auto',
                 nick_name=None, model_name=None,
-                session_id='admin', history=[], function_modules={},
+                session_id='admin', history=[],
+                function_modules={},
                 sysText=None, reqText=None, inpText='こんにちは',
                 upload_files=[], image_urls=[],
                 temperature=0.8, max_step=10, jsonSchema=None):
@@ -1294,8 +1295,8 @@ class _assistAPI:
                         hit = False
 
                         # 登録された関数モジュールを検索
-                        for module_dic in function_modules.values():
-                            if (f_name == module_dic['func_name']):
+                        module_dic = function_modules.get(f_name)
+                        if (module_dic is not None):
                                 hit = True
                                 logger.info(f"//Assist//   function_call '{ module_dic['script'] }' ({  f_name })")
                                 logger.info(f"//Assist//   → { f_kwargs }")
@@ -1310,7 +1311,10 @@ class _assistAPI:
                                 # ツール実行
                                 try:
                                     ext_func_proc = module_dic['func_proc']
-                                    res_json = ext_func_proc(f_kwargs)
+                                    if (module_dic['script'] != 'mcp'):
+                                        res_json = ext_func_proc(f_kwargs)
+                                    else:
+                                        res_json = ext_func_proc(f_name, f_kwargs)
                                 except Exception as e:
                                     logger.error(f"ツール実行エラー: {e}")
                                     # エラーメッセージ作成
@@ -1355,15 +1359,15 @@ class _assistAPI:
 
                         # 関数が見つからない場合
                         if (hit == False):
-                            logger.error(f"//Assist//   function not found Error ! ({f_name})")
-
-                            dic = {}
-                            dic['result'] = 'error' 
+                            dic = {'error': f"function not found Error ! ({f_name})"}
                             res_json = json.dumps(dic, ensure_ascii=False, )
 
                             # tool_result
                             logger.info(f"//Assist//   → { res_json }")
                             tool_result.append({"tool_call_id": f_id, "output": res_json})
+
+                            logger.error(f"//Assist//   function not found Error ! ({f_name})")
+                            break
 
                     # 結果通知
                     run = self.client.beta.threads.runs.submit_tool_outputs(
@@ -1485,7 +1489,8 @@ class _assistAPI:
 
 
     def chatBot(self, chat_class='auto', model_select='auto',
-                session_id='admin', history=[], function_modules={},
+                session_id='admin', history=[],
+                function_modules={},
                 sysText=None, reqText=None, inpText='こんにちは', 
                 filePath=[],
                 temperature=0.8, max_step=10, jsonSchema=None,
@@ -1526,7 +1531,8 @@ class _assistAPI:
         res_text, res_path, res_files, nick_name, model_name, res_history = \
             self.run_assist(chat_class=chat_class, model_select=model_select,
                         nick_name=nick_name, model_name=model_name,
-                        session_id=session_id, history=res_history, function_modules=function_modules,
+                        session_id=session_id, history=res_history,
+                        function_modules=function_modules,
                         sysText=sysText, reqText=reqText, inpText=inpText,
                         upload_files=upload_files, image_urls=image_urls,
                         temperature=temperature, max_step=max_step, jsonSchema=jsonSchema)
@@ -1606,7 +1612,8 @@ if __name__ == '__main__':
                 logger.info(f"inpText : {inpText.rstrip()}")
             res_text, res_path, res_files, res_name, res_api, assistAPI.history = \
                 assistAPI.chatBot(chat_class='auto', model_select='auto', 
-                                        session_id=session_id, history=assistAPI.history, function_modules=function_modules,
+                                        session_id=session_id, history=assistAPI.history,
+                                        function_modules=function_modules,
                                         sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
                                         inpLang='ja', outLang='ja', )
             print(f"----------------------------")
@@ -1627,7 +1634,8 @@ if __name__ == '__main__':
                 logger.info(f"inpText : {inpText.rstrip()}")
             res_text, res_path, res_files, res_name, res_api, assistAPI.history = \
                 assistAPI.chatBot(chat_class='auto', model_select='auto', 
-                                        session_id=session_id, history=assistAPI.history, function_modules=function_modules,
+                                        session_id=session_id, history=assistAPI.history,
+                                        function_modules=function_modules,
                                         sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
                                         inpLang='ja', outLang='ja', )
             print(f"----------------------------")
@@ -1656,7 +1664,8 @@ if __name__ == '__main__':
                 logger.info(f"inpText : {inpText.rstrip()}")
             res_text, res_path, res_files, res_name, res_api, assistAPI.history = \
                     assistAPI.chatBot(   chat_class='auto', model_select='auto', 
-                                            session_id=session_id, history=assistAPI.history, function_modules=function_modules,
+                                            session_id=session_id, history=assistAPI.history,
+                                            function_modules=function_modules,
                                             sysText=sysText, reqText=reqText, inpText=inpText, filePath=filePath,
                                             inpLang='ja', outLang='ja', )
             print(f"----------------------------")

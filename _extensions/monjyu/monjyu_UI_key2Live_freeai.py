@@ -845,36 +845,38 @@ class _live_api_freeai:
             self.researchAgent_enable = False
             # 有効確認
             if self.botFunc is not None:
-                for module_dic in self.botFunc.function_modules.values():
-                    if (module_dic['func_name'] == 'execute_monjyu_request'):
-                        self.monjyu_enable = True
-                        print(f" Live(freeai) : [INIT] (execute_monjyu_request) ")
-                        # 受付音
-                        self.play(outFile='_sounds/_sound_accept.mp3')
-                        # function 実行
-                        dic = {}
-                        dic['runMode'] = 'chat' #ここは'chat'で内部的に問い合わせる
-                        dic['userId'] = 'live'
-                        dic['reqText'] = '利用できるFunctions(Tools)と機能内容を要約して報告してください'
-                        f_kwargs = json.dumps(dic, ensure_ascii=False, )
-                        try:
-                            ext_func_proc = module_dic['func_proc']
-                            res_json = ext_func_proc( f_kwargs )
-                            res_dic = json.loads(res_json)
-                            res_text = res_dic.get('result_text','')
-                            res_text = res_text.replace('`', '"')
-                            #print(res_text)
-                            self.monjyu_funcinfo = res_text
-                        except Exception as e:
-                            print(e)
-                    if (module_dic['func_name'] == 'web_operation_agent'):
-                        self.webOperator_enable = True
-                    if (module_dic['func_name'] == 'research_operation_agent'):
-                        self.researchAgent_enable = True
-                    if  (self.monjyu_enable == True) \
-                    and (self.webOperator_enable == True) \
-                    and (self.researchAgent_enable == True):
-                        break
+                module_dic = self.botFunc.function_modules.get('execute_monjyu_request', None)
+                if (module_dic is not None):
+
+                    # Monjyu function 実行
+                    self.monjyu_enable = True
+                    print(f" Live(freeai) : [INIT] (execute_monjyu_request) ")
+                    # 受付音
+                    self.play(outFile='_sounds/_sound_accept.mp3')
+                    # function 実行
+                    dic = {}
+                    dic['runMode'] = 'chat' #ここは'chat'で内部的に問い合わせる
+                    dic['userId'] = 'live'
+                    dic['reqText'] = '利用できるFunctions(Tools)と機能内容を要約して報告してください'
+                    f_kwargs = json.dumps(dic, ensure_ascii=False, )
+                    try:
+                        ext_func_proc = module_dic['func_proc']
+                        res_json = ext_func_proc( f_kwargs )
+                        res_dic = json.loads(res_json)
+                        res_text = res_dic.get('result_text','')
+                        res_text = res_text.replace('`', '"')
+                        #print(res_text)
+                        self.monjyu_funcinfo = res_text
+                    except Exception as e:
+                        print(e)
+
+                module_dic = self.botFunc.function_modules.get('web_operation_agent', None)
+                if (module_dic is not None):
+                    self.webOperator_enable = True
+                module_dic = self.botFunc.function_modules.get('research_operation_agent', None)
+                if (module_dic is not None):
+                    self.researchAgent_enable = True
+
         # 初期化
         self.image_send_queue = asyncio.Queue()
         self.audio_send_queue = asyncio.Queue()
@@ -1428,7 +1430,8 @@ class _monjyu_class:
             os.makedirs(self.path)
 
         # ポート設定等
-        self.local_endpoint = f'http://localhost:{ CORE_PORT }'
+        self.local_endpoint1 = f'http://localhost:{ int(CORE_PORT) + 1 }'
+        self.local_endpoint2 = f'http://localhost:{ int(CORE_PORT) + 2 }'
         self.user_id = 'admin'
 
         # 履歴送信用
@@ -1529,7 +1532,7 @@ class _monjyu_class:
         # AI要求送信
         try:
             response = requests.post(
-                self.local_endpoint + '/post_input_log',
+                self.local_endpoint1 + '/post_input_log',
                 json={'user_id': self.user_id, 
                       'request_text': reqText,
                       'input_text': inpText, },
@@ -1548,7 +1551,7 @@ class _monjyu_class:
         # AI要求送信
         try:
             response = requests.post(
-                self.local_endpoint + '/post_output_log',
+                self.local_endpoint2 + '/post_output_log',
                 json={'user_id': self.user_id, 
                       'output_text': outText,
                       'output_data': outData, },
@@ -1565,7 +1568,7 @@ class _monjyu_class:
         # AI要求送信
         try:
             response = requests.post(
-                self.local_endpoint + '/post_histories',
+                self.local_endpoint2 + '/post_histories',
                 json={'user_id': self.user_id, 'from_port': "live", 'to_port': "live",
                       'req_mode': "live",
                       'system_text': "", 'request_text': self.last_reqText, 'input_text': self.last_inpText,

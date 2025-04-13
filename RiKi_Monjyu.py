@@ -119,15 +119,15 @@ qPath_sandbox = 'temp/sandbox/'
 CORE_PORT = 8000
 SUB_BASE  = 8100
 
-# 共通ルーチンのインポート
-import _v6__qFunc
-qFunc = _v6__qFunc.qFunc_class()
-
 # 処理ルーチンのインポート
 import RiKi_Monjyu__conf
 import RiKi_Monjyu__data
 import RiKi_Monjyu__addin
-import RiKi_Monjyu__coreai
+import RiKi_Monjyu__mcpHost
+import RiKi_Monjyu__coreai0
+import RiKi_Monjyu__coreai1
+import RiKi_Monjyu__coreai2
+import RiKi_Monjyu__coreai5
 import RiKi_Monjyu__subai
 import RiKi_Monjyu__webui
 import speech_bot_function
@@ -149,6 +149,38 @@ numSubAIs = '48'
 if getattr(sys, 'frozen', False):
     numSubAIs = '128'
 
+
+
+def makeDirs(ppath, remove=False, ):
+    try:
+        if (len(ppath) > 0):
+            path=ppath.replace('\\', '/')
+            if (path[-1:] != '/'):
+                path += '/'
+            if (not os.path.isdir(path[:-1])):
+                os.makedirs(path[:-1])
+            else:
+                if (remove == True):
+                    try:
+                        shutil.rmtree(path, ignore_errors=True, )
+                    except Exception as e:
+                        pass
+                elif (str(remove).isdigit()):
+                    files = glob.glob(path + '*')
+                    for f in files:
+                        try:
+                            nowTime   = datetime.datetime.now()
+                            fileStamp = os.path.getmtime(f)
+                            fileTime  = datetime.datetime.fromtimestamp(fileStamp)
+                            td = nowTime - fileTime
+                            if (td.days >= int(remove)):
+                                os.remove(f) 
+                        except Exception as e:
+                            pass
+
+    except Exception as e:
+        pass
+    return True
 
 
 class _main_class:
@@ -175,12 +207,12 @@ if __name__ == '__main__':
     main_start = time.time()
 
     # ディレクトリ作成
-    qFunc.makeDirs(qPath_temp, remove=False)
-    qFunc.makeDirs(qPath_log, remove=False)
-    qFunc.makeDirs(qPath_work, remove=False)
-    qFunc.makeDirs(qPath_input, remove=False)
-    qFunc.makeDirs(qPath_output, remove=False)
-    qFunc.makeDirs(qPath_sandbox, remove=False)
+    makeDirs(qPath_temp, remove=False)
+    makeDirs(qPath_log, remove=False)
+    makeDirs(qPath_work, remove=False)
+    makeDirs(qPath_input, remove=False)
+    makeDirs(qPath_output, remove=False)
+    makeDirs(qPath_sandbox, remove=False)
 
     # ログの初期化
     nowTime = datetime.datetime.now()
@@ -268,13 +300,13 @@ if __name__ == '__main__':
             print()
 
         # autoSandbox
-        addin_module = addin.addin_modules.get('addin_autoSandbox', None)
+        addin_module = addin.addin_modules.get('automatic_sandbox', None)
         if (addin_module is not None):
             try:
                 if (addin_module['onoff'] == 'on'):
                     func_reset = addin_module['func_reset']
                     res  = func_reset(main=main, data=data, addin=addin, botFunc=botFunc, )
-                    print('reset', 'addin_autoSandbox')
+                    print('reset', 'automatic_sandbox')
             except Exception as e:
                 print(e)
 
@@ -290,25 +322,25 @@ if __name__ == '__main__':
                 print(e)
 
         # task_worker
-        addin_module = addin.addin_modules.get('monjyu_task_worker', None)
+        addin_module = addin.addin_modules.get('extension_task_worker', None)
         if (addin_module is not None):
             try:
                 if (addin_module['onoff'] == 'on'):
                     func_reset = addin_module['func_reset']
                     res  = func_reset(botFunc=botFunc, data=data, )
-                    print('reset', 'monjyu_task_worker')
+                    print('reset', 'extension_task_worker')
             except Exception as e:
                 print(e)
 
         # key2Live_freeai
         liveai_enable = False
-        addin_module = addin.addin_modules.get('monjyu_UI_key2Live_freeai', None)
+        addin_module = addin.addin_modules.get('extension_UI_key2Live_freeai', None)
         if (addin_module is not None):
             try:
                 if (addin_module['onoff'] == 'on'):
                     func_reset = addin_module['func_reset']
                     res  = func_reset(main=main, data=data, addin=addin, botFunc=botFunc, )
-                    print('reset', 'monjyu_UI_key2Live_freeai')
+                    print('reset', 'extension_UI_key2Live_freeai')
                     liveai_enable = True
 
                     data.live_models['freeai']  = addin_module['class'].sub_proc.liveAPI.live_models
@@ -322,13 +354,13 @@ if __name__ == '__main__':
 
         # key2Live_openai
         #liveai_enable = False
-        addin_module = addin.addin_modules.get('monjyu_UI_key2Live_openai', None)
+        addin_module = addin.addin_modules.get('extension_UI_key2Live_openai', None)
         if (addin_module is not None):
             try:
                 if (addin_module['onoff'] == 'on'):
                     func_reset = addin_module['func_reset']
                     res  = func_reset(main=main, data=data, addin=addin, botFunc=botFunc, )
-                    print('reset', 'monjyu_UI_key2Live_openai')
+                    print('reset', 'extension_UI_key2Live_openai')
                     liveai_enable = True
 
                     data.live_models['openai']  = addin_module['class'].sub_proc.liveAPI.live_models
@@ -342,56 +374,86 @@ if __name__ == '__main__':
 
         # web操作Agent
         webOperator_enable = False
-        for module_dic in botFunc.function_modules.values():
-            if (module_dic['func_name'] == 'web_operation_agent'):
-                try:
-                    if (module_dic['onoff'] == 'on'):
-                        func_reset = module_dic['func_reset']
-                        res  = func_reset(main=main, data=data, addin=addin, botFunc=botFunc, )
-                        print('reset', 'web_operation_agent')
-                        webOperator_enable = True
+        module_dic = botFunc.function_modules.get('web_operation_agent', None)
+        if (module_dic is not None):
+            try:
+                if (module_dic['onoff'] == 'on'):
+                    func_reset = module_dic['func_reset']
+                    res  = func_reset(main=main, data=data, addin=addin, botFunc=botFunc, )
+                    print('reset', 'web_operation_agent')
+                    webOperator_enable = True
 
-                        data.webOperator_models['freeai'] = module_dic['class'].agent_models['freeai']
-                        data.webOperator_models['openai'] = module_dic['class'].agent_models['openai']
-                        data.webOperator_models['claude'] = module_dic['class'].agent_models['claude']
-                        data.webOperator_setting = {    'engine':   module_dic['class'].agent_engine,
-                                                        'model':    module_dic['class'].agent_model,
-                                                        'max_step': module_dic['class'].agent_max_step,
-                                                        'browser':  module_dic['class'].agent_browser, }
-                except Exception as e:
-                    print(e)
-                break
+                    data.webOperator_models['freeai'] = module_dic['class'].agent_models['freeai']
+                    data.webOperator_models['openai'] = module_dic['class'].agent_models['openai']
+                    data.webOperator_models['claude'] = module_dic['class'].agent_models['claude']
+                    data.webOperator_setting = {    'engine':   module_dic['class'].agent_engine,
+                                                    'model':    module_dic['class'].agent_model,
+                                                    'max_step': module_dic['class'].agent_max_step,
+                                                    'browser':  module_dic['class'].agent_browser, }
+            except Exception as e:
+                print(e)
 
         # research操作Agent
         researchAgent_enable = False
-        for module_dic in botFunc.function_modules.values():
-            if (module_dic['func_name'] == 'research_operation_agent'):
-                try:
-                    if (module_dic['onoff'] == 'on'):
-                        func_reset = module_dic['func_reset']
-                        res  = func_reset(main=main, data=data, addin=addin, botFunc=botFunc, )
-                        print('reset', 'research_operation_agent')
-                        researchAgent_enable = True
+        module_dic = botFunc.function_modules.get('research_operation_agent', None)
+        if (module_dic is not None):
+            try:
+                if (module_dic['onoff'] == 'on'):
+                    func_reset = module_dic['func_reset']
+                    res  = func_reset(main=main, data=data, addin=addin, botFunc=botFunc, )
+                    print('reset', 'research_operation_agent')
+                    researchAgent_enable = True
 
-                        data.researchAgent_models['freeai'] = module_dic['class'].agent_models['freeai']
-                        data.researchAgent_models['openai'] = module_dic['class'].agent_models['openai']
-                        data.researchAgent_models['claude'] = module_dic['class'].agent_models['claude']
-                        data.researchAgent_setting = {  'engine':   module_dic['class'].agent_engine,
-                                                        'model':    module_dic['class'].agent_model,
-                                                        'max_step': module_dic['class'].agent_max_step,
-                                                        'browser':  module_dic['class'].agent_browser, }
-                except Exception as e:
-                    print(e)
-                break
+                    data.researchAgent_models['freeai'] = module_dic['class'].agent_models['freeai']
+                    data.researchAgent_models['openai'] = module_dic['class'].agent_models['openai']
+                    data.researchAgent_models['claude'] = module_dic['class'].agent_models['claude']
+                    data.researchAgent_setting = {  'engine':   module_dic['class'].agent_engine,
+                                                    'model':    module_dic['class'].agent_model,
+                                                    'max_step': module_dic['class'].agent_max_step,
+                                                    'browser':  module_dic['class'].agent_browser, }
+            except Exception as e:
+                print(e)
+
+    # mcpHost起動
+    if True:
+        mcpHost = RiKi_Monjyu__mcpHost._mcpHost_class(  runMode=runMode, qLog_fn=qLog_fn,
+                                                        main=main, conf=conf, data=data, addin=addin, botFunc=botFunc)
+        mcpHost_thread = threading.Thread(target=mcpHost.run)
+        mcpHost_thread.daemon = True
+        mcpHost_thread.start()
 
     # コアAI起動
     if True:
-        coreai = RiKi_Monjyu__coreai.CoreAiClass(   runMode=runMode, qLog_fn=qLog_fn,
-                                                    main=main, conf=conf, data=data, addin=addin, botFunc=botFunc,
-                                                    core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
-        coreai_thread = threading.Thread(target=coreai.run)
-        coreai_thread.daemon = True
-        coreai_thread.start()
+        coreai0 = RiKi_Monjyu__coreai0.coreai0_class(   runMode=runMode, qLog_fn=qLog_fn,
+                                                        main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
+                                                        core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
+        coreai0_thread = threading.Thread(target=coreai0.run)
+        coreai0_thread.daemon = True
+        coreai0_thread.start()
+
+        coreai1 = RiKi_Monjyu__coreai1.coreai1_class(   runMode=runMode, qLog_fn=qLog_fn,
+                                                        main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
+                                                        coreai=coreai0, 
+                                                        core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
+        coreai1_thread = threading.Thread(target=coreai1.run)
+        coreai1_thread.daemon = True
+        coreai1_thread.start()
+
+        coreai2 = RiKi_Monjyu__coreai2.coreai2_class(   runMode=runMode, qLog_fn=qLog_fn,
+                                                        main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
+                                                        coreai=coreai0, 
+                                                        core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
+        coreai2_thread = threading.Thread(target=coreai2.run)
+        coreai2_thread.daemon = True
+        coreai2_thread.start()
+
+        coreai5 = RiKi_Monjyu__coreai5.coreai5_class(   runMode=runMode, qLog_fn=qLog_fn,
+                                                        main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
+                                                        coreai=coreai0, 
+                                                        core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
+        coreai5_thread = threading.Thread(target=coreai5.run)
+        coreai5_thread.daemon = True
+        coreai5_thread.start()
 
     # サブAI起動
     if True:
@@ -403,8 +465,8 @@ if __name__ == '__main__':
         for n in range(int(numSubAIs)):
             self_port = str(SUB_BASE + n + 1)
             subai_class[n] = RiKi_Monjyu__subai.SubAiClass( runMode=runMode, qLog_fn=qLog_fn,
-                                                            main=main, conf=conf, data=data, addin=addin, botFunc=botFunc,
-                                                            coreai=coreai, 
+                                                            main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
+                                                            coreai=coreai0, 
                                                             core_port=core_port, sub_base=sub_base, num_subais=numSubAIs,
                                                             self_port=self_port, profile_number=subai_profiles[n])
             subai_thread[n] = threading.Thread(target=subai_class[n].run)
@@ -415,13 +477,16 @@ if __name__ == '__main__':
     if True:
         self_port = str(CORE_PORT + 8)
         webui_class = RiKi_Monjyu__webui.WebUiClass(runMode=runMode, qLog_fn=qLog_fn,
-                                                    main=main, conf=conf, data=data, addin=addin, botFunc=botFunc,
-                                                    coreai=coreai, 
+                                                    main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
+                                                    coreai=coreai0, 
                                                     core_port=core_port, sub_base=sub_base, num_subais=numSubAIs,
                                                     self_port=self_port)
         webui_thread = threading.Thread(target=webui_class.run)
         webui_thread.daemon = True
         webui_thread.start()
+
+    # 30秒待機
+    time.sleep(30)
 
     # 起動メッセージ
     print()
@@ -439,7 +504,7 @@ if __name__ == '__main__':
     main.main_all_ready = True
 
     # モデル情報設定
-    _ = asyncio.run( coreai.get_models(req_mode='chat') )    
+    _ = asyncio.run( coreai0.get_models(req_mode='chat') )    
 
     # 無限ループでプロセスを監視
     while True:

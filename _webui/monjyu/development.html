@@ -23,8 +23,14 @@
     </style>
 </head>
 <body>
-    <input type="hidden" id="core_endpoint" name="core_endpoint" value="http://localhost:8000">
+
+    <!-- 初期設定値 -->
+    <input type="hidden" id="core_endpoint0" name="core_endpoint0" value="http://localhost:8000">
+    <input type="hidden" id="core_endpoint1" name="core_endpoint1" value="http://localhost:8001">
+    <input type="hidden" id="core_endpoint2" name="core_endpoint2" value="http://localhost:8002">
+    <input type="hidden" id="core_endpoint5" name="core_endpoint5" value="http://localhost:8005">
     <input type="hidden" id="user_id" name="user_id" value="admin">
+
     <div class="dev-container">
         <h2>【 Development (開発) 】</h2>
         <br><br>
@@ -58,9 +64,13 @@
         <button type="button" id="btnSource_conf">_conf.py</button>
         <button type="button" id="btnSource_data">_data.py</button>
         <button type="button" id="btnSource_addin">_addin.py</button>
-        <button type="button" id="btnSource_coreai">_coreai.py</button>
+        <button type="button" id="btnSource_coreai0">_coreai0.py</button>
+        <button type="button" id="btnSource_coreai1">_1.py</button>
+        <button type="button" id="btnSource_coreai2">_2.py</button>
+        <button type="button" id="btnSource_coreai5">_5.py</button>
         <button type="button" id="btnSource_subai">_subai.py</button>
         <button type="button" id="btnSource_subbot">_subbot.py</button>
+        <button type="button" id="btnSource_llm">_llm.py</button>
         <button type="button" id="btnSource_webui">_webui.py</button>
         
         <br><br>
