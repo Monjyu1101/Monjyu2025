@@ -15,7 +15,7 @@ let currentOutputFiles = [];
 function get_default_image() {
     // サーバーからデフォルト画像を取得するAJAXリクエスト
     $.ajax({
-        url: '/get_default_image',
+        url: $('#core_endpoint2').val() + '/get_default_image',
         method: 'GET',
         success: function(data) {
             // 画像情報を更新
@@ -34,7 +34,7 @@ function get_default_image() {
 function get_image_info() {
     // サーバーからイメージ情報を取得するAJAXリクエスト
     $.ajax({
-        url: '/get_image_info',
+        url: $('#core_endpoint2').val() + '/get_image_info',
         method: 'GET',
         success: function(data) {
             if (data.image_data !== last_image_data) {

@@ -591,7 +591,7 @@ class _class:
         self.func_auth = "y+MlAmcqvzqaXoBZtIz/V9H611RcQmQJ/HqghKjoH/1eSmmAQ9zTVio4xBlwCyn1"
         self.function  = {
             "name": self.func_name,
-            "description": "拡張ＵＩ_文殊(もんじゅ):Monjyuのクリップボードインターフェース機能。",
+            "description": "拡張ＵＩ_Monjyu(もんじゅ)のクリップボードインターフェース機能。",
             "parameters": {
                 "type": "object",
                 "properties": {

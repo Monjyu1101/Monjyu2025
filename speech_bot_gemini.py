@@ -752,10 +752,16 @@ class _geminiAPI:
         tools = []
         if (use_tools.lower().find('yes') >= 0):
             function_declarations = []
-            for module_dic in function_modules.values():
-                if (module_dic['script'] != 'mcp'):
-                    func_dic = module_dic['function']
+            for module_name, module_dic in function_modules.items():
+                func_dic = module_dic['function']
+                not_support = False
+                properties = func_dic['parameters'].get('properties', {})
+                for field in properties:
+                    if properties[field]['type'] in ['array', 'boolean']:
+                        not_support = True
+                if not_support == False:
                     function_declarations.append(func_dic)
+                    #print(func_dic)
             if (len(function_declarations) > 0):
                 tools.append({"function_declarations": function_declarations})
 
@@ -994,9 +1000,7 @@ class _geminiAPI:
                             except Exception as e:
                                 logger.error(f"ツール実行エラー: {e}")
                                 # エラーメッセージ作成
-                                dic = {}
-                                dic['error'] = str(e)
-                                res_json = json.dumps(dic, ensure_ascii=False)
+                                res_json = json.dumps({'error': str(e)}, ensure_ascii=False)
 
                             # 実行結果を表示
                             logger.info(f"//Gemini//   → {res_json}")
@@ -1006,14 +1010,7 @@ class _geminiAPI:
                             res_list = []
                             for key, value in res_dic.items():
                                 res_list.append({"key": key, "value": {"string_value": value}})
-                            parts = {
-                                "function_response": {
-                                    "name": f_name,
-                                    "response": {
-                                        "fields": res_list
-                                    }
-                                }
-                            }
+                            parts = {"function_response": {"name": f_name, "response": {"fields": res_list} } }
                             request.append(parts)
 
                             # 履歴に関数結果を追加

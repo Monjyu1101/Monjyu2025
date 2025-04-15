@@ -153,7 +153,7 @@ class _class:
             "description": \
 """
 この機能は、LiveAPI(RealTimeAPI)セッションから呼び出して利用する。
-この機能から、画像生成などの機能が実行可能な外部AI 文殊/Monjyu(もんじゅ) が実行される。
+この機能から、画像生成などの機能が実行可能な外部AI Monjyu(もんじゅ) が実行される。
 社内システム(WEB) 出退勤,日報,掲示板 へのログイン,出勤,退勤の操作は、'operation_internal_web_systems'機能の利用を明示して呼び出す必要がある。
 この機能の呼出し時のrunModeには、以下の値を設定してください。
 runMode='clip'  : クリップボード操作からの呼出し要求。

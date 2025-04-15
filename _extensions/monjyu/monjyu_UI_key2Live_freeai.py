@@ -962,14 +962,14 @@ Agentic AI Web-Operator(ウェブオペレーター:web_operation_agent) が利�
 """
                 # Monjyu 有効
                 if (self.monjyu_enable == True):
-                    print(" Live(freeai) : [READY] 外部AI 文殊/Monjyu(もんじゅ:execute_monjyu_request) ")
+                    print(" Live(freeai) : [READY] 外部AI Monjyu(もんじゅ:execute_monjyu_request) ")
                     instructions += \
 """
-外部AI 文殊/Monjyu(もんじゅ:execute_monjyu_request) が利用可能です。
-利用指示があった場合、文殊/Monjyu(もんじゅ) をRunMode='voice'で呼び出すことで、適切なFunctions(Tools)を間接的に利用して、その結果を報告してください。
+外部AI Monjyu(もんじゅ:execute_monjyu_request) が利用可能です。
+利用指示があった場合、Monjyu(もんじゅ) をRunMode='voice'で呼び出すことで、適切なFunctions(Tools)を間接的に利用して、その結果を報告してください。
 """
                     if (self.monjyu_funcinfo != ''):
-                        instructions += '\n【外部AI 文殊/Monjyu(もんじゅ:execute_monjyu_request) 経由で利用可能なFunctions(Tools)の情報】\n'
+                        instructions += '\n【外部AI Monjyu(もんじゅ:execute_monjyu_request) 経由で利用可能なFunctions(Tools)の情報】\n'
                         instructions += self.monjyu_funcinfo
 
                 # ツール設定 通常はexecute_monjyu_requestのみ有効として処理

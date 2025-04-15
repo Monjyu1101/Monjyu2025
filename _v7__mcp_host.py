@@ -3,29 +3,32 @@ MCP サーバー管理
 MCPサーバーを動的にロードして実行するMCPホストです。
 複数のMCPサーバーを同時に管理できます。
 """
-import asyncio
-import importlib
-import json
-import os
-import sys
-import logging
-from typing import Any, Dict, List, Optional
-# MCP クライアント関連のインポート
-from mcp import ClientSession, StdioServerParameters
-from mcp.client.sse import sse_client
-from mcp.client.stdio import stdio_client
-from contextlib import AsyncExitStack
 
 # モジュール名定義
 MODULE_NAME = 'mcp_host'
 
 # ロガーの設定
+import logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)-16s - %(levelname)-8s - %(message)s',
     datefmt='%H:%M:%S'
 )
 logger = logging.getLogger(MODULE_NAME)
+
+import asyncio
+import glob
+import importlib
+import json
+import os
+import sys
+from typing import Any, Dict, List, Optional
+
+# MCP クライアント関連のインポート
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.sse import sse_client
+from mcp.client.stdio import stdio_client
+from contextlib import AsyncExitStack
 
 
 class mcp_host_class:
@@ -37,7 +40,8 @@ class mcp_host_class:
         self.exit_stack = AsyncExitStack()
         self.servers_info: Dict[str, Dict[str, Any]] = {}
         self.tools_info: Dict[str, Dict[str, Any]] = {}
-        
+        self.last_port: int = 5000
+
     def _parms_to_args(self, parms: List[str]):
         """コマンドライン引数をキーワード引数に変換"""
         args = {}
@@ -129,7 +133,7 @@ class mcp_host_class:
                 return False
             
             # SSE接続設定
-            port = args.get("port", "8001")
+            port = args.get("port", "5000")
             server_url = f"http://127.0.0.1:{port}/sse"
             logger.debug(f"SSEサーバーURL: {server_url}")
 
@@ -264,14 +268,14 @@ class mcp_host_class:
             logger.error(f"{server_name} の起動中にエラーが発生しました: {e}")
             return False
 
-    async def start_from_config(self, config_path: str, reset: bool = True) -> bool:
+    async def start_from_config(self, config_json_path: str, reset: bool = True) -> bool:
         """JSON設定ファイルからサーバーを起動"""
         try:
-            logger.info(f"JSON設定ファイル '{config_path}' のロード開始...")
+            logger.info(f"JSON設定ファイル '{config_json_path}' のロード開始...")
             
             # ファイル存在確認
-            if not os.path.exists(config_path):
-                logger.error(f"JSON設定ファイル '{config_path}' が見つかりません。")
+            if not os.path.exists(config_json_path):
+                logger.error(f"JSON設定ファイル '{config_json_path}' が見つかりません。")
                 return False
             
             # 既存セッションリセット
@@ -280,9 +284,9 @@ class mcp_host_class:
                 await self.terminate()
             
             # 設定読み込み
-            with open(config_path, 'r', encoding='utf-8') as f:
+            with open(config_json_path, 'r', encoding='utf-8') as f:
                 config = json.load(f)
-            logger.debug(f"JSON設定ファイルを読み込みました: {config_path}")
+            logger.debug(f"JSON設定ファイルを読み込みました: {config_json_path}")
             
             # 設定内容確認
             if 'mcpServers' not in config:
@@ -331,7 +335,7 @@ class mcp_host_class:
             return True
             
         except json.JSONDecodeError as e:
-            logger.error(f"JSON設定ファイル '{config_path}' の解析エラー: {e}")
+            logger.error(f"JSON設定ファイル '{config_json_path}' の解析エラー: {e}")
             if reset:
                 await self.terminate()
             return False
@@ -341,6 +345,56 @@ class mcp_host_class:
             if reset:
                 await self.terminate()
             return False
+
+    async def start_from_path(self, mcp_servers_path: str, reset: bool = True) -> bool:
+        """フォルダパスからサーバーを起動"""
+        #try:
+        if True:
+            logger.info(f"フォルダパス '{mcp_servers_path}' からロード開始...")
+            
+            # ファイル存在確認
+            if not os.path.isdir(mcp_servers_path):
+                logger.error(f"フォルダパス '{mcp_servers_path}' が見つかりません。")
+                return False
+            
+            # 既存セッションリセット
+            if reset and self.servers_info:
+                logger.debug("既存セッションをリセットします")
+                await self.terminate()
+
+            path = mcp_servers_path
+            path_files = glob.glob(path + '*.py')
+            path_files.sort()
+            
+            if len(path_files) > 0:
+                for f in path_files:
+                    base_name = os.path.basename(f)
+                    if  base_name[:4]   != '_v6_' \
+                    and base_name[:4]   != '_v7_' \
+                    and base_name[-10:] != '_pyinit.py' \
+                    and base_name[-10:] != '_python.py':
+                            f = f.replace('\\', '/')
+                            print(f)
+
+                        #try:
+                            port_str = str(self.last_port + 1)
+                            res = self.start_module(module_path=f, parms=['--port', port_str])
+                            if res == False:
+                                res = self.start_script(script_path=f, parms=['--port', port_str])
+                                if res:
+                                    # 正常時カウントアップ
+                                    self.last_port = int(port_str)
+                        #except Exception as e:
+                        #    logger.error(f"起動エラー: {e}")
+
+            logger.info("フォルダパスからロード完了")
+            return True
+            
+        #except Exception as e:
+        #    logger.error(f"フォルダパス '{mcp_servers_path}' の処理エラー: {e}")
+        #    if reset:
+        #        await self.terminate()
+        #    return False
 
     async def _initialize_tools(self, server_name: str, session: ClientSession) -> bool:
         """サーバーの初期化とツール情報の登録"""
@@ -432,7 +486,7 @@ class mcp_host_class:
 
     async def terminate(self):
         """全てのMCPサーバーを停止"""
-        logger.info("すべてのMCPサーバーの終了を開始します")
+        logger.info("すべてのMCPサーバーを終了します")
 
         if not self.servers_info:
             logger.warning("終了するMCPサーバーがありません")
@@ -440,13 +494,13 @@ class mcp_host_class:
 
         try:
             if hasattr(self, 'exit_stack'):
-                logger.debug("exit_stackの終了処理を開始します")
+                logger.debug("exit_stackの終了を開始します")
                 await asyncio.wait_for(self.exit_stack.aclose(), timeout=2)
-                logger.debug("exit_stackの終了処理が完了しました")
+                logger.debug("exit_stackの終了が完了しました")
         except asyncio.TimeoutError:
-            logger.warning("exit_stackの終了処理がタイムアウトしました")
+            logger.warning("exit_stackの終了がタイムアウトしました")
         except Exception as e:
-            logger.error(f"exit_stack終了処理中にエラー: {e}")
+            logger.error(f"exit_stack終了中にエラー: {e}")
 
         # 全タスクのクリーンアップ
         for key, server_info in list(self.servers_info.items()):
@@ -465,18 +519,18 @@ class mcp_host_class:
                     logger.debug(f"{name} のセッションをクローズします")
                     try:
                         await asyncio.wait_for(session_ctx.__aexit__(None, None, None), timeout=2)
-                        logger.debug(f"{name} のセッション終了処理が完了しました")
+                        logger.debug(f"{name} のセッション終了が完了しました")
                     except asyncio.TimeoutError:
-                        logger.warning(f"{name} のセッション終了処理がタイムアウトしました")
+                        logger.warning(f"{name} のセッション終了がタイムアウトしました")
 
                 # ストリームクリーンアップ
                 if streams_ctx:
                     logger.debug(f"{name} のストリームをクローズします")
                     try:
                         await asyncio.wait_for(streams_ctx.__aexit__(None, None, None), timeout=2)
-                        logger.debug(f"{name} のストリーム終了処理が完了しました")
+                        logger.debug(f"{name} のストリーム終了が完了しました")
                     except asyncio.TimeoutError:
-                        logger.warning(f"{name} のストリーム終了処理がタイムアウトしました")
+                        logger.warning(f"{name} のストリーム終了がタイムアウトしました")
 
                 # タスクキャンセル
                 if server_task:

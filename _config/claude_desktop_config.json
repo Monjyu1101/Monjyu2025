@@ -6,8 +6,27 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "C:\\_共有\\_MCP\\_sandbox"
+        "C:\\_共有\\_sandbox"
       ]
+    },
+
+    "helloworld": {
+      "command": "uv",
+      "args": [
+         "run",
+         "_v7__mcp_server.py"
+      ]
+    },
+
+    "perplexity-ask": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "server-perplexity-ask"
+      ],
+      "env": {
+        "PERPLEXITY_API_KEY": "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"
+      }
     }
 
   }

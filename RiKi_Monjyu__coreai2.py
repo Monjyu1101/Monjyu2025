@@ -27,6 +27,7 @@ import datetime
 import codecs
 
 import json
+import base64
 
 from typing import Dict, Optional
 from fastapi import FastAPI, HTTPException, Request
@@ -47,6 +48,9 @@ qPath_input   = 'temp/input/'
 qPath_output  = 'temp/output/'
 qPath_tts     = 'temp/s6_5tts_txt/'
 qPath_sandbox = 'temp/sandbox/'
+
+qPath_static    = '_webui/monjyu/static'
+DEFAULT_ICON    = qPath_static + '/' + "icon_monjyu.gif"
 
 # 定数の定義
 DELETE_OUTPUTLOG_SEC  = 600
@@ -157,6 +161,8 @@ class coreai2_class:
         self.app.get("/")(self.root)
         self.app.get("/get_output_log_user")(self.get_output_log_user)
         self.app.get("/get_debug_log_user")(self.get_debug_log_user)
+        self.app.get("/get_default_image")(self.get_default_image)
+        self.app.get("/get_image_info")(self.get_image_info)
         self.app.post("/post_complete")(self.post_complete)
         self.app.post("/post_debug_log")(self.post_debug_log)
         self.app.post("/post_output_log")(self.post_output_log)
@@ -244,6 +250,39 @@ class coreai2_class:
                 for key in debug_log_to_delete:
                     del self.data.subai_debug_log_all[key]
         return JSONResponse(content=result)
+
+    async def get_default_image(self):
+        # デフォルト画像データの取得
+        image_data = self._get_image_data(DEFAULT_ICON)
+        _, image_ext = os.path.splitext(DEFAULT_ICON.lower())
+        return JSONResponse(content={"image_data": image_data, "image_ext": image_ext})
+
+    async def get_image_info(self):
+        # 次回表示する画像データの取得
+        image_data = None
+        image_ext  = None
+        if (self.coreai is not None):
+            if ((time.time() - self.coreai.last_image_time) > 60):
+                self.coreai.last_image_file = None
+                self.coreai.last_image_time = 0
+            if (self.coreai.last_image_file is not None):
+                image_data = self._get_image_data(self.coreai.last_image_file)
+                if (image_data is not None):
+                    _, image_ext = os.path.splitext(self.coreai.last_image_file.lower())
+        return JSONResponse(content={"image_data": image_data, "image_ext": image_ext})
+
+    def _get_image_data(self, image_path):
+        # 画像ファイルをBase64エンコードしてデータURIスキーマ形式で返す
+        image_data = None
+        _, image_ext = os.path.splitext(image_path.lower())
+        if (image_ext in ['.jpg', '.jpeg', '.png', '.gif', '.bmp']):
+            try:
+                with open(image_path, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                    image_data = f"data:image/png;base64,{encoded_string}"
+            except Exception as e:
+                print(e)
+        return image_data
 
     async def post_complete(self, postData: ResultDataModel):
         """
@@ -578,8 +617,9 @@ class coreai2_class:
         
         if (self.last_output_files != output_files):
             self.last_output_files = output_files
-            self.last_image_file = image_file
-            self.last_image_time = time.time()
+            if (self.coreai is not None):
+                self.coreai.last_image_file = image_file
+                self.coreai.last_image_time = time.time()
         return JSONResponse(content={"files": output_files})
 
     def run(self):

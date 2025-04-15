@@ -44,9 +44,9 @@ from pydantic import BaseModel
 import chardet
 
 import threading
-import base64
-import socket
 import subprocess
+
+import socket
 qHOSTNAME = socket.gethostname().lower()
 
 # 各種ディレクトリパスの設定
@@ -58,7 +58,6 @@ qPath_tts       = 'temp/s6_5tts_txt/'
 qPath_reacts    = '_datas/reacts/'
 qPath_templates = '_webui/monjyu'
 qPath_static    = '_webui/monjyu/static'
-DEFAULT_ICON    = qPath_static + '/' + "icon_monjyu.gif"
 
 qPath_sandbox = 'temp/sandbox/'
 qSandBox_name = 'react_sandbox'
@@ -239,12 +238,6 @@ class WebUiClass:
         # スレッドロックの初期化
         self.thread_lock = threading.Lock()
 
-        # 送信処理用の初期化
-        self.last_image_file = None
-        self.last_image_time = 0
-        self.last_input_files = []
-        self.last_output_files = []
-
         # FastAPIの設定
         self.app = FastAPI()
 
@@ -266,8 +259,6 @@ class WebUiClass:
         self.app.get("/get_agent_setting")(self.get_agent_setting)
         self.app.post("/post_agent_engine")(self.post_agent_engine)
         self.app.post("/post_agent_setting")(self.post_agent_setting)
-        self.app.get("/get_default_image")(self.get_default_image)
-        self.app.get("/get_image_info")(self.get_image_info)
         self.app.post("/post_text_files")(self.post_text_files)
         self.app.post("/post_drop_files")(self.post_drop_files)
         self.app.get("/get_output_file/{filename}")(self.get_output_file)
@@ -920,38 +911,6 @@ class WebUiClass:
                                                     "browser": browser, }
 
         return JSONResponse(content={'message': 'post_agent_setting successfully'})
-
-    async def get_default_image(self):
-        # デフォルト画像データの取得
-        image_data = self._get_image_data(DEFAULT_ICON)
-        _, image_ext = os.path.splitext(DEFAULT_ICON.lower())
-        return JSONResponse(content={"image_data": image_data, "image_ext": image_ext})
-
-    async def get_image_info(self):
-        # 次回表示する画像データの取得
-        image_data = None
-        image_ext  = None
-        if ((time.time() - self.last_image_time) > 60):
-            self.last_image_file = None
-            self.last_image_time = 0
-        if (self.last_image_file is not None):
-            image_data = self._get_image_data(self.last_image_file)
-            if (image_data is not None):
-                _, image_ext = os.path.splitext(self.last_image_file.lower())
-        return JSONResponse(content={"image_data": image_data, "image_ext": image_ext})
-
-    def _get_image_data(self, image_path):
-        # 画像ファイルをBase64エンコードしてデータURIスキーマ形式で返す
-        image_data = None
-        _, image_ext = os.path.splitext(image_path.lower())
-        if (image_ext in ['.jpg', '.jpeg', '.png', '.gif', '.bmp']):
-            try:
-                with open(image_path, "rb") as image_file:
-                    encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-                    image_data = f"data:image/png;base64,{encoded_string}"
-            except Exception as e:
-                print(e)
-        return image_data
 
     async def post_text_files(self, drop_target: str = Form(...), files: list[UploadFile] = File(...)):
         # アップロードされた複数ファイルを解析してテキストを返す

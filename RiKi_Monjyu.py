@@ -19,6 +19,8 @@ logging.basicConfig(
     datefmt='%H:%M:%S'
 )
 logger = logging.getLogger(MODULE_NAME)
+logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
+logging.getLogger('comtypes.client._code_cache').setLevel(logging.WARNING)
 logging.getLogger('httpx').setLevel(logging.WARNING)
 logging.getLogger('google_genai').setLevel(logging.WARNING)
 
@@ -27,12 +29,10 @@ import sys
 import os
 import time
 import datetime
-import codecs
 import glob
 import shutil
 import random
 import threading
-import multiprocessing
 
 import asyncio
 
@@ -245,11 +245,13 @@ if __name__ == '__main__':
         core_port = str(CORE_PORT)
         sub_base  = str(SUB_BASE)
 
-        # main 初期化
+    # main 初期化
+    if True:
         main = _main_class()
         main.init(runMode=runMode, qLog_fn=qLog_fn)
         
-        # conf 初期化
+    # conf 初期化
+    if True:
         conf = RiKi_Monjyu__conf._conf_class()
         conf.init(runMode=runMode, qLog_fn=qLog_fn)
 
@@ -269,12 +271,14 @@ if __name__ == '__main__':
         if  (conf.claude_key_id[:1] != '<'):
             os.environ['ANTHROPIC_API_KEY'] = conf.claude_key_id
 
-        # data 初期化
+    # data 初期化
+    if True:
         data = RiKi_Monjyu__data._data_class(   runMode=runMode, qLog_fn=qLog_fn,
                                                 main=main, conf=conf,
                                                 core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
 
-        # addin 初期化
+    # addin 初期化
+    if True:
         addin = RiKi_Monjyu__addin._addin_class()
         addin.init(runMode=runMode, qLog_fn=qLog_fn,
                    addins_path='_extensions/monjyu/', secure_level='low')
@@ -287,7 +291,8 @@ if __name__ == '__main__':
             print(msg)
             print()
 
-        # botFunction 初期化
+    # botFunction 初期化
+    if True:
         botFunc = speech_bot_function.botFunction()
         res, msg = botFunc.functions_load(
             functions_path='_extensions/function/', secure_level='low')
@@ -300,7 +305,7 @@ if __name__ == '__main__':
             print()
 
         # autoSandbox
-        addin_module = addin.addin_modules.get('automatic_sandbox', None)
+        addin_module = addin.addin_modules.get('automatic_sandbox')
         if (addin_module is not None):
             try:
                 if (addin_module['onoff'] == 'on'):
@@ -311,7 +316,7 @@ if __name__ == '__main__':
                 print(e)
 
         # ClipnMonjyu
-        addin_module = addin.addin_modules.get('monjyu_UI_ClipnMonjyu', None)
+        addin_module = addin.addin_modules.get('monjyu_UI_ClipnMonjyu')
         if (addin_module is not None):
             try:
                 if (addin_module['onoff'] == 'on'):
@@ -322,7 +327,7 @@ if __name__ == '__main__':
                 print(e)
 
         # task_worker
-        addin_module = addin.addin_modules.get('extension_task_worker', None)
+        addin_module = addin.addin_modules.get('extension_task_worker')
         if (addin_module is not None):
             try:
                 if (addin_module['onoff'] == 'on'):
@@ -334,7 +339,7 @@ if __name__ == '__main__':
 
         # key2Live_freeai
         liveai_enable = False
-        addin_module = addin.addin_modules.get('extension_UI_key2Live_freeai', None)
+        addin_module = addin.addin_modules.get('extension_UI_key2Live_freeai')
         if (addin_module is not None):
             try:
                 if (addin_module['onoff'] == 'on'):
@@ -354,7 +359,7 @@ if __name__ == '__main__':
 
         # key2Live_openai
         #liveai_enable = False
-        addin_module = addin.addin_modules.get('extension_UI_key2Live_openai', None)
+        addin_module = addin.addin_modules.get('extension_UI_key2Live_openai')
         if (addin_module is not None):
             try:
                 if (addin_module['onoff'] == 'on'):
@@ -485,26 +490,33 @@ if __name__ == '__main__':
         webui_thread.daemon = True
         webui_thread.start()
 
-    # 30秒待機
-    time.sleep(30)
-
     # 起動メッセージ
-    print()
-    logger.info("================================================================================================")
-    logger.info(" Thank you for using our systems.")
-    logger.info(" To use [ Assistant AI 文殊/Monjyu(もんじゅ) ], Access 'http://localhost:8008/' in your browser.")
-    if (liveai_enable == True):
-        logger.info(" To use [ Live AI 力/RiKi(りき) ], Press ctrl-l or ctrl-r three times.")
-    if (webOperator_enable == True):
-        logger.info(" To use [ Agentic AI Web-Operator(ウェブオペレーター) ], Specify use at the prompt.")
-    if (researchAgent_enable == True):
-        logger.info(" To use [ Agentic AI Research-Agent(リサーチエージェント) ], Specify use at the prompt.")
-    logger.info("================================================================================================")
-    print()
-    main.main_all_ready = True
+    if True:
+        # 30秒待機
+        time.sleep(30)
+
+        print()
+        logger.info("============================================================================")
+        logger.info(" Thank you for using our systems.")
+        logger.info(" Multiple AI Platforms with MCP, Monjyu (もんじゅ), 'http://localhost:8008/'.")
+        if (liveai_enable == True):
+            logger.info(" Live AI 力/RiKi(りき), Press ctrl-l or ctrl-r three times.")
+        if (webOperator_enable == True):
+            logger.info(" Agentic AI Web-Operator(ウェブオペレーター), Specify use at the prompt.")
+        if (researchAgent_enable == True):
+            logger.info(" Agentic AI Research-Agent(リサーチエージェント), Specify use at the prompt.")
+        logger.info("============================================================================")
+        print()
 
     # モデル情報設定
-    _ = asyncio.run( coreai0.get_models(req_mode='chat') )    
+    asyncio.run( coreai0.get_models(req_mode='chat') )
+
+    # 15秒待機
+    time.sleep(15)
+    print()
+
+    # 準備完了
+    main.main_all_ready = True
 
     # 無限ループでプロセスを監視
     while True:

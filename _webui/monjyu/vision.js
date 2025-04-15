@@ -90,7 +90,7 @@ function get_image_info() {
     
     // サーバーからイメージ情報を取得するAJAXリクエスト
     $.ajax({
-        url: '/get_image_info',
+        url: $('#core_endpoint2').val() + '/get_image_info',
         method: 'GET',
         success: function(data) {
             if (data.image_data !== last_image_data) {

@@ -148,7 +148,7 @@ class _class:
 この機能は、ユーザーからブラウザ操作の指示があった場合に実行する。
 この機能から、自律的にブラウザ操作が可能なAIエージェント Web-Operator(ウェブオペレーター) が実行される。
 この機能で、AIエージェント Web-Operator(ウェブオペレーター) によりウェブ操作を実行し、その結果を取得することができる。
-社内システム(Web)の操作は、文殊/Monjyu(もんじゅ:execute_monjyu_request) 経由で'operation_internal_web_systems'から、この機能を使います。
+社内システム(Web)の操作は、Monjyu(もんじゅ:execute_monjyu_request) 経由で'operation_internal_web_systems'から、この機能を使います。
 """,
             "parameters": {
                 "type": "object",

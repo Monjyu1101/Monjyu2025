@@ -158,6 +158,8 @@ class coreai0_class:
         # 最終回答の保存
         self.last_models_list = None
         self.last_input_files = None
+        self.last_image_file = None
+        self.last_image_time = 0
 
         # サブAIの順番をランダムにシャッフル
         if (self.data is not None):
