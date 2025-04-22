@@ -7,7 +7,7 @@ let last_addins_setting = null;
 function get_addins_setting() {
     // 設定値をサーバーから受信
     $.ajax({
-        url: '/get_addins_setting',
+        url: $('#core_endpoint4').val() + '/get_addins_setting',
         method: 'GET',
         success: function(data) {
             if (JSON.stringify(data) !== last_addins_setting) {
@@ -43,7 +43,7 @@ function post_addins_setting() {
     }
     // 設定値をサーバーに送信
     $.ajax({
-        url: '/post_addins_setting',
+        url: $('#core_endpoint4').val() + '/post_addins_setting',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData),
@@ -64,7 +64,7 @@ function post_set_react(filename) {
     }
     // 設定値をサーバーに送信
     $.ajax({
-        url: '/post_set_react',
+        url: $('#core_endpoint4').val() + '/post_set_react',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData),

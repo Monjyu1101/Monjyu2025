@@ -9,7 +9,7 @@ let last_live_setting = {
 // Liveのmodel情報を取得してコンボボックスを設定する関数
 function get_live_models(engine) {
     $.ajax({
-        url: '/get_live_models',
+        url: $('#core_endpoint4').val() + '/get_live_models',
         method: 'GET',
         data: { engine: engine },
         dataType: 'json',
@@ -44,7 +44,7 @@ function get_live_models(engine) {
 // Liveのvoice情報を取得してコンボボックスを設定する関数
 function get_live_voices(engine) {
     $.ajax({
-        url: '/get_live_voices',
+        url: $('#core_endpoint4').val() + '/get_live_voices',
         method: 'GET',
         data: { engine: engine },
         dataType: 'json',
@@ -82,7 +82,7 @@ function get_live_setting_all() {
 function get_live_setting(engine) {
     // Live設定をサーバーから受信
     $.ajax({
-        url: '/get_live_setting',
+        url: $('#core_endpoint4').val() + '/get_live_setting',
         method: 'GET',
         data: { engine: engine },
         dataType: 'json',
@@ -145,7 +145,7 @@ function post_live_setting(engine) {
 
     // Live設定をサーバーに送信
     $.ajax({
-        url: '/post_live_setting',
+        url: $('#core_endpoint4').val() + '/post_live_setting',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData),

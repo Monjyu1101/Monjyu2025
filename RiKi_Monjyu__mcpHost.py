@@ -8,13 +8,13 @@
 # Thank you for keeping the rules.
 # ------------------------------------------------
 
-# モジュール名定義
+# モジュール名
 MODULE_NAME = 'mcpHost'
 
 # ロガーの設定
 import logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,
     format='%(asctime)s - %(name)-10s - %(levelname)-8s - %(message)s',
     datefmt='%H:%M:%S'
 )
@@ -35,7 +35,7 @@ qPath_log    = 'temp/_log/'
 
 # MCPクライアントのインポート
 import _v7__mcp_host
-mcp_client = _v7__mcp_host.mcp_host_class()
+mcp_host = _v7__mcp_host.mcp_host_class()
 
 # MCP管理クラス
 class _mcpHost_class:
@@ -76,7 +76,7 @@ class _mcpHost_class:
         logger.debug('MCP機能モジュール取得開始')
         
         modules = {}
-        for name, value in mcp_client.tools_info.items():
+        for name, value in mcp_host.tools_info.items():
             try:
                 # parameters
                 parameters = value.get('inputSchema')
@@ -126,7 +126,7 @@ class _mcpHost_class:
                         "parameters": parameters
                         }
 
-                server = mcp_client.servers_info[value.get('server')]
+                server = mcp_host.servers_info[value.get('server')]
                 server_name = server.get('name')
                 modules[name] = { 'script': 'mcp',
                                     'module': server_name,
@@ -296,7 +296,7 @@ async def main( req_q, res_q,
                             if isRunning:
                                 isRunning = False
                                 logger.info('MCP終了処理')
-                                result = await mcp_client.terminate()
+                                result = await mcp_host.terminate()
                                 await asyncio.sleep(2)
                             req_cmd = 'start'
 
@@ -312,17 +312,27 @@ async def main( req_q, res_q,
                 if (req_cmd == 'start'):
                     isRunning = True
                     logger.info(f'MCP起動処理: {config_json_path}')
-                    await mcp_client.start_from_config(config_json_path=config_json_path, reset=True)
+                    await mcp_host.start_from_config(config_json_path=config_json_path, reset=True)
                     await asyncio.sleep(2)
-                    #logger.info(f'MCP起動処理: {mcp_servers_path}')
-                    #await mcp_client.start_from_path(mcp_servers_path=mcp_servers_path)
-                    #await asyncio.sleep(2)
+                    
+                    #module_path = '_extensions/mcp/helloworld.py'
+                    #parms = ['--port', '5001']
+                    #await mcp_host.start_module(module_path=module_path, parms=parms)
+                    
+                    #script_path = '_extensions/mcp/helloworld.py'
+                    #parms = []
+                    #await mcp_host.start_script(script_path=script_path)
+
+                    logger.info(f'MCP起動処理: {mcp_servers_path}')
+                    await mcp_host.start_from_path(mcp_servers_path=mcp_servers_path)
+                    await asyncio.sleep(2)
+
                     res_q.put(True)
 
                 elif (req_cmd == 'terminate'):
                     isRunning = False
                     logger.info('MCP終了処理')
-                    result = await mcp_client.terminate()
+                    result = await mcp_host.terminate()
                     await asyncio.sleep(2)
                     res_q.put(result)
 
@@ -330,7 +340,7 @@ async def main( req_q, res_q,
                     tool_name = req_dic.get('tool_name')
                     request_json = req_dic.get('request_json')
                     logger.debug(f'ツール実行: {tool_name}')
-                    result = await mcp_client.execute(tool_name=tool_name, request_json=request_json)
+                    result = await mcp_host.execute(tool_name=tool_name, request_json=request_json)
                     res_q.put(result)
 
                 else:

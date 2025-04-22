@@ -3,27 +3,39 @@
 Model Context Protocol (MCP) を利用した簡単なサーバーです。
 基本的な挨拶メッセージとエコー機能を提供します。
 """
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# ------------------------------------------------
+# COPYRIGHT (C) 2014-2025 Mitsuo KONDOU.
+# This software is released under the MIT License.
+# https://github.com/monjyu1101
+# Thank you for keeping the rules.
+# ------------------------------------------------
+
+# モジュール名
+MODULE_NAME = 'mcp_server'
+
+# ロガーの設定
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)-10s - %(levelname)-8s - %(message)s',
+    datefmt='%H:%M:%S'
+)
+logger = logging.getLogger(MODULE_NAME)
+logging.getLogger('uvicorn.access').setLevel(logging.WARNING)
+
+
 import argparse
 import asyncio
 import json
 import sys
-import logging
 import threading
 from typing import Dict, Any
 
 from mcp.server.fastmcp import FastMCP
 from pydantic import Field
-
-# モジュール名定義
-MODULE_NAME = 'mcp_server'
-
-# ロガーの設定
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)-16s - %(levelname)-8s - %(message)s',
-    datefmt='%H:%M:%S'
-)
-logger = logging.getLogger(MODULE_NAME)
 
 
 class mcp_server_class:
@@ -169,7 +181,7 @@ async def main(**args) -> None:
 
 if __name__ == "__main__":
     # 引数解析
-    parser = argparse.ArgumentParser(description='Hello World MCP サーバー')
+    parser = argparse.ArgumentParser(description='MCP サーバー')
     parser.add_argument('--port', type=str, help='使用するポート番号 (SSEモード)')
     args = parser.parse_args()
     logger.info(f"コマンドライン引数: {args}")

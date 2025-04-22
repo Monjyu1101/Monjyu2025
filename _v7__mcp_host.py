@@ -192,10 +192,6 @@ class mcp_host_class:
         if parms:
             logger.debug(f"引数: {parms_str}")
 
-        # 引数変換
-        args = self._parms_to_args(parms)
-        logger.debug(f"変換後の引数: {args}")
-
         try:
             logger.info(f"スクリプトを開始: {script_path}")
             # ファイル存在確認
@@ -210,8 +206,14 @@ class mcp_host_class:
                 logger.debug(f"環境変数を更新: 追加数={len(env)}")
 
             # サーバーパラメータ設定
+            #python_exe = sys.executable
+            if sys.platform == "win32":
+                python_exe = 'python'
+            else:
+                python_exe = 'python3'
+            logger.info('sys.executable:' + sys.executable)
             server_params = StdioServerParameters(
-                command=sys.executable,
+                command=python_exe,
                 args=[script_path] + (parms or []),
                 env=process_env
             )
@@ -219,7 +221,7 @@ class mcp_host_class:
 
             # タスク作成と実行
             self.servers_info[server_name] = {'server_task': None}
-            server_task = asyncio.create_task(self._start_stdio(server_name, server_params, args, env))
+            server_task = asyncio.create_task(self._start_stdio(server_name, server_params, {}, env))
             self.servers_info[server_name]['server_task'] = server_task
             logger.debug(f"{server_name} の起動タスクを作成しました: task_id={id(server_task)}")
 
@@ -378,12 +380,12 @@ class mcp_host_class:
 
                         #try:
                             port_str = str(self.last_port + 1)
-                            res = self.start_module(module_path=f, parms=['--port', port_str])
-                            if res == False:
-                                res = self.start_script(script_path=f, parms=['--port', port_str])
-                                if res:
-                                    # 正常時カウントアップ
-                                    self.last_port = int(port_str)
+                            res = await self.start_module(module_path=f, parms=['--port', port_str])
+                            if res:
+                                # 正常時カウントアップ
+                                self.last_port = int(port_str)
+                            else:
+                                res = await self.start_script(script_path=f, parms=[])
                         #except Exception as e:
                         #    logger.error(f"起動エラー: {e}")
 

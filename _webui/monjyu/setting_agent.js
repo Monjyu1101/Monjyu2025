@@ -22,7 +22,7 @@ function get_agent_setting_all() {
 function get_agent_engine(agent) {
     // engine設定をサーバーから受信
     $.ajax({
-        url: '/get_agent_engine',
+        url: $('#core_endpoint4').val() + '/get_agent_engine',
         method: 'GET',
         data: { agent: agent },
         dataType: 'json',
@@ -65,7 +65,7 @@ function get_agent_engine(agent) {
 function get_agent_setting(agent) {
     // Agent設定をサーバーから受信
     $.ajax({
-        url: '/get_agent_setting',
+        url: $('#core_endpoint4').val() + '/get_agent_setting',
         method: 'GET',
         data: { agent: agent },
         dataType: 'json',
@@ -120,7 +120,7 @@ function post_agent_engine(agent) {
 
     // engine設定をサーバーに送信
     $.ajax({
-        url: '/post_agent_engine',
+        url: $('#core_endpoint4').val() + '/post_agent_engine',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData),
@@ -161,7 +161,7 @@ function post_agent_setting(agent) {
 
     // webOperator設定をサーバーに送信
     $.ajax({
-        url: '/post_agent_setting',
+        url: $('#core_endpoint4').val() + '/post_agent_setting',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData),

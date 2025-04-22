@@ -56,7 +56,7 @@ function add_wait_sec(key, value) {
 // エンジンのmodels情報を取得してコンボボックスを設定する関数
 function get_engine_models(engine) {
     $.ajax({
-        url: '/get_engine_models',
+        url: $('#core_endpoint4').val() + '/get_engine_models',
         method: 'GET',
         data: { engine: engine },
         dataType: 'json',
@@ -357,7 +357,7 @@ function get_engine_setting_all(engine) {
 function get_engine_setting(engine) {
     // 設定値をサーバーから受信
     $.ajax({
-        url: '/get_engine_setting',
+        url: $('#core_endpoint4').val() + '/get_engine_setting',
         method: 'GET',
         data: { engine: engine },
         dataType: 'json',
@@ -772,7 +772,7 @@ function post_engine_setting(engine) {
 
     // 設定値をサーバーに送信
     $.ajax({
-        url: '/post_engine_setting',
+        url: $('#core_endpoint4').val() +  '/post_engine_setting',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData),

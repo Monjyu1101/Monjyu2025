@@ -32,8 +32,8 @@ async def main():
     if True:
         print()
         logger.info("serverをモジュール起動します")
-        module_path = '_v7__mcp_server.py'
-        parms = ['--port', '8001']
+        module_path = './_v7__mcp_server.py'
+        parms = ['--port', '5001']
         env = {}
         
         # モジュールとして起動
@@ -70,7 +70,7 @@ async def main():
     if True:
         print()
         logger.info("serverをスクリプト起動します")
-        module_path = '_v7__mcp_server.py'
+        module_path = './_v7__mcp_server.py'
         parms = []
         env = {}
         

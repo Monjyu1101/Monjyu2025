@@ -148,7 +148,7 @@ function get_mode_setting_all() {
 function get_mode_setting(req_mode) {
     // 設定値をサーバーから受信
     $.ajax({
-        url: '/get_mode_setting',
+        url: $('#core_endpoint4').val() + '/get_mode_setting',
         method: 'GET',
         data: { req_mode: req_mode },
         dataType: 'json',
@@ -455,7 +455,7 @@ function post_mode_setting(req_mode) {
 
     // 設定値をサーバーに送信
     $.ajax({
-        url: '/post_mode_setting',
+        url: $('#core_endpoint4').val() + '/post_mode_setting',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData),

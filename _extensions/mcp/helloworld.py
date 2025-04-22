@@ -1,3 +1,8 @@
+"""
+ハローワールド MCP サーバー
+Model Context Protocol (MCP) を利用した簡単なサーバーです。
+基本的な挨拶メッセージとエコー機能を提供します。
+"""
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -9,7 +14,7 @@
 # ------------------------------------------------
 
 # モジュール名
-MODULE_NAME = 'monjyu_mcp'
+MODULE_NAME = 'helloworld'
 
 # ロガーの設定
 import logging
@@ -32,133 +37,16 @@ from typing import Dict, Any
 from mcp.server.fastmcp import FastMCP
 from pydantic import Field
 
-import time
-import requests
-
-
-# 定数の定義
-CORE_PORT = '8000'
-CONNECTION_TIMEOUT = 15
-REQUEST_TIMEOUT = 30
-
-
-
-class _monjyu_class:
-    def __init__(self, runMode='chat' ):
-        self.runMode   = runMode
-
-        # ポート設定等
-        self.local_endpoint0 = f'http://localhost:{ int(CORE_PORT) + 0 }'
-
-    def get_ready(self):
-        # ファイル添付
-        try:
-            response = requests.get(
-                self.local_endpoint0 + '/get_ready_count',
-                timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
-            )
-            if response.status_code == 200:
-                results = response.json()
-                isReady = results.get('ready_count',0)
-                isBusy = results.get('busy_count',0)
-                if isReady > 0:
-                    return True
-                else:
-                    return False
-            else:
-                logger.error(f"Monjyu_Request : Error response (/get_input_list) : {response.status_code}")
-        except Exception as e:
-            logger.error(f"Monjyu_Request : Error communicating (/get_input_list) : {e}")
-        return False
-
-    def request(self, req_mode='chat', user_id='admin', sysText='', reqText='', inpText='', ):
-        res_port = ''
-
-        # ファイル添付
-        file_names = []
-        try:
-            response = requests.get(
-                self.local_endpoint0 + '/get_input_list',
-                timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
-            )
-            if response.status_code == 200:
-                results = response.json()
-                for f in results['files']:
-                    #fx = f.split(' ')
-                    #if (fx[3] == 'checked'):
-                    #    file_names.append(fx[0])
-                    file_name = f.get('file_name','')
-                    checked   = f.get('checked','')
-                    if checked == 'yes':
-                        file_names.append(file_name)
-            else:
-                logger.error(f"Monjyu_Request : Error response (/get_input_list) : {response.status_code}")
-        except Exception as e:
-            logger.error(f"Monjyu_Request : Error communicating (/get_input_list) : {e}")
-
-        # AI要求送信
-        try:
-            res_port = ''
-            if (req_mode in ['clip', 'voice']):
-                res_port = CORE_PORT
-            response = requests.post(
-                self.local_endpoint0 + '/post_req',
-                json={'user_id': user_id, 'from_port': CORE_PORT, 'to_port': res_port,
-                    'req_mode': req_mode,
-                    'system_text': sysText, 'request_text': reqText, 'input_text': inpText,
-                    'file_names': file_names, 'result_savepath': '', 'result_schema': '', },
-                timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
-            )
-            if response.status_code == 200:
-                if (res_port == ''):
-                    res_port = str(response.json()['port'])
-            else:
-                logger.error(f"Monjyu_Request : Error response (/post_req) : {response.status_code}")
-        except Exception as e:
-            logger.error(f"Monjyu_Request : Error communicating (/post_req) : {e}")
-
-        # AI結果受信
-        res_text = ''
-        if res_port != '':
-            try:
-
-                # AIメンバー応答待機
-                timeout = time.time() + 120
-                while time.time() < timeout:
-
-                    response = requests.get(
-                        self.local_endpoint0 + '/get_sessions_port?user_id=' + user_id + '&from_port=' + CORE_PORT,
-                        timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
-                    )
-                    if response.status_code == 200:
-                        results = response.json()
-                        key_val = f"{ user_id }:{ CORE_PORT }:{ res_port }"
-                        if key_val in results:
-                            if results[key_val]["out_time"] is not None:
-                                res_text = str(results[key_val]["out_data"])
-                                break
-                        else:
-                            time.sleep(1.00)
-                    else:
-                        logger.error(f"Monjyu_Request : Error response (/get_sessions_port) : {response.status_code} - {response.text}")
-
-            except Exception as e:
-                logger.error(f"'Monjyu_Request : Error communicating (/get_sessions_port) : {e}")
-
-        return res_text
-
 
 class mcp_server_class:
-    """Monjyuを実行するMCPサーバー"""
+    """メッセージ機能を提供するMCPサーバー"""
     
     def __init__(self, name: str = None, transport: str = 'stdio', port: str = None):
         """サーバーインスタンスの初期化"""
         self.name = name if name is not None else MODULE_NAME
         self.transport = transport
         self.port = port if port is not None else '5000'
-
-        self.monjyu = _monjyu_class()
-
+        
         # ログ出力
         logger.info(f"サーバー初期化: name={self.name}, transport={transport}, port={self.port}")
         
@@ -172,6 +60,7 @@ class mcp_server_class:
             
         self.abort_flag = False
         self.error_flag = False
+        self.message_header = 'Hello World!'
         self.mcp_thread = None
         
         logger.info("MCPサーバーを初期化します...")
@@ -191,24 +80,43 @@ class mcp_server_class:
         """サーバーのツールとリソースを登録"""
         logger.info("ツールとリソースのセットアップを開始")
 
+        # HelloWorldツール
         @self.mcp.tool()
-        async def request(
-                request_text: str = Field(description="外部AIMonjyuへ依頼するテキスト")
+        async def HelloWorld() -> str:
+            """現在のメッセージヘッダーを返す"""
+            logger.info("HelloWorldツールが呼び出されました")
+            return self._create_response({"result": "ok", "message": self.message_header})
+
+        # Echoツール
+        @self.mcp.tool()
+        async def Echo(
+                message_text: str = Field(description="エコーするメッセージテキスト")
             ) -> str:
-            logger.info("Monjyu MCP サーバーが呼び出されました")
+            """メッセージをヘッダー付きでエコー"""
+            logger.info(f"Echoツールが呼び出されました: {message_text}")
+            return self._create_response({"result": "ok", "message": f"{self.message_header}, {message_text}"})
+        
+        # ヘッダー設定ツール
+        @self.mcp.tool()
+        async def SetMessageHeader(
+                header_text: str = Field(description="設定するヘッダーテキスト")
+            ) -> str:
+            """メッセージヘッダーを変更"""
+            logger.info(f"メッセージヘッダーを変更: '{self.message_header}' -> '{header_text}'")
+            self.message_header = header_text
+            return self._create_response({"result": "ok", "message_header": self.message_header})
 
-            isReady = self.monjyu.get_ready()
-            if (isReady == False):
-                logger.error(f"サービス停止中です")
-                return self._create_response({"error": "サービス停止中です"})
-
-            req_mode = "chat"
-            user_id = "admin"
-            sysText = "あなたは美しい日本語を話す賢いアシスタントです。"
-            reqText = request_text
-            inpText = ""
-            resText = self.monjyu.request(req_mode=req_mode, user_id=user_id, sysText=sysText, reqText=reqText, inpText=inpText,)
-            return self._create_response({"result": "ok", "result_text": resText})
+        # ステータスリソース
+        @self.mcp.resource("server://get_status")
+        def get_status() -> str:
+            """サーバーの状態情報を提供"""
+            logger.info("サーバーステータスが要求されました")
+            return self._create_response({
+                "status": "running",
+                "name": self.name,
+                "resources": {"message_header": self.message_header},
+                "timestamp": asyncio.get_event_loop().time()
+            })
 
         logger.info("ツールとリソースのセットアップが完了")
 

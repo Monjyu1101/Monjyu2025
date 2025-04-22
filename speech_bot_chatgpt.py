@@ -522,8 +522,8 @@ class _chatgptAPI:
 
             # function_call以外の通常メッセージを変換
             if (role != 'function_call'):
-                #if (role not in ['system', 'user', 'assistant']):
-                #    role = 'user'
+                if (role not in ['system', 'user', 'assistant']):
+                    role = 'user'
                 if (name == ''):
                     dic = {'role': role, 'content': content}
                     res_msg.append(dic)
@@ -788,47 +788,25 @@ class _chatgptAPI:
 
                 # 2. ツール使用モード
                 elif (len(tools) != 0):
-                    # o3, o4モデル以外の場合
-                    if (res_api[:2].lower() not in ['o3', 'o4']):
-                        response = self.client.chat.completions.create(
-                            model=res_api,
-                            messages=msg,
-                            tools=tools, tool_choice='auto',
-                            timeout=self.max_wait_sec,
-                            stream=stream,
-                            )
-                    # o3, o4モデルの場合は高推論努力
-                    else:
-                        response = self.client.chat.completions.create(
-                            model=res_api,
-                            messages=msg,
-                            tools=tools, tool_choice='auto',
-                            timeout=self.max_wait_sec,
-                            stream=stream,
-                            reasoning_effort='high',
-                            )
+                    response = self.client.chat.completions.create(
+                        model=res_api,
+                        messages=msg,
+                        tools=tools, tool_choice='auto',
+                        timeout=self.max_wait_sec,
+                        stream=stream,
+                        )
 
                 # 3. 通常モード
                 else:
                     # JSONスキーマなしの場合
                     if (jsonSchema is None) or (jsonSchema == ''):
-                        # o3, o4モデル以外の場合
-                        if (res_api[:2].lower() not in ['o3', 'o4']):
-                            response = self.client.chat.completions.create(
-                                model=res_api,
-                                messages=msg,
-                                timeout=self.max_wait_sec,
-                                stream=stream,
-                                )
-                        # o3, o4モデルの場合は高推論努力
-                        else:
-                            response = self.client.chat.completions.create(
-                                model=res_api,
-                                messages=msg,
-                                timeout=self.max_wait_sec,
-                                stream=stream,
-                                reasoning_effort='high',
-                                )
+                        response = self.client.chat.completions.create(
+                            model=res_api,
+                            messages=msg,
+                            timeout=self.max_wait_sec,
+                            stream=stream,
+                            )
+
                     # JSONスキーマありの場合
                     else:
                         schema = None

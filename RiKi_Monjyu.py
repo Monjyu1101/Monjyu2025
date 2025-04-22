@@ -24,8 +24,16 @@ logging.getLogger('comtypes.client._code_cache').setLevel(logging.WARNING)
 logging.getLogger('httpx').setLevel(logging.WARNING)
 logging.getLogger('google_genai').setLevel(logging.WARNING)
 
-
 import sys
+#from rainbow_logging_handler import RainbowLoggingHandler
+#logger_format   = logging.Formatter('%(asctime)s - %(name)-10s - %(levelname)-8s - %(message)s')
+#rainbow_handler = RainbowLoggingHandler(sys.stderr, color_funcName=('black', 'yellow', True))
+#rainbow_handler.setFormatter(logger_format)
+#for h in logger.handlers:
+#    logger.removeHandler(h)
+#logger.addHandler(rainbow_handler)
+
+
 import os
 import time
 import datetime
@@ -127,6 +135,7 @@ import RiKi_Monjyu__mcpHost
 import RiKi_Monjyu__coreai0
 import RiKi_Monjyu__coreai1
 import RiKi_Monjyu__coreai2
+import RiKi_Monjyu__coreai4
 import RiKi_Monjyu__coreai5
 import RiKi_Monjyu__subai
 import RiKi_Monjyu__webui
@@ -451,6 +460,14 @@ if __name__ == '__main__':
         coreai2_thread = threading.Thread(target=coreai2.run)
         coreai2_thread.daemon = True
         coreai2_thread.start()
+
+        coreai4 = RiKi_Monjyu__coreai4.coreai4_class(   runMode=runMode, qLog_fn=qLog_fn,
+                                                        main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
+                                                        coreai=coreai0, 
+                                                        core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
+        coreai4_thread = threading.Thread(target=coreai4.run)
+        coreai4_thread.daemon = True
+        coreai4_thread.start()
 
         coreai5 = RiKi_Monjyu__coreai5.coreai5_class(   runMode=runMode, qLog_fn=qLog_fn,
                                                         main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
