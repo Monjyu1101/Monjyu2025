@@ -21,34 +21,20 @@ logging.basicConfig(
 logger = logging.getLogger(MODULE_NAME)
 
 
-import os
 import time
 import datetime
 
 import json
 import queue
-import base64
 
 
 # API ライブラリ
 import groq
 
-# APIキー情報のインポート
+# モジュールインポート
+import speech_bot__common
+bot_common = speech_bot__common._bot_common()
 import speech_bot_groq_key as groq_key
-
-
-# Base64エンコード機能
-def base64_encode(file_path):
-    """
-    ファイルをBase64エンコードする関数
-    Args:
-        file_path (str): エンコードするファイルのパス
-    Returns:
-        str: Base64エンコードされた文字列
-    """
-    with open(file_path, "rb") as input_file:
-        logger.debug(f"ファイル '{file_path}' をBase64エンコード")
-        return base64.b64encode(input_file.read()).decode('utf-8')
 
 
 class _groqAPI:
@@ -203,7 +189,7 @@ class _groqAPI:
         # APIクライアントの初期化
         self.client = None
         try:
-            # Grok API認証
+            # API認証
             if (key_id[:1] == '<'):
                 logger.warning("APIキーが未設定です")
                 return False
@@ -402,157 +388,6 @@ class _groqAPI:
             logger.error(f"set_models() モデル設定更新エラー: {e}")
             return False
 
-    def history_add(self, history=[], sysText=None, reqText=None, inpText='こんにちは'):
-        """
-        会話履歴にメッセージを追加する
-        Args:
-            history (list, optional): 既存の会話履歴
-            sysText (str, optional): システムテキスト
-            reqText (str, optional): 要求テキスト
-            inpText (str, optional): 入力テキスト
-        Returns:
-            list: 更新された会話履歴
-        """
-        res_history = history
-
-        # sysTextの処理 (システムテキスト)
-        if (sysText is not None) and (sysText.strip() != ''):
-            # 既存履歴のシステムメッセージと異なる場合は履歴をリセット
-            if (len(res_history) > 0):
-                # 既存の履歴にシステムと新しいものと異なる場合は履歴をクリア
-                if (sysText.strip() != res_history[0]['content'].strip()):
-                    res_history = []
-            # システムテキストを追加
-            if (len(res_history) == 0):
-                self.seq += 1
-                dic = {'seq': self.seq, 'time': time.time(), 'role': 'system', 'name': '', 'content': sysText.strip()}
-                res_history.append(dic)
-        
-        # reqTextの処理 (要求テキスト)
-        if (reqText is not None) and (reqText.strip() != ''):
-            self.seq += 1
-            dic = {'seq': self.seq, 'time': time.time(), 'role': 'user', 'name': '', 'content': reqText.strip()}
-            res_history.append(dic)
-
-        # inpTextの処理 (入力テキスト)
-        if (inpText.strip() != ''):
-            self.seq += 1
-            dic = {'seq': self.seq, 'time': time.time(), 'role': 'user', 'name': '', 'content': inpText.rstrip()}
-            res_history.append(dic)
-
-        return res_history
-
-    def history_zip1(self, history=[]):
-        """
-        会話履歴から古いメッセージを削除する（時間ベース）
-        15分以上経過したメッセージを削除
-        Args:
-            history (list, optional): 圧縮する会話履歴
-        Returns:
-            list: 圧縮された会話履歴
-        """
-        res_history = history
-
-        if (len(res_history) > 0):
-            for h in reversed(range(len(res_history))):
-                tm = res_history[h]['time']
-                # 15分（900秒）以上前のメッセージは削除対象
-                if ((time.time() - tm) > 900):
-                    if (h != 0):
-                        del res_history[h]
-                    else:
-                        # インデックス0はシステムメッセージのみ維持
-                        if (res_history[0]['role'] != 'system'):
-                            del res_history[0]
-
-        return res_history
-
-    def history_zip2(self, history=[], leave_count=4):
-        """
-        会話履歴から古いメッセージを削除する（カウントベース）
-        最新のleave_count件とシステムメッセージを残して削除
-        Args:
-            history (list, optional): 圧縮する会話履歴
-            leave_count (int, optional): 残すメッセージの数
-        Returns:
-            list: 圧縮された会話履歴
-        """
-        res_history = history
-
-        if (len(res_history) > 6):
-            for h in reversed(range(2, len(res_history) - leave_count)):
-                del res_history[h]
-
-        return res_history
-
-    def history2msg_gpt(self, history=[]):
-        """
-        履歴をChatgpt API用のメッセージ形式に変換
-        Args:
-            history (list, optional): 会話履歴            
-        Returns:
-            list: API用に変換されたメッセージリスト
-        """
-        res_msg = []
-        for h in range(len(history)):
-            role = history[h]['role']
-            content = history[h]['content']
-            name = history[h]['name']
-
-            # function_call以外の通常メッセージを変換
-            if (role != 'function_call'):
-                if (role not in ['system', 'user', 'assistant']):
-                    role = 'user'
-                if (name == ''):
-                    dic = {'role': role, 'content': content}
-                    res_msg.append(dic)
-                else:
-                    dic = {'role': role, 'name': name, 'content': content}
-                    res_msg.append(dic)
-
-        return res_msg
-
-    def history2msg_vision(self, history=[], image_urls=[]):
-        """
-        履歴をVision API用のメッセージ形式に変換（画像付き）        
-        Args:
-            history (list, optional): 会話履歴
-            image_urls (list, optional): 画像URL情報のリスト
-        Returns:
-            list: Vision API用に変換されたメッセージリスト
-        """
-        res_msg = []
-        last_h = 0
-        
-        # 最後の通常メッセージのインデックスを検索
-        for h in range(len(history)):
-            role = history[h]['role']
-            if (role != 'function_call') and (role != 'function'):
-                last_h = h 
-
-        # メッセージ変換処理
-        for h in range(len(history)):
-            role = history[h]['role']
-            content = history[h]['content']
-            name = history[h]['name']
-
-            # 通常メッセージの処理
-            if (role != 'function_call') and (role != 'function'):
-                con = []
-                con.append({'type': 'text', 'text': content})
-                if (h == last_h):
-                    for image_url in image_urls:
-                        con.append(image_url)
-                if (name == ''):
-                    dic = {'role': role, 'content': con}
-                    res_msg.append(dic)
-                else:
-                    dic = {'role': role, 'name': name, 'content': con}
-                    res_msg.append(dic)
-
-        return res_msg
-
-
     def run_gpt(self, chat_class='chat', model_select='auto',
                 nick_name=None, model_name=None,
                 session_id='admin', history=[],
@@ -574,163 +409,29 @@ class _groqAPI:
             logger.error("API認証されていません!")
             return res_text, res_path, res_files, res_name, res_api, res_history
 
-        # モデル選択の補正（アシスタント用）
-        if ((chat_class == 'assistant') \
-        or (chat_class == 'コード生成') \
-        or (chat_class == 'コード実行') \
-        or (chat_class == '文書検索') \
-        or (chat_class == '複雑な会話') \
-        or (chat_class == 'アシスタント') \
-        or (model_select == 'x')):
-            if (self.x_enable == True):
-                res_name = self.x_nick_name
-                res_api = self.x_model
-                use_tools = self.x_use_tools
-
-        # ニックネーム指定に基づくモデル選択
-        if (self.a_nick_name != ''):
-            if (inpText.strip()[:len(self.a_nick_name)+1].lower() == (self.a_nick_name.lower() + ',')):
-                inpText = inpText.strip()[len(self.a_nick_name)+1:]
-        if (self.b_nick_name != ''):
-            if (inpText.strip()[:len(self.b_nick_name)+1].lower() == (self.b_nick_name.lower() + ',')):
-                inpText = inpText.strip()[len(self.b_nick_name)+1:]
-                if (self.b_enable == True):
-                        res_name = self.b_nick_name
-                        res_api = self.b_model
-                        use_tools = self.b_use_tools
-        if (self.v_nick_name != ''):
-            if (inpText.strip()[:len(self.v_nick_name)+1].lower() == (self.v_nick_name.lower() + ',')):
-                inpText = inpText.strip()[len(self.v_nick_name)+1:]
-                if (self.v_enable == True):
-                    if (len(image_urls) > 0) \
-                    and (len(image_urls) == len(upload_files)):
-                        res_name = self.v_nick_name
-                        res_api = self.v_model
-                        use_tools = self.v_use_tools
-                elif (self.x_enable == True):
-                        res_name = self.x_nick_name
-                        res_api = self.x_model
-                        use_tools = self.x_use_tools
-        if (self.x_nick_name != ''):
-            if (inpText.strip()[:len(self.x_nick_name)+1].lower() == (self.x_nick_name.lower() + ',')):
-                inpText = inpText.strip()[len(self.x_nick_name)+1:]
-                if (self.x_enable == True):
-                        res_name = self.x_nick_name
-                        res_api = self.x_model
-                        use_tools = self.x_use_tools
-                elif (self.b_enable == True):
-                        res_name = self.b_nick_name
-                        res_api = self.b_model
-                        use_tools = self.b_use_tools
-
-        # 特殊プレフィックスによるモデル選択
-        if (inpText.strip()[:5].lower() == ('riki,')):
-            inpText = inpText.strip()[5:]
-            if (self.x_enable == True):
-                    res_name = self.x_nick_name
-                    res_api = self.x_model
-                    use_tools = self.x_use_tools
-            elif (self.b_enable == True):
-                    res_name = self.b_nick_name
-                    res_api = self.b_model
-                    use_tools = self.b_use_tools
-        elif (inpText.strip()[:7].lower() == ('vision,')):
-            inpText = inpText.strip()[7:]
-            if (self.v_enable == True):
-                if (len(image_urls) > 0) \
-                and (len(image_urls) == len(upload_files)):
-                        res_name = self.v_nick_name
-                        res_api = self.v_model
-                        use_tools = self.v_use_tools
-            elif (self.x_enable == True):
-                    res_name = self.x_nick_name
-                    res_api = self.x_model
-                    use_tools = self.x_use_tools
-        elif (inpText.strip()[:10].lower() == ('assistant,')):
-            inpText = inpText.strip()[10:]
-            if (self.x_enable == True):
-                    res_name = self.x_nick_name
-                    res_api = self.x_model
-                    use_tools = self.x_use_tools
-            elif (self.b_enable == True):
-                    res_name = self.b_nick_name
-                    res_api = self.b_model
-                    use_tools = self.b_use_tools
-        elif (inpText.strip()[:7].lower() == ('openai,')):
-            inpText = inpText.strip()[7:]
-        elif (inpText.strip()[:6].lower() == ('azure,')):
-            inpText = inpText.strip()[6:]
-        elif (inpText.strip()[:8].lower() == ('chatgpt,')):
-            inpText = inpText.strip()[8:]
-        elif (inpText.strip()[:7].lower() == ('assist,')):
-            inpText = inpText.strip()[7:]
-        elif (inpText.strip()[:6].lower() == ('respo,')):
-            inpText = inpText.strip()[6:]
-        elif (inpText.strip()[:7].lower() == ('gemini,')):
-            inpText = inpText.strip()[7:]
-        elif (inpText.strip()[:7].lower() == ('freeai,')):
-            inpText = inpText.strip()[7:]
-        elif (inpText.strip()[:5].lower() == ('free,')):
-            inpText = inpText.strip()[5:]
-        elif (inpText.strip()[:7].lower() == ('claude,')):
-            inpText = inpText.strip()[7:]
-        elif (inpText.strip()[:11].lower() == ('openrouter,')):
-            inpText = inpText.strip()[11:]
-        elif (inpText.strip()[:7].lower() == ('openrt,')):
-            inpText = inpText.strip()[7:]
-        elif (inpText.strip()[:11].lower() == ('perplexity,')):
-            inpText = inpText.strip()[11:]
-        elif (inpText.strip()[:5].lower() == ('pplx,')):
-            inpText = inpText.strip()[5:]
-        elif (inpText.strip()[:5].lower() == ('grok,')):
-            inpText = inpText.strip()[5:]
-        elif (inpText.strip()[:5].lower() == ('groq,')):
-            inpText = inpText.strip()[5:]
-        elif (inpText.strip()[:7].lower() == ('ollama,')):
-            inpText = inpText.strip()[7:]
-        elif (inpText.strip()[:6].lower() == ('local,')):
-            inpText = inpText.strip()[6:]
-
-        # モデル未設定時の自動選択
-        if (res_api is None):
-            res_name = self.a_nick_name
-            res_api = self.a_model
-            use_tools = self.a_use_tools
-
-            # テキスト長または添付ファイルに基づくモデル選択
-            if (self.b_enable == True):
-                if (len(upload_files) > 0) \
-                or (len(inpText) > 1000):
-                    res_name = self.b_nick_name
-                    res_api = self.b_model
-                    use_tools = self.b_use_tools
-
-        # 画像処理のためのモデル補正
-        if (len(image_urls) > 0) \
-        and (len(image_urls) == len(upload_files)):
-            if (self.v_enable == True):
-                res_name = self.v_nick_name
-                res_api = self.v_model
-                use_tools = self.v_use_tools
-            elif (self.x_enable == True):
-                res_name = self.x_nick_name
-                res_api = self.x_model
-                use_tools = self.x_use_tools
+        # モデル選択
+        inpText, res_name, res_api, use_tools = bot_common.select_model(
+                chat_class, model_select, inpText, upload_files, image_urls,
+                self.a_nick_name, self.a_model, self.a_use_tools,
+                self.b_nick_name, self.b_model, self.b_use_tools,
+                self.v_nick_name, self.v_model, self.v_use_tools,
+                self.x_nick_name, self.x_model, self.x_use_tools)
 
         # 履歴の追加と圧縮
-        res_history = self.history_add(history=res_history, sysText=sysText, reqText=reqText, inpText=inpText)
-        res_history = self.history_zip1(history=res_history)
+        res_history = bot_common.history_add(history=res_history, sysText=sysText, reqText=reqText, inpText=inpText)
+        res_history = bot_common.history_zip1(history=res_history)
 
         # メッセージの作成
         if (model_select != 'v'):
-            msg = self.history2msg_gpt(history=res_history, )
+            msg = bot_common.history2msg_gpt(history=res_history)
         else:
-            msg = self.history2msg_vision(history=res_history, image_urls=image_urls,)
+            msg = bot_common.history2msg_vision(history=res_history, image_urls=image_urls)
 
         # ストリーミングモード無効
         stream = False
 
         # ツール（関数）設定
+        tools = []
         functions = []
         # 2025/04/09時点 ツールに未対応です！
 
@@ -747,16 +448,77 @@ class _groqAPI:
                 n += 1
                 logger.info(f"//Groq// {res_name.lower()}, {res_api}, pass={n}, ")
 
-                # ストリーミング実行
-                if (stream == True):
+                # APIリクエスト作成と実行
+                # 1. 画像処理モード
+                if (res_name == self.v_nick_name) and (len(image_urls) > 0):
+                    null_history = bot_common.history_add(history=[], sysText=sysText, reqText=reqText, inpText=inpText)
+                    msg = bot_common.history2msg_vision(history=null_history, image_urls=image_urls)
                     response = self.client.chat.completions.create(
-                            model = res_api,
-                            messages = msg,
-                            temperature = float(temperature),
-                            timeout = self.max_wait_sec,
-                            stream = stream, 
+                            model=res_api,
+                            messages=msg,
+                            temperature=float(temperature),
+                            timeout=self.max_wait_sec,
+                            stream=stream,
                             )
 
+                # 2. ツール使用モード（現在は未サポート）
+                elif (len(tools) != 0):
+                    # ツール設定
+                    tools = []
+                    for f in range(len(functions)):
+                        tools.append({"type": "function", "function": functions[f]})
+                        response = self.client.chat.completions.create(
+                            model=res_api,
+                            messages=msg,
+                            temperature=float(temperature),
+                            tools=tools, tool_choice='auto',
+                            timeout=self.max_wait_sec,
+                            stream=stream,
+                            )
+
+                # 3. 通常モード
+                else:
+                    # JSONスキーマなしの場合
+                    if (jsonSchema is None) or (jsonSchema == ''):
+                        response = self.client.chat.completions.create(
+                            model=res_api,
+                            messages=msg,
+                            temperature=float(temperature),
+                            timeout=self.max_wait_sec,
+                            stream=stream,
+                            )
+                    # JSONスキーマありの場合
+                    else:
+                        schema = None
+                        try:
+                            schema = json.loads(jsonSchema)
+                        except Exception as e:
+                            logger.warning(f"JSONスキーマの解析に失敗: {e}")
+
+                        # スキーマ指定なし
+                        if (schema is None):
+                            response = self.client.chat.completions.create(
+                                model=res_api,
+                                messages=msg,
+                                temperature=float(temperature),
+                                timeout=self.max_wait_sec,
+                                response_format={"type": "json_object"},
+                                stream=stream,
+                                )
+                        # スキーマ指定あり
+                        else:
+                            response = self.client.chat.completions.create(
+                                model=res_api,
+                                messages=msg,
+                                temperature=float(temperature),
+                                timeout=self.max_wait_sec,
+                                response_format={"type": "json_schema", "json_schema": schema},
+                                stream=stream,
+                                )
+
+                # ストリーミング応答処理
+                if (stream == True):
+                    logger.debug("ストリーミング応答の処理開始")
                     chkTime = time.time()
                     for chunk in response:
                         if ((time.time() - chkTime) > self.max_wait_sec):
@@ -764,102 +526,39 @@ class _groqAPI:
                             break
                         delta = chunk.choices[0].delta
                         if (delta is not None):
-                            # テキスト部分の処理
+                            # テキストコンテンツの処理
                             if (delta.content is not None):
                                 res_role = 'assistant'
                                 content = delta.content
                                 res_content += content
                                 self.stream(session_id, content)
 
-                    # ストリーム出力の終了時に改行を出力
+                    # 改行処理
                     if (res_content != ''):
-                        self.print(session_id, )
+                        self.print(session_id)
 
                 # 通常実行（ストリームなし）
                 if (stream == False):
-                    # 画像指定がある場合（ビジョンモデル）
-                    if (model_select == 'v') and (len(image_urls) > 0):
-                        null_history = self.history_add(history=[], sysText=sysText, reqText=reqText, inpText=inpText, )
-                        msg = self.history2msg_vision(history=null_history, image_urls=image_urls,)
-                        response = self.client.chat.completions.create(
-                                model = res_api,
-                                messages = msg,
-                                temperature = float(temperature),
-                                timeout = self.max_wait_sec, 
-                                stream = stream, 
-                                )
-
-                    # ツールの使用（現在は未サポート）
-                    elif (len(functions) != 0):
-                        # ツール設定
-                        tools = []
-                        for f in range(len(functions)):
-                            tools.append({"type": "function", "function": functions[f]})
-                            response = self.client.chat.completions.create(
-                                model = res_api,
-                                messages = msg,
-                                temperature = float(temperature),
-                                tools = tools,
-                                tool_choice = 'auto',
-                                timeout = self.max_wait_sec,
-                                stream = stream, 
-                                )
-
-                    else:
-                        # JSONスキーマなしの通常実行
-                        if (jsonSchema is None) or (jsonSchema == ''):                        
-                            response = self.client.chat.completions.create(
-                                model = res_api,
-                                messages = msg,
-                                temperature = float(temperature),
-                                timeout = self.max_wait_sec,
-                                stream = stream, 
-                                )
-                        else:
-                            # JSONスキーマの処理
-                            schema = None
-                            try:
-                                schema = json.loads(jsonSchema)
-                            except:
-                                logger.warning("JSONスキーマの解析に失敗しました")
-                            # スキーマ指定なし（JSONオブジェクト形式）
-                            if (schema is None):
-                                response = self.client.chat.completions.create(
-                                    model = res_api,
-                                    messages = msg,
-                                    temperature = float(temperature),
-                                    timeout = self.max_wait_sec, 
-                                    response_format = { "type": "json_object" },
-                                    stream = stream, 
-                                    )
-                            # スキーマ指定あり
-                            else:
-                                response = self.client.chat.completions.create(
-                                    model = res_api,
-                                    messages = msg,
-                                    temperature = float(temperature),
-                                    timeout = self.max_wait_sec, 
-                                    response_format = { "type": "json_schema", "json_schema": schema },
-                                    stream = stream, 
-                                    )
 
                     # レスポンス処理
                     try:
+                        # 通常メッセージ
                         res_role = str(response.choices[0].message.role)
                         res_content = str(response.choices[0].message.content)
-                        logger.debug("レスポンスの処理に成功しました")
                     except Exception as e:
-                        logger.error(f"レスポンス処理エラー: {e}")
+                        logger.error(f"応答処理エラー: {e}")
 
                 # 実行終了
-                function_name = 'exit'
-                if (res_content.strip() != ''):
-                    res_text += res_content.rstrip() + '\n'
+                # 応答結果の確認
+                if True:
+                    function_name = 'exit'
+                    if (res_content.strip() != ''):
+                        res_text += res_content.rstrip() + '\n'
 
-                    # 応答結果を履歴に追加
-                    self.seq += 1
-                    dic = {'seq': self.seq, 'time': time.time(), 'role': 'assistant', 'name': '', 'content': res_content}
-                    res_history.append(dic)
+                        # 応答結果を履歴に追加
+                        self.seq += 1
+                        dic = {'seq': self.seq, 'time': time.time(), 'role': 'assistant', 'name': '', 'content': res_content}
+                        res_history.append(dic)
 
         # 最終応答結果の確認
         if (res_text != ''):
@@ -868,54 +567,6 @@ class _groqAPI:
             logger.error('//Grok// Error !')
 
         return res_text, res_path, res_files, res_name, res_api, res_history
-
-
-    def files_check(self, filePath=[]):
-        """
-        アップロードされたファイルを処理し、画像ファイルをbase64エンコードする
-        Args:
-            filePath (list, optional): ファイルパスのリスト
-        Returns:
-            tuple: (アップロードファイルリスト, 画像URLリスト)
-        """
-        upload_files = []
-        image_urls = []
-
-        # 添付ファイルの確認と処理
-        if (len(filePath) > 0):
-            logger.debug(f"files_check() {len(filePath)}個のファイルを処理します")
-            try:
-                for file_name in filePath:
-                    if (os.path.isfile(file_name)):
-                        # 2025/03/15時点でのサイズ上限 20Mbyte
-                        file_size = os.path.getsize(file_name)
-                        if (file_size <= 20000000):
-                            upload_files.append(file_name)
-
-                            # 画像ファイルの場合、base64エンコードしてURL形式に変換
-                            file_ext = os.path.splitext(file_name)[1][1:].lower()
-                            if (file_ext in ('jpg', 'jpeg', 'png', 'gif')):
-                                base64_text = base64_encode(file_name)
-                                # 画像フォーマット別の処理
-                                if (file_ext in ('jpg', 'jpeg')):
-                                    url = {"url": f"data:image/jpeg;base64,{base64_text}"}
-                                    image_url = {'type': 'image_url', 'image_url': url}
-                                    image_urls.append(image_url)
-                                elif (file_ext == 'png'):
-                                    url = {"url": f"data:image/png;base64,{base64_text}"}
-                                    image_url = {'type': 'image_url', 'image_url': url}
-                                    image_urls.append(image_url)
-                                elif (file_ext == 'gif'):
-                                    url = {"url": f"data:image/gif;base64,{base64_text}"}
-                                    image_url = {'type': 'image_url', 'image_url': url}
-                                    image_urls.append(image_url)
-                        else:
-                            logger.warning(f"files_check() ファイルサイズが上限を超えています: {file_name} ({file_size} bytes)")
-
-            except Exception as e:
-                logger.error(f"files_check() ファイル処理エラー: {e}")
-
-        return upload_files, image_urls
 
     def chatBot(self, chat_class='auto', model_select='auto',
                 session_id='admin', history=[],
@@ -951,7 +602,7 @@ class _groqAPI:
         upload_files = []
         image_urls = []
         try:
-            upload_files, image_urls = self.files_check(filePath=filePath)
+            upload_files, image_urls = bot_common.files_check(filePath=filePath)
         except Exception as e:
             logger.error(f"ファイル処理エラー: {e}")
 
@@ -1073,8 +724,8 @@ if __name__ == '__main__':
 
         # テスト3: ツール実行
         if False:
-            import    speech_bot_function
-            botFunc = speech_bot_function.botFunction()
+            import    speech_bot__function
+            botFunc = speech_bot__function.botFunction()
             res, msg = botFunc.functions_load(
                 functions_path='_extensions/function/', secure_level='low', )
             for key, module_dic in botFunc.function_modules.items():

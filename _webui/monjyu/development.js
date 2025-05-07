@@ -97,6 +97,7 @@ async function allPyRequest() {
     get_source_request('RiKi_Monjyu__coreai0.py');
     get_source_request('RiKi_Monjyu__coreai1.py');
     get_source_request('RiKi_Monjyu__coreai2.py');
+    get_source_request('RiKi_Monjyu__coreai4.py');
     get_source_request('RiKi_Monjyu__coreai5.py');
     get_source_request('RiKi_Monjyu__subai.py');
     get_source_request('RiKi_Monjyu__subbot.py');
@@ -232,6 +233,7 @@ $(document).ready(function() {
         get_source_input('RiKi_Monjyu__coreai0.py');
         get_source_input('RiKi_Monjyu__coreai1.py');
         get_source_input('RiKi_Monjyu__coreai2.py');
+        get_source_input('RiKi_Monjyu__coreai4.py');
         get_source_input('RiKi_Monjyu__coreai5.py');
         get_source_input('RiKi_Monjyu__subai.py');
         get_source_input('RiKi_Monjyu__subbot.py');
@@ -324,6 +326,9 @@ $(document).ready(function() {
     });
     $('#btnSource_coreai2').click(function() {
         get_source_input('RiKi_Monjyu__coreai2.py');
+    });
+    $('#btnSource_coreai4').click(function() {
+        get_source_input('RiKi_Monjyu__coreai4.py');
     });
     $('#btnSource_coreai5').click(function() {
         get_source_input('RiKi_Monjyu__coreai5.py');

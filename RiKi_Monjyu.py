@@ -21,6 +21,9 @@ logging.basicConfig(
 logger = logging.getLogger(MODULE_NAME)
 logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
 logging.getLogger('comtypes.client._code_cache').setLevel(logging.WARNING)
+logging.getLogger('uvicorn').setLevel(logging.WARNING)
+logging.getLogger('uvicorn.access').setLevel(logging.WARNING)
+logging.getLogger('uvicorn.app').setLevel(logging.WARNING)
 logging.getLogger('httpx').setLevel(logging.WARNING)
 logging.getLogger('google_genai').setLevel(logging.WARNING)
 
@@ -139,7 +142,7 @@ import RiKi_Monjyu__coreai4
 import RiKi_Monjyu__coreai5
 import RiKi_Monjyu__subai
 import RiKi_Monjyu__webui
-import speech_bot_function
+import speech_bot__function
 
 # シグナル処理
 import signal
@@ -205,13 +208,13 @@ if __name__ == '__main__':
 
     # 制限日設定
     limit_date = '{:1d}{:1d}'.format(int(float(3.0)), int(float(1.0)))
-    limit_date = '{:1d}{:1d}'.format(int(float(1.0)), int(float(2.0))) + '/' + limit_date
+    limit_date = '{:1d}{:1d}'.format(int(float(1.0)), int(float(0.0))) + '/' + limit_date
     limit_date = '/' + limit_date
     limit_date = '{:3d}{:1d}'.format(int(float(202.0)), int(float(6.0))) + limit_date
-    #limit_date = '2026/12/31'
+    #limit_date = '2026/10/31'
     dt = datetime.datetime.now()
     dateinfo_today = dt.strftime('%Y/%m/%d')
-    dt = datetime.datetime.strptime(limit_date, '%Y/%m/%d') + datetime.timedelta(days=-60)
+    dt = datetime.datetime.strptime(limit_date, '%Y/%m/%d') + datetime.timedelta(days=-180)
     dateinfo_start = dt.strftime('%Y/%m/%d')
     main_start = time.time()
 
@@ -245,7 +248,7 @@ if __name__ == '__main__':
     if True:
          # ライセンス制限
         if (dateinfo_today >= dateinfo_start):
-            logger.warning(f'利用ライセンスは、 {limit_date} まで有効です。')
+            logger.warning(f'利用ライセンス(Python3.10support)は、 {limit_date} まで有効です。')
         if (dateinfo_today > limit_date):
             time.sleep(60)
             sys.exit(0)
@@ -302,7 +305,7 @@ if __name__ == '__main__':
 
     # botFunction 初期化
     if True:
-        botFunc = speech_bot_function.botFunction()
+        botFunc = speech_bot__function.botFunction()
         res, msg = botFunc.functions_load(
             functions_path='_extensions/function/', secure_level='low')
         if res != True or msg != '':
@@ -513,7 +516,7 @@ if __name__ == '__main__':
         time.sleep(30)
 
         print()
-        logger.info("============================================================================")
+        logger.info("=============================================================================")
         logger.info(" Thank you for using our systems.")
         logger.info(" Multiple AI Platforms with MCP, Monjyu (もんじゅ), 'http://localhost:8008/'.")
         if (liveai_enable == True):
@@ -522,7 +525,7 @@ if __name__ == '__main__':
             logger.info(" Agentic AI Web-Operator(ウェブオペレーター), Specify use at the prompt.")
         if (researchAgent_enable == True):
             logger.info(" Agentic AI Research-Agent(リサーチエージェント), Specify use at the prompt.")
-        logger.info("============================================================================")
+        logger.info("=============================================================================")
         print()
 
     # モデル情報設定
@@ -531,6 +534,7 @@ if __name__ == '__main__':
     # 15秒待機
     time.sleep(15)
     print()
+    logger.info("Monjyu (もんじゅ) is Ready,")
 
     # 準備完了
     main.main_all_ready = True

@@ -20,6 +20,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(MODULE_NAME)
 
+
 # MCPホストのインスタンス化
 mcp_host = _v7__mcp_host.mcp_host_class()
 
