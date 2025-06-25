@@ -224,23 +224,6 @@ class coreai0_class:
                 if self.subbot.llm.chatgptAPI.x_nick_name:
                     models[self.subbot.llm.chatgptAPI.x_nick_name.lower()] = ' ' + self.subbot.llm.chatgptAPI.x_nick_name
 
-        # Assist
-        if self.subbot.llm.assist_enable is None:
-            self.subbot.llm.assist_auth()
-            if self.subbot.llm.assist_enable:
-                logger.info(f"Assist     : Ready, (Models count={ len(self.subbot.llm.assistAPI.models) })")
-        if self.subbot.llm.assist_enable:
-            if (req_mode == 'chat'):
-                models['[assist]'] = '[Assist]'
-                if self.subbot.llm.assistAPI.a_nick_name:
-                    models[self.subbot.llm.assistAPI.a_nick_name.lower()] = ' ' + self.subbot.llm.assistAPI.a_nick_name
-                if self.subbot.llm.assistAPI.b_nick_name:
-                    models[self.subbot.llm.assistAPI.b_nick_name.lower()] = ' ' + self.subbot.llm.assistAPI.b_nick_name
-                if self.subbot.llm.assistAPI.v_nick_name:
-                    models[self.subbot.llm.assistAPI.v_nick_name.lower()] = ' ' + self.subbot.llm.assistAPI.v_nick_name
-                if self.subbot.llm.assistAPI.x_nick_name:
-                    models[self.subbot.llm.assistAPI.x_nick_name.lower()] = ' ' + self.subbot.llm.assistAPI.x_nick_name
-
         # Respo
         if self.subbot.llm.respo_enable is None:
             self.subbot.llm.respo_auth()
@@ -420,16 +403,6 @@ class coreai0_class:
                         self.subbot.llm.chatgptAPI.models[modelx]['token'] = str(token)
                         self.subbot.llm.chatgptAPI.models[modelx]['modality'] = str(modality)
                         #self.subbot.llm.chatgptAPI.models[modelx]['date'] = str(date_ymd)
-
-                    # assist
-                    if (model in self.subbot.llm.assistAPI.models):
-                        self.subbot.llm.assistAPI.models[model]['token'] = str(token)
-                        self.subbot.llm.assistAPI.models[model]['modality'] = str(modality)
-                        #self.subbot.llm.assistAPI.models[model]['date'] = str(date_ymd)
-                    if (modelx in self.subbot.llm.assistAPI.models):
-                        self.subbot.llm.assistAPI.models[modelx]['token'] = str(token)
-                        self.subbot.llm.assistAPI.models[modelx]['modality'] = str(modality)
-                        #self.subbot.llm.assistAPI.models[modelx]['date'] = str(date_ymd)
 
                     # respo
                     if (model in self.subbot.llm.respoAPI.models):

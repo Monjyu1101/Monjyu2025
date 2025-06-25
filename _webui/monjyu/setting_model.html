@@ -87,7 +87,6 @@
             <div class="tab-header">
                 <button data-target="reset">Reset</button>
                 <button data-target="gpt">ChatGPT</button>
-                <button data-target="asst">Assist</button>
                 <button data-target="resp">Respo</button>
                 <button data-target="gemn">Gemini</button>
                 <button data-target="free">FreeAI</button>
@@ -210,110 +209,6 @@
                         <td align="right">tools :</td>
                         <td>
                             <select id="gpt_x_use_tools" name="gpt_x_use_tools">
-                                <option value="">Auto (自動)</option>
-                                <option value="yes">Yes (有効)</option>
-                                <option value="no">No (無効)</option>
-                            </select>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <!-- Assistタブ -->
-            <div class="tab-content" id="asst" style="justify-content: center;">
-                <table>
-                    <tr><td align="right">　</td><td>　</td></tr>
-                    <tr>
-                        <td align="right">【Assist】</td>
-                        <td><a href="https://platform.openai.com/docs/models#current-model-aliases" target="_blank">https://platform.openai.com/docs/models</a></td>
-                    </tr>
-
-                    <tr><td align="right">　</td><td>※ OpenAI Assistant API 利用</td></tr>
-                    <tr>
-                        <td align="right">　</td>
-                        <td>(Setting)</td>
-                    </tr>
-                    <tr>
-                        <td align="right">Timeout :</td>
-                        <td>
-                            <select id="asst_max_wait_sec" name="asst_max_wait_sec">
-                                <option value="">Auto (自動)</option>
-                            </select>
-                        </td>
-                    </tr>
-
-                    <tr><td align="right">　</td><td>　</td></tr>
-                    <tr>
-                        <td align="right">　</td>
-                        <td>(OpenAI Models)</td>
-                    </tr>
-                    <tr>
-                        <td align="right"><span id="asst_a_nick_name">assist-a</span>, :</td>
-                        <td>
-                            <select id="asst_a_model" name="asst_a_model">
-                                <option value="">Auto (自動)</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="right">tools :</td>
-                        <td>
-                            <select id="asst_a_use_tools" name="asst_a_use_tools">
-                                <option value="">Auto (自動)</option>
-                                <option value="yes">Yes (有効)</option>
-                                <option value="no">No (無効)</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr><td align="right">　</td><td align="center"><button type="button" id="asst-a2bvx-button">↓ (a to b,v,x,)</button></td></tr>
-                    <tr>
-                        <td align="right"><span id="asst_b_nick_name">assist-b</span>, :</td>
-                        <td>
-                            <select id="asst_b_model" name="asst_b_model">
-                                <option value="">Auto (自動)</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="right">tools :</td>
-                        <td>
-                            <select id="asst_b_use_tools" name="asst_b_use_tools">
-                                <option value="">Auto (自動)</option>
-                                <option value="yes">Yes (有効)</option>
-                                <option value="no">No (無効)</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="right"><span id="asst_v_nick_name">assist-v</span>, :</td>
-                        <td>
-                            <select id="asst_v_model" name="asst_v_model">
-                                <option value="">Auto (自動)</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="right">tools :</td>
-                        <td>
-                            <select id="asst_v_use_tools" name="asst_v_use_tools">
-                                <option value="">Auto (自動)</option>
-                                <option value="yes">Yes (有効)</option>
-                                <option value="no">No (無効)</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="right"><span id="asst_x_nick_name">assist-x</span>, :</td>
-                        <td>
-                            <select id="asst_x_model" name="asst_x_model">
-                                <option value="">Auto (自動)</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="right">tools :</td>
-                        <td>
-                            <select id="asst_x_use_tools" name="asst_x_use_tools">
                                 <option value="">Auto (自動)</option>
                                 <option value="yes">Yes (有効)</option>
                                 <option value="no">No (無効)</option>

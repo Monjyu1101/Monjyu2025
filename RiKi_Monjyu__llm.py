@@ -32,8 +32,6 @@ from typing import Dict, List, Tuple
 # freeai チャットボット
 import speech_bot_chatgpt
 import speech_bot_chatgpt_key as chatgpt_key
-import speech_bot_assist
-import speech_bot_assist_key as assist_key
 import speech_bot_respo
 import speech_bot_respo_key as respo_key
 import speech_bot_gemini
@@ -97,7 +95,6 @@ class llm_class:
         # bot 定義
         self.history            = []
         self.chatgpt_enable     = None
-        self.assist_enable      = None
         self.respo_enable       = None
         self.gemini_enable      = None
         self.freeai_enable      = None
@@ -232,68 +229,6 @@ class llm_class:
             logger.error('chatgpt authenticate NG!')
 
         return self.chatgpt_enable
-
-    def assist_auth(self):
-        """
-        assist 認証
-        """
-
-        # assist 定義
-        self.assistAPI = speech_bot_assist._assistAPI()
-        self.assistAPI.init(stream_queue=None)
-        assistKEY = assist_key._conf_class()
-        assistKEY.init(runMode=self.runMode)
-
-        # assist 認証情報
-        api_type      	= assistKEY.api_type
-        organization  	= assistKEY.openai_organization
-        openai_key_id 	= assistKEY.openai_key_id
-        endpoint      	= assistKEY.azure_endpoint
-        version       	= assistKEY.azure_version
-        azure_key_id  	= assistKEY.azure_key_id
-        if (self.conf is not None):
-            if (self.conf.openai_api_type not in ['', 'auto']):
-                api_type = self.conf.openai_api_type
-            if (self.conf.openai_organization[:1] not in ['', '<']):
-                organization = self.conf.openai_organization
-            if (self.conf.openai_key_id[:1] not in ['', '<']):
-                openai_key_id = self.conf.openai_key_id
-            if (self.conf.azure_endpoint[:1] not in ['', '<']):
-                endpoint = self.conf.azure_endpoint
-            if (self.conf.azure_version not in ['', 'yyyy-mm-dd']):
-                version = self.conf.azure_version
-            if (self.conf.azure_key_id[:1] not in ['', '<']):
-                azure_key_id = self.conf.azure_key_id
-
-        # assist 認証実行
-        res = self.assistAPI.authenticate('assist',
-                            api_type,
-                            assistKEY.default_gpt, assistKEY.default_class,
-                            assistKEY.auto_continue,
-                            assistKEY.max_step, assistKEY.max_session,
-                            assistKEY.max_wait_sec,
-
-                            organization, openai_key_id,
-                            endpoint, version, azure_key_id,
-
-                            assistKEY.a_nick_name, assistKEY.a_model, assistKEY.a_token,
-                            assistKEY.a_use_tools,
-                            assistKEY.b_nick_name, assistKEY.b_model, assistKEY.b_token,
-                            assistKEY.b_use_tools,
-                            assistKEY.v_nick_name, assistKEY.v_model, assistKEY.v_token,
-                            assistKEY.v_use_tools,
-                            assistKEY.x_nick_name, assistKEY.x_model, assistKEY.x_token,
-                            assistKEY.x_use_tools,
-                            )
-
-        if res == True:
-            self.assist_enable = True
-            #logger.info('assist authenticate OK!')
-        else:
-            self.assist_enable = False
-            logger.error('assist authenticate NG!')
-
-        return self.assist_enable
 
     def respo_auth(self):
         """
@@ -746,8 +681,6 @@ class llm_class:
 
         if (self.chatgpt_enable is None):
             self.chatgpt_auth()
-        if (self.assist_enable is None):
-            self.assist_auth()
         if (self.respo_enable is None):
             self.respo_auth()
         if (self.gemini_enable is None):
@@ -943,99 +876,6 @@ class llm_class:
                                                     filePath=filePath, jsonSchema=jsonSchema, inpLang=inpLang, outLang=outLang, )
                     if ((res_text != '') and (res_text != '!')):
                         res_engine = 'ChatGPT'
-                        res_data = res_text
-                except Exception as e:
-                    logger.error(f"Error: {e}")
-
-        # assist
-        if  ((res_text == '') or (res_text == '!')) \
-        and (self.assist_enable == True):
-
-            # DEBUG
-            if (engine == '') and (reqText.find(',') < 1) and (inpText.find(',') < 1):
-                logger.debug("assist, reqText and inpText not nick_name !!!")
-
-            engine_text = ''
-            if (engine == '[assist]'):
-                engine_text = self.assistAPI.b_nick_name.lower() + ',\n'
-            else:
-                model_nick_name = 'assist'
-                a_nick_name = self.assistAPI.a_nick_name.lower()
-                b_nick_name = self.assistAPI.b_nick_name.lower()
-                v_nick_name = self.assistAPI.v_nick_name.lower()
-                x_nick_name = self.assistAPI.x_nick_name.lower()
-                if (engine != ''):
-                    if   ((len(a_nick_name) != 0) and (engine.lower() == a_nick_name)):
-                        engine_text = a_nick_name + ',\n'
-                    elif ((len(b_nick_name) != 0) and (engine.lower() == b_nick_name)):
-                        engine_text = b_nick_name + ',\n'
-                    elif ((len(v_nick_name) != 0) and (engine.lower() == v_nick_name)):
-                        engine_text = v_nick_name + ',\n'
-                    elif ((len(x_nick_name) != 0) and (engine.lower() == x_nick_name)):
-                        engine_text = x_nick_name + ',\n'
-                if (engine_text == '') and (reqText.find(',') >= 1):
-                    req_nick_name = reqText[:reqText.find(',')].lower()
-                    if   (req_nick_name == model_nick_name):
-                        engine_text = model_nick_name + ',\n'
-                        reqText = reqText[len(model_nick_name)+1:].strip()
-                    elif (len(a_nick_name) != 0) and (req_nick_name == a_nick_name):
-                        engine_text = a_nick_name + ',\n'
-                        reqText = reqText[len(a_nick_name)+1:].strip()
-                    elif (len(b_nick_name) != 0) and (req_nick_name == b_nick_name):
-                        engine_text = b_nick_name + ',\n'
-                        reqText = reqText[len(b_nick_name)+1:].strip()
-                    elif (len(v_nick_name) != 0) and (req_nick_name == v_nick_name):
-                        engine_text = v_nick_name + ',\n'
-                        reqText = reqText[len(v_nick_name)+1:].strip()
-                    elif (len(x_nick_name) != 0) and (req_nick_name == x_nick_name):
-                        engine_text = x_nick_name + ',\n'
-                        reqText = reqText[len(x_nick_name)+1:].strip()
-                if (engine_text == '') and (inpText.find(',') >= 1):
-                    inp_nick_name = inpText[:inpText.find(',')].lower()
-                    if   (inp_nick_name == model_nick_name1):
-                        engine_text = model_nick_name1 + ',\n'
-                        inpText = inpText[len(model_nick_name1)+1:].strip()
-                    elif (inp_nick_name == model_nick_name2):
-                        engine_text = model_nick_name2 + ',\n'
-                        inpText = inpText[len(model_nick_name2)+1:].strip()
-                    elif (len(a_nick_name) != 0) and (inp_nick_name == a_nick_name):
-                        engine_text = a_nick_name + ',\n'
-                        inpText = inpText[len(a_nick_name)+1:].strip()
-                    elif (len(b_nick_name) != 0) and (inp_nick_name == b_nick_name):
-                        engine_text = b_nick_name + ',\n'
-                        inpText = inpText[len(b_nick_name)+1:].strip()
-                    elif (len(v_nick_name) != 0) and (inp_nick_name == v_nick_name):
-                        engine_text = v_nick_name + ',\n'
-                        inpText = inpText[len(v_nick_name)+1:].strip()
-                    elif (len(x_nick_name) != 0) and (inp_nick_name == x_nick_name):
-                        engine_text = x_nick_name + ',\n'
-                        inpText = inpText[len(x_nick_name)+1:].strip()
-
-            if (engine_text != ''):
-                inpText2 = engine_text + inpText
-                engine_text = ''
-
-                try:
-                    logger.info('### Assist ###')
-
-                    if (self.coreai is not None):
-                        self.assistAPI.set_models(  max_wait_sec=self.coreai.subbot.llm.assistAPI.max_wait_sec,
-                                                    a_model=self.coreai.subbot.llm.assistAPI.a_model,
-                                                    a_use_tools=self.coreai.subbot.llm.assistAPI.a_use_tools,
-                                                    b_model=self.coreai.subbot.llm.assistAPI.b_model,
-                                                    b_use_tools=self.coreai.subbot.llm.assistAPI.b_use_tools,
-                                                    v_model=self.coreai.subbot.llm.assistAPI.v_model,
-                                                    v_use_tools=self.coreai.subbot.llm.assistAPI.v_use_tools,
-                                                    x_model=self.coreai.subbot.llm.assistAPI.x_model,
-                                                    x_use_tools=self.coreai.subbot.llm.assistAPI.x_use_tools, )
-
-                    res_text, res_path, res_files, res_name, res_api, res_history = \
-                        self.assistAPI.chatBot(     chat_class=chat_class, model_select=model_select, session_id=session_id, 
-                                                    history=history, function_modules=function_modules,
-                                                    sysText=sysText, reqText=reqText, inpText=inpText2,
-                                                    filePath=filePath, jsonSchema=jsonSchema, inpLang=inpLang, outLang=outLang, )
-                    if ((res_text != '') and (res_text != '!')):
-                        res_engine = 'Assist'
                         res_data = res_text
                 except Exception as e:
                     logger.error(f"Error: {e}")
@@ -1862,7 +1702,7 @@ class llm_class:
 
                 n_max = 1
                 if (engine == '[freeai]'):
-                    n_max = 4
+                    n_max = 2
                 n = 0
                 while ((res_text == '') or (res_text == '!')) and (n < n_max) and (self.bot_cancel_request != True):
                     n += 1

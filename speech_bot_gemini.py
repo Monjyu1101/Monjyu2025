@@ -498,45 +498,36 @@ class _geminiAPI:
             if (len(function_declarations) > 0):
                 tools.append({"function_declarations": function_declarations})
 
+        # パラメータ
+        parm_kwargs = {
+            "temperature": float(temperature),
+            "top_p": 0.95,
+            "top_k": 32,
+            "max_output_tokens": 8192
+        }
+
         # API設定
         if (jsonSchema is None) or (jsonSchema == ''):
             if (res_api.find('image-gen') < 0):
                 # 通常モデル
                 if (len(image_urls) <= 0):
-                    generation_config = types.GenerateContentConfig(
-                        temperature=temperature,
-                        top_p=0.95,
-                        top_k=32,
-                        max_output_tokens=8192,
-                        tools=tools,
-                        response_mime_type="text/plain")
+                    parm_kwargs["tools"] = tools
+                    parm_kwargs["response_mime_type"] = "text/plain"
                 # 画像認識モデル
                 else:
-                    generation_config = types.GenerateContentConfig(
-                        temperature=temperature,
-                        top_p=0.95,
-                        top_k=32,
-                        max_output_tokens=8192,
-                        response_mime_type="text/plain")
+                    parm_kwargs["response_mime_type"] = "text/plain"
             # イメージ生成モデル
             else:
-                generation_config = types.GenerateContentConfig(
-                    temperature=temperature,
-                    top_p=0.95,
-                    top_k=32,
-                    max_output_tokens=8192,
-                    response_mime_type="text/plain",
-                    response_modalities=["Image", "Text"])
+                    parm_kwargs["response_mime_type"] = "text/plain"
+                    parm_kwargs["response_modalities"] = ["Image", "Text"]
         else:
             # JSONスキーマモード（2024/09/04時点ではツール使用不可）
             tools = []
-            generation_config = types.GenerateContentConfig(
-                temperature=temperature,
-                top_p=0.95,
-                top_k=32,
-                max_output_tokens=8192,
-                tools=tools,
-                response_mime_type="application/json")
+            parm_kwargs["tools"] = tools
+            parm_kwargs["response_mime_type"] = "application/json"
+
+        # API設定(config)
+        generation_config = types.GenerateContentConfig(**parm_kwargs)
 
         # リクエスト作成
         request = []
@@ -551,6 +542,7 @@ class _geminiAPI:
             n = 0
             function_name = ''
             while (function_name != 'exit') and (n < int(max_step)):
+
                 # 結果初期化
                 res_role = ''
                 res_content = ''
@@ -856,11 +848,11 @@ if __name__ == '__main__':
     stream_queue = queue.Queue()
     res = geminiAPI.init(stream_queue=stream_queue)
 
-    print('debug model setting!')
-    geminiKEY.a_model = 'gemini-2.0-flash-exp'
-    geminiKEY.b_model = 'gemini-2.0-flash-exp'
-    geminiKEY.v_model = 'gemini-2.0-flash-exp'
-    geminiKEY.x_model = 'gemini-2.0-flash-exp'
+    #print('debug model setting!')
+    #geminiKEY.a_model = 'gemini-2.0-flash-exp'
+    #geminiKEY.b_model = 'gemini-2.0-flash-exp'
+    #geminiKEY.v_model = 'gemini-2.0-flash-exp'
+    #geminiKEY.x_model = 'gemini-2.0-flash-exp'
 
     # 認証処理
     res = geminiAPI.authenticate('google',
@@ -954,7 +946,8 @@ if __name__ == '__main__':
         if function_modules:
             sysText = None
             reqText = ''
-            inpText = 'flash,toolsで兵庫県三木市の天気を調べて'
+            inpText = 'gemini-x,toolsで兵庫県三木市の天気を調べて'
+            #inpText = 'gemini-x,データベース名"管理"の、テーブル名"M仕入先"の、全件検索してください。'
             filePath = []
             if reqText:
                 logger.info(f"ReqText : {reqText.rstrip()}")

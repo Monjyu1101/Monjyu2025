@@ -478,7 +478,7 @@ class mcp_host_class:
             
             call_result = await session.call_tool(tool, args)
             
-            if call_result and call_result.content and call_result.content:
+            if call_result and call_result.content:
                 result = call_result.content[0].text
                 logger.info("(MCP) ツール実行が完了しました")
                 return result

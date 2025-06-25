@@ -464,6 +464,7 @@ class _claudeAPI:
                 # 結果初期化
                 res_role = ''
                 res_content = ''
+                res_thinking = ''
                 tool_calls = []
 
                 # モデル実行
@@ -474,26 +475,39 @@ class _claudeAPI:
                 max_tokens = 20000
                 if (res_api.lower().find('opus') >= 0):
                     max_tokens = 4096
-                    logger.debug('Opusモデル検出、max_token=4096に設定')
+                    logger.warning(f"//Claude// (opus) max_tokens = { max_tokens }, ")
                 if (res_api.lower().find('haiku') >= 0):
                     max_tokens = 8192
-                    logger.debug('Haikuモデル検出、max_token=8192に設定')
+                    logger.warning(f"//Claude// (haiku) max_tokens = { max_tokens }, ")
 
-                # Thinking設定
-                thinking = None
-                if (res_name == self.x_nick_name):
-                    thinking = {"type": "enabled", "budget_tokens": 16000}
-                    logger.debug("思考モード有効 (budget 16000トークン)")
+                # パラメータ
+                parm_kwargs = {
+                    "model": res_api, 
+                    "max_tokens": max_tokens,
+                    "system": sysText,
+                    "messages": messages,
+                    "tools": tools,
+                }
+
+                # 推論モデル以外 temperature設定
+                if (res_name not in [self.v_nick_name, self.x_nick_name]):
+                    parm_kwargs["temperature"] = float(temperature)
+
+                # 推論モデル Thinking設定
+                if (res_name in [self.v_nick_name, self.x_nick_name]):
+                    budget_tokens = 2000
+                    logger.warning(f"//Claude// (thinking) budget_tokens = { budget_tokens }, ")
+                    parm_kwargs.update({
+                        "thinking": {
+                            "type": "enabled",
+                            "budget_tokens": budget_tokens
+                        }
+                    })
 
                 # ストリーム処理
                 if (stream == True):
                     chkTime = time.time()
-                    with self.client.messages.stream(model=res_api, 
-                                                    max_tokens=max_tokens,
-                                                    temperature=temperature,
-                                                    system=sysText,
-                                                    messages=messages,
-                                                    tools=tools) as streams:
+                    with self.client.messages.stream(**parm_kwargs) as streams:
                         # ストリームデータの処理
                         hit_thinking = False
                         hit_string = False
@@ -556,21 +570,7 @@ class _claudeAPI:
 
                 # 通常実行（ストリームなし）
                 if (stream == False):
-                    if (res_name != self.x_nick_name):
-                        response = self.client.messages.create(model=res_api, 
-                                                            max_tokens=max_tokens,
-                                                            temperature=temperature,
-                                                            system=sysText,
-                                                            messages=messages,
-                                                            tools=tools)
-                    # Thinking有効モード
-                    else:
-                        response = self.client.messages.create(model=res_api, 
-                                                            max_tokens=max_tokens,
-                                                            system=sysText,
-                                                            messages=messages,
-                                                            tools=tools, 
-                                                            thinking=thinking)
+                    response = self.client.messages.create(**parm_kwargs)
 
                 # レスポンス処理
                 res_role = response.role
@@ -869,7 +869,7 @@ if __name__ == '__main__':
         if function_modules:
             sysText = None
             reqText = ''
-            inpText = 'sonnet,toolsで兵庫県三木市の天気を調べて'
+            inpText = 'claude-x,toolsで兵庫県三木市の天気を調べて'
             filePath = []
             if reqText:
                 logger.info(f"ReqText : {reqText.rstrip()}")

@@ -133,24 +133,6 @@ rem del  "%pyname%.exe"
 
 
 
-set pyname=RiKi_MonjyuMCP
-    echo;
-    echo taskkill /im %pyname%.exe /f >nul
-         taskkill /im %pyname%.exe /f >nul
-    echo %pyname%.py
-       pyinstaller %pyname%.py  -F --log-level ERROR --icon="_icons/RiKi_Monjyu.ico"
-
-IF EXIST "dist\%pyname%.exe"  ECHO "%pyname%.exe"
-    copy "dist\%pyname%.exe"       "%pyname%.exe"
-    del  "%pyname%.spec"
-    copy "%pyname%.exe"        "C:\RiKi_assistant\%pyname%.exe"
-    copy "%pyname%.exe"        "C:\_共有\Worker\%pyname%.exe"
-    copy "%pyname%.exe"        "C:\_共有\Monjyu\%pyname%.exe"
-    ping  localhost -w 1000 -n 1 >nul
-rem del  "%pyname%.exe"
-
-
-
 set pyname=RiKi_Monjyu_debug
     echo;
     echo taskkill /im %pyname%.exe /f >nul
@@ -164,6 +146,40 @@ IF EXIST "dist\%pyname%.exe"  ECHO "%pyname%.exe"
 rem copy "%pyname%.exe"        "C:\RiKi_assistant\%pyname%.exe"
 rem copy "%pyname%.exe"        "C:\_共有\Worker\%pyname%.exe"
 rem copy "%pyname%.exe"        "C:\_共有\Monjyu\%pyname%.exe"
+    ping  localhost -w 1000 -n 1 >nul
+rem del  "%pyname%.exe"
+
+
+
+set pyname=RiKi_mcp_monjyu
+    echo;
+    echo taskkill /im %pyname%.exe /f >nul
+         taskkill /im %pyname%.exe /f >nul
+    echo %pyname%.py
+       pyinstaller %pyname%.py  -F --log-level ERROR --icon="_icons/RiKi_mcp.ico"
+
+IF EXIST "dist\%pyname%.exe"  ECHO "%pyname%.exe"
+    copy "dist\%pyname%.exe"       "%pyname%.exe"
+    del  "%pyname%.spec"
+    copy "%pyname%.exe"        "C:\RiKi_assistant\%pyname%.exe"
+    copy "%pyname%.exe"        "C:\_共有\Worker\%pyname%.exe"
+    copy "%pyname%.exe"        "C:\_共有\Monjyu\%pyname%.exe"
+    ping  localhost -w 1000 -n 1 >nul
+rem del  "%pyname%.exe"
+
+set pyname=RiKi_mcp_msSqlsrv
+    echo;
+    echo taskkill /im %pyname%.exe /f >nul
+         taskkill /im %pyname%.exe /f >nul
+    echo %pyname%.py
+       pyinstaller %pyname%.py  -F --log-level ERROR --icon="_icons/RiKi_mcp.ico"
+
+IF EXIST "dist\%pyname%.exe"  ECHO "%pyname%.exe"
+    copy "dist\%pyname%.exe"       "%pyname%.exe"
+    del  "%pyname%.spec"
+    copy "%pyname%.exe"        "C:\RiKi_assistant\%pyname%.exe"
+    copy "%pyname%.exe"        "C:\_共有\Worker\%pyname%.exe"
+    copy "%pyname%.exe"        "C:\_共有\Monjyu\%pyname%.exe"
     ping  localhost -w 1000 -n 1 >nul
 rem del  "%pyname%.exe"
 

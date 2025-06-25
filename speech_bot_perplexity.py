@@ -445,14 +445,17 @@ class _perplexityAPI:
                 n += 1
                 logger.info(f"//Perplexity// {res_name.lower()}, {res_api}, pass={n}, ")
 
-                # APIリクエスト作成と実行
-                response = self.client.chat.completions.create(
-                        model=res_api,
-                        messages=msg,
-                        temperature = float(temperature),
-                        timeout=self.max_wait_sec,
-                        stream=stream,
-                        )
+                # パラメータ
+                parm_kwargs = {
+                    "model": res_api,
+                    "messages": msg,
+                    "temperature": float(temperature),
+                    "timeout": self.max_wait_sec,
+                    "stream": stream,
+                }
+
+                # LLM実行
+                response = self.client.chat.completions.create(**parm_kwargs)
 
                 # ストリーミング応答処理
                 if (stream == True):

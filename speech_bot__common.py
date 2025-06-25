@@ -154,20 +154,16 @@ class _bot_common:
                 inpText = inpText.strip()[len(nick)+1:]
                 
                 # 各モデル特有の条件チェック
-                if nick == v_nick_name:
-                    if len(image_urls) > 0 and len(image_urls) == len(upload_files):
-                        res_name, res_api, use_tools = name, model, tools
-                    elif x_nick_name != '':
-                        res_name, res_api, use_tools = x_nick_name, x_model, x_use_tools
-                elif nick == x_nick_name:
+                if v_nick_name != '' and nick == v_nick_name:
                     res_name, res_api, use_tools = name, model, tools
-                elif b_nick_name != '' and nick == x_nick_name:
-                    if nick == '':  # x_nick_nameが空の場合
-                        res_name, res_api, use_tools = b_nick_name, b_model, b_use_tools
-                    else:
-                        res_name, res_api, use_tools = name, model, tools
-                else:
+                elif x_nick_name != '' and nick == x_nick_name:
                     res_name, res_api, use_tools = name, model, tools
+                elif b_nick_name != '' and nick == b_nick_name:
+                    res_name, res_api, use_tools = name, model, tools
+                elif b_nick_name != '' and (nick == v_nick_name or nick == x_nick_name):
+                    res_name, res_api, use_tools = b_nick_name, b_model, b_use_tools
+                elif a_nick_name != '':
+                    res_name, res_api, use_tools = a_nick_name, a_model, a_use_tools
         
         # 特殊プレフィックスリスト
         special_prefixes = [
@@ -198,7 +194,7 @@ class _bot_common:
                     elif b_nick_name != '':
                         res_name, res_api, use_tools = b_nick_name, b_model, b_use_tools
                 elif prefix_part == 'vision':
-                    if v_nick_name != '' and len(image_urls) > 0 and len(image_urls) == len(upload_files):
+                    if v_nick_name != '':
                         res_name, res_api, use_tools = v_nick_name, v_model, v_use_tools
                     elif x_nick_name != '':
                         res_name, res_api, use_tools = x_nick_name, x_model, x_use_tools
@@ -226,10 +222,6 @@ class _bot_common:
                 res_name = v_nick_name
                 res_api = v_model
                 use_tools = v_use_tools
-            elif x_nick_name != '':
-                res_name = x_nick_name
-                res_api = x_model
-                use_tools = x_use_tools
         
         return inpText, res_name, res_api, use_tools
     

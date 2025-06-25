@@ -58,9 +58,10 @@ qIO_liveAiRun  = 'temp/monjyu_live_ai_run.txt'
 qIO_agent2live = 'temp/monjyu_io_agent2live.txt'
 
 # モデル設定 (freeai)
-LIVE_MODELS = { "gemini-2.0-pro-exp-02-05": "gemini-2.0-pro-exp-02-05",
-                "gemini-2.0-flash-exp": "gemini-2.0-flash-exp",
-                "gemini-2.0-flash-001": "gemini-2.0-flash-001", }
+LIVE_MODELS = { "gemini-2.0-flash-exp": "gemini-2.0-flash-exp",
+                "gemini-2.0-flash-live-001": "gemini-2.0-flash-live-001",
+                "gemini-2.5-flash-exp-native-audio-thinking-dialog": "gemini-2.5-flash-exp-native-audio-thinking-dialog",
+                "gemini-2.5-flash-preview-native-audio-dialog": "gemini-2.5-flash-preview-native-audio-dialog", }
 LIVE_VOICES = { "Puck": "Puck",
                 "Charon": "Charon", 
                 "Kore": "Kore", 

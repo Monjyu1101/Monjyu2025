@@ -422,7 +422,7 @@ class _groqAPI:
         res_history = bot_common.history_zip1(history=res_history)
 
         # メッセージの作成
-        if (model_select != 'v'):
+        if (len(image_urls) == 0):
             msg = bot_common.history2msg_gpt(history=res_history)
         else:
             msg = bot_common.history2msg_vision(history=res_history, image_urls=image_urls)
@@ -434,6 +434,12 @@ class _groqAPI:
         tools = []
         functions = []
         # 2025/04/09時点 ツールに未対応です！
+
+        # 画像処理モード
+        if (res_name in [self.v_nick_name, self.x_nick_name]):
+            if (len(image_urls) > 0) and len(image_urls) == len(upload_files):
+                null_history = bot_common.history_add(history=[], sysText=sysText, reqText=reqText, inpText=inpText)
+                msg = bot_common.history2msg_vision(history=null_history, image_urls=image_urls)
 
         # 実行ループ
         if True:
@@ -448,73 +454,45 @@ class _groqAPI:
                 n += 1
                 logger.info(f"//Groq// {res_name.lower()}, {res_api}, pass={n}, ")
 
-                # APIリクエスト作成と実行
-                # 1. 画像処理モード
-                if (res_name == self.v_nick_name) and (len(image_urls) > 0):
-                    null_history = bot_common.history_add(history=[], sysText=sysText, reqText=reqText, inpText=inpText)
-                    msg = bot_common.history2msg_vision(history=null_history, image_urls=image_urls)
-                    response = self.client.chat.completions.create(
-                            model=res_api,
-                            messages=msg,
-                            temperature=float(temperature),
-                            timeout=self.max_wait_sec,
-                            stream=stream,
-                            )
+                # パラメータ
+                parm_kwargs = {
+                    "model": res_api,
+                    "messages": msg,
+                    "temperature": float(temperature),
+                    "timeout": self.max_wait_sec,
+                    "stream": stream,
+                }
 
-                # 2. ツール使用モード（現在は未サポート）
-                elif (len(tools) != 0):
-                    # ツール設定
-                    tools = []
-                    for f in range(len(functions)):
-                        tools.append({"type": "function", "function": functions[f]})
-                        response = self.client.chat.completions.create(
-                            model=res_api,
-                            messages=msg,
-                            temperature=float(temperature),
-                            tools=tools, tool_choice='auto',
-                            timeout=self.max_wait_sec,
-                            stream=stream,
-                            )
+                # ツール指定
+                if (len(image_urls) == 0):
 
-                # 3. 通常モード
-                else:
-                    # JSONスキーマなしの場合
-                    if (jsonSchema is None) or (jsonSchema == ''):
-                        response = self.client.chat.completions.create(
-                            model=res_api,
-                            messages=msg,
-                            temperature=float(temperature),
-                            timeout=self.max_wait_sec,
-                            stream=stream,
-                            )
-                    # JSONスキーマありの場合
-                    else:
+                    if (len(tools) != 0):
+                        parm_kwargs.update({
+                            "tools": tools,
+                            "tool_choice": "auto"
+                        })
+
+                # スキーマ指定
+                if (len(image_urls) == 0):
+
+                    # jsonスキーマ指定確認
+                    schema = jsonSchema
+                    if (jsonSchema is not None) and (jsonSchema != ''):
                         schema = None
                         try:
                             schema = json.loads(jsonSchema)
+                            parm_kwargs["response_format"] = {
+                                "type": "json_schema",
+                                "json_schema": schema
+                            }
                         except Exception as e:
                             logger.warning(f"JSONスキーマの解析に失敗: {e}")
+                            parm_kwargs["response_format"] = {
+                                "type": "json_object"
+                            }
 
-                        # スキーマ指定なし
-                        if (schema is None):
-                            response = self.client.chat.completions.create(
-                                model=res_api,
-                                messages=msg,
-                                temperature=float(temperature),
-                                timeout=self.max_wait_sec,
-                                response_format={"type": "json_object"},
-                                stream=stream,
-                                )
-                        # スキーマ指定あり
-                        else:
-                            response = self.client.chat.completions.create(
-                                model=res_api,
-                                messages=msg,
-                                temperature=float(temperature),
-                                timeout=self.max_wait_sec,
-                                response_format={"type": "json_schema", "json_schema": schema},
-                                stream=stream,
-                                )
+                # LLM実行
+                response = self.client.chat.completions.create(**parm_kwargs)
 
                 # ストリーミング応答処理
                 if (stream == True):

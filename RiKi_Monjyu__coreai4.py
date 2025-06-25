@@ -236,15 +236,6 @@ class coreai4_class:
                                                                          + str(self.coreai.subbot.llm.chatgptAPI.models[key]["token"]) + ", " \
                                                                          + self.coreai.subbot.llm.chatgptAPI.models[key]["modality"] + ", "
 
-                elif (engine == 'assist'):
-                    if (len(self.data.engine_models['assist']) != len(self.coreai.subbot.llm.assistAPI.models)):
-                        self.data.engine_models['assist'] = {}
-                        for key,value in self.coreai.subbot.llm.assistAPI.models.items():
-                            self.data.engine_models['assist'][key]      = self.coreai.subbot.llm.assistAPI.models[key]["date"] + " : " \
-                                                                        + self.coreai.subbot.llm.assistAPI.models[key]["id"] + ", " \
-                                                                        + str(self.coreai.subbot.llm.assistAPI.models[key]["token"]) + ", " \
-                                                                        + self.coreai.subbot.llm.assistAPI.models[key]["modality"] + ", "
-
                 elif (engine == 'respo'):
                     if (len(self.data.engine_models['respo']) != len(self.coreai.subbot.llm.respoAPI.models)):
                         self.data.engine_models['respo'] = {}
@@ -356,23 +347,6 @@ class coreai4_class:
                         "v_use_tools": self.coreai.subbot.llm.chatgptAPI.v_use_tools,
                         "x_model": self.coreai.subbot.llm.chatgptAPI.x_model,
                         "x_use_tools": self.coreai.subbot.llm.chatgptAPI.x_use_tools,
-                    }
-
-                elif (engine == 'assist'):
-                    self.data.engine_setting['assist'] = {
-                        "a_nick_name": self.coreai.subbot.llm.assistAPI.a_nick_name,
-                        "b_nick_name": self.coreai.subbot.llm.assistAPI.b_nick_name,
-                        "v_nick_name": self.coreai.subbot.llm.assistAPI.v_nick_name,
-                        "x_nick_name": self.coreai.subbot.llm.assistAPI.x_nick_name,
-                        "max_wait_sec": str(self.coreai.subbot.llm.assistAPI.max_wait_sec),
-                        "a_model": self.coreai.subbot.llm.assistAPI.a_model,
-                        "a_use_tools": self.coreai.subbot.llm.assistAPI.a_use_tools,
-                        "b_model": self.coreai.subbot.llm.assistAPI.b_model,
-                        "b_use_tools": self.coreai.subbot.llm.assistAPI.b_use_tools,
-                        "v_model": self.coreai.subbot.llm.assistAPI.v_model,
-                        "v_use_tools": self.coreai.subbot.llm.assistAPI.v_use_tools,
-                        "x_model": self.coreai.subbot.llm.assistAPI.x_model,
-                        "x_use_tools": self.coreai.subbot.llm.assistAPI.x_use_tools,
                     }
 
                 elif (engine == 'respo'):
@@ -561,14 +535,6 @@ class coreai4_class:
                     if (engine == 'chatgpt'):
                         engine_set_thread = threading.Thread(
                             target=self.coreai.subbot.llm.chatgptAPI.set_models,
-                            args=(max_wait_sec, a_model, a_use_tools, b_model, b_use_tools,
-                                                v_model, v_use_tools, x_model, x_use_tools, ),
-                            daemon=True, )
-                        engine_set_thread.start()
-
-                    elif (engine == 'assist'):
-                        engine_set_thread = threading.Thread(
-                            target=self.coreai.subbot.llm.assistAPI.set_models,
                             args=(max_wait_sec, a_model, a_use_tools, b_model, b_use_tools,
                                                 v_model, v_use_tools, x_model, x_use_tools, ),
                             daemon=True, )

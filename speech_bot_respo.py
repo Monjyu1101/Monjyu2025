@@ -419,6 +419,7 @@ class _respoAPI:
         """レスポンスを生成"""
         # 戻り値の初期化
         res_text = ''
+        res_think = ''
         res_path = ''
         res_files = []
         res_name = None
@@ -443,7 +444,7 @@ class _respoAPI:
         res_history = bot_common.history_zip1(history=res_history)
 
         # メッセージの作成
-        if (model_select != 'v'):
+        if (len(image_urls) == 0):
             msg = bot_common.history2msg_gpt(history=res_history)
         else:
             msg = bot_common.history2msg_vision(history=res_history, image_urls=image_urls, api_type='respo')
@@ -454,14 +455,24 @@ class _respoAPI:
         # ツール（関数）設定
         tools = []
         if (use_tools.lower().find('yes') >= 0):
-            if res_name in [self.b_nick_name, self.x_nick_name]:
-                tools.append({"type": "web_search_preview"})
-            
-            # 関数モジュールのツール定義追加
-            for module_dic in function_modules.values():
-                func_dic = module_dic['function']
-                func_dic['type'] = "function"
-                tools.append(func_dic)
+
+                # o1,o3,o4以外
+                if (res_api[:2] not in ['o1', 'o3', 'o4']):
+
+                    if res_name in [self.b_nick_name, self.x_nick_name]:
+                        tools.append({"type": "web_search_preview"})
+
+                # 関数モジュールのツール定義追加
+                for module_dic in function_modules.values():
+                    func_dic = module_dic['function']
+                    func_dic['type'] = "function"
+                    tools.append(func_dic)
+
+        # 画像処理モード
+        if (res_name in [self.v_nick_name, self.x_nick_name]):
+            if (len(image_urls) > 0) and len(image_urls) == len(upload_files):
+                null_history = bot_common.history_add(history=[], sysText=sysText, reqText=reqText, inpText=inpText)
+                msg = bot_common.history2msg_vision(history=null_history, image_urls=image_urls, api_type='respo')
 
         # 実行ループ
         if True:
@@ -471,72 +482,61 @@ class _respoAPI:
                 # 結果初期化
                 res_role = ''
                 res_content = ''
+                res_thinking = ''
                 tool_calls = []
 
                 # モデル実行
                 n += 1
                 logger.info(f"//Respo// {res_name.lower()}, {res_api}, pass={n}, ")
 
-                # APIリクエスト作成と実行
-                # 1. 画像処理モード
-                if (res_name == self.v_nick_name) and (len(image_urls) > 0):
-                    null_history = bot_common.history_add(history=[], sysText=sysText, reqText=reqText, inpText=inpText)
-                    msg = bot_common.history2msg_vision(history=null_history, image_urls=image_urls, api_type='respo')
-                    response = self.client.responses.create(
-                                model=res_api,
-                                input=msg,
-                                timeout=self.max_wait_sec, 
-                                stream=stream, 
-                                )
+                # パラメータ
+                parm_kwargs = {
+                    "model": res_api,
+                    "input": msg,
+                    "timeout": self.max_wait_sec,
+                    "stream": stream,
+                }
 
-                # 2. ツール使用モード
-                elif (len(tools) != 0):
-                    response = self.client.responses.create(
-                        model=res_api,
-                        input=msg,
-                        tools=tools,
-                        timeout=self.max_wait_sec,
-                        stream=stream, 
-                        )
+                # o1,o3,o4以外
+                if (res_api[:2] not in ['o1', 'o3', 'o4']):
+                    parm_kwargs["temperature"] = float(temperature)
 
-                # 3. 通常モード
-                else:
-                    # JSONスキーマなしの場合
-                    if (jsonSchema is None) or (jsonSchema == ''):                        
-                        response = self.client.responses.create(
-                            model=res_api,
-                            input=msg,
-                            timeout=self.max_wait_sec,
-                            stream=stream, 
-                            )
+                # reasoningモデル o3,o4
+                #if (res_name in [self.v_nick_name, self.x_nick_name]):
+                #    if (res_api[:2] in ['o3', 'o4']):
+                #        logger.warning(f"//Respo// reasoning_effort = high, ")
+                #        parm_kwargs["reasoning_effort"] = 'high'
 
-                    # JSONスキーマありの場合
-                    else:
+                # ツール指定
+                if (len(image_urls) == 0):
+
+                    if (len(tools) != 0):
+                        parm_kwargs.update({
+                            "tools": tools,
+                            "tool_choice": "auto"
+                        })
+
+                # スキーマ指定
+                if (len(image_urls) == 0):
+
+                    # jsonスキーマ指定確認
+                    schema = jsonSchema
+                    if (jsonSchema is not None) and (jsonSchema != ''):
                         schema = None
                         try:
                             schema = json.loads(jsonSchema)
+                            parm_kwargs["response_format"] = {
+                                "type": "json_schema",
+                                "json_schema": schema
+                            }
                         except Exception as e:
                             logger.warning(f"JSONスキーマの解析に失敗: {e}")
-                            
-                        # スキーマ指定なし
-                        if (schema is None):
-                            response = self.client.responses.create(
-                                model=res_api,
-                                input=msg,
-                                timeout=self.max_wait_sec, 
-                                response_format={"type": "json_object"},
-                                stream=stream, 
-                                )
+                            parm_kwargs["response_format"] = {
+                                "type": "json_object"
+                            }
 
-                        # スキーマ指定あり
-                        else:
-                            response = self.client.responses.create(
-                                model=res_api,
-                                input=msg,
-                                timeout=self.max_wait_sec, 
-                                response_format={"type": "json_schema", "json_schema": schema},
-                                stream=stream, 
-                                )
+                # LLM実行
+                response = self.client.responses.create(**parm_kwargs)
 
                 # ストリーム表示処理（現在は未実装）
                 if (stream == True):
@@ -551,14 +551,40 @@ class _respoAPI:
                 # 通常実行（ストリームなし）
                 if (stream == False):
                     # レスポンス処理
+
+                    # debug
+                    if (res_api[:2] in ['o1', 'o3', 'o4']):
+                        print("<<<<msg>>>\n", msg, "\n")
+                        print("<<<<response>>>\n", response, "\n")
+
                     for output in response.output:
+                        
+                        # 思考中
+                        if (output.type == 'reasoning'):
+                            if (res_api[:2] in ['o1', 'o3', 'o4']):
+                                print("reasoning\n", output, "\n")
+
                         # 通常メッセージ
-                        if (output.type == 'message'):
-                            res_role = str(response.output[0].role)
-                            res_content = str(response.output[0].content[0].text)
+                        elif (output.type == 'message'):
+                            if (res_api[:2] in ['o1', 'o3', 'o4']):
+                                print("message\n", output, "\n")
+                            try:
+                                res_role = str(response.output[0].role)
+                                res_content = str(response.output[0].content[0].text)
+                            except Exception as e:
+                                print(str(e))
+                                #text = output.content[0].text
+                                #print(text)
+                                #try:
+                                #    dummy = json.loads(text)
+                                #except Exception as e:
+                                #    res_role = output.role
+                                #    res_content = text
 
                         # 関数呼び出し
                         elif (output.type == 'function_call'):
+                            if (res_api[:2] in ['o1', 'o3', 'o4']):
+                                print("function_call\n", output, "\n")
                             o_id = str(output.id)
                             f_id = str(output.call_id)
                             f_name = str(output.name)
@@ -573,9 +599,10 @@ class _respoAPI:
                                 #logger.warning(f"run_gpt() 関数引数のJSON整形に失敗: {e}")
                                 f_kwargs ="{}"
 
-                            # ツールコール追加
+                            # ツールコール追加  
                             tool_calls.append({
-                                "id": f_id, 
+                                "id": o_id, 
+                                "call_id": f_id, 
                                 "type": "function", 
                                 "function": {
                                     "name": f_name, 
@@ -592,11 +619,12 @@ class _respoAPI:
                                 'arguments': f_kwargs
                             }
                             msg.append(dic)
+                            #msg.append(output)
 
                 # ツール実行処理
                 if (len(tool_calls) > 0):
                     for tc in tool_calls:
-                        f_id = tc['id']
+                        f_id = tc['call_id']
                         f_name = tc['function'].get('name')
                         f_kwargs = tc['function'].get('arguments')
 
@@ -635,6 +663,8 @@ class _respoAPI:
                             # メッセージ追加格納
                             dic = {'type': 'function_call_output', 'call_id': f_id, 'output': res_json}
                             msg.append(dic)
+
+                            print(msg[-2:])
 
                             # 履歴に関数結果を追加
                             self.seq += 1
@@ -846,7 +876,8 @@ if __name__ == '__main__':
         if function_modules:
             sysText = None
             reqText = ''
-            inpText = 'respo-b,toolsで兵庫県三木市の天気を調べて'
+            #inpText = 'respo-x,toolsで兵庫県三木市の天気を調べて'
+            inpText = 'respo-x,toolsで"今日"の休暇予定者調べて'
             filePath = []
             if reqText:
                 logger.info(f"ReqText : {reqText.rstrip()}")

@@ -28,7 +28,7 @@ import os
 import time
 import threading
 import queue
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Any, Optional, Tuple, Union
 
 # インターフェースのパス設定
 qPath_temp   = 'temp/'
@@ -68,6 +68,51 @@ class _mcpHost_class:
         self.last_modules = None
 
         logger.debug("(Host) 初期化完了")
+
+    def json_check(self, input_string: str) -> Tuple[bool, Union[Dict[str, Any], str]]:
+        """
+        文字列がJSON形式かチェックし、適切な形式で返却するシンプルなサブルーチン
+        
+        Args:
+            input_string (str): チェックする文字列
+        
+        Returns:
+            Tuple[bool, Union[Dict[str, Any], str]]: 
+                - JSON型 → (True, dict)
+                - list型で内容がjson → (True, {"data1": 内容, "data2": 内容, ...})
+                - list型で内容が文字列 → (True, {"data1": 文字列, "data2": 文字列, ...})
+                - 以外 → (False, 元の文字列)
+        """
+        # 空文字やNoneの場合は失敗として扱う
+        if not input_string or not isinstance(input_string, str):
+            return False, input_string
+        
+        # 文字列の前後の空白を除去
+        cleaned_string = input_string.strip()
+        
+        try:
+            # JSONとしてパース試行
+            parsed_data = json.loads(cleaned_string)
+            
+            # 1) JSON型（辞書）の場合
+            if isinstance(parsed_data, dict):
+                return True, parsed_data
+            
+            # 2) list型の場合
+            elif isinstance(parsed_data, list):
+                # リストの内容を"datan"形式のdictに変換
+                result_dict = {}
+                for i, item in enumerate(parsed_data, 1):
+                    result_dict[f"data{i}"] = item
+                return True, result_dict
+            
+            # 3) その他の型（数値、真偽値、null等）
+            else:
+                return False, input_string
+                
+        except json.JSONDecodeError:
+            # JSONパースに失敗した場合
+            return False, input_string
 
     # MCP機能モジュール取得
     def get_mcp_modules(self):
@@ -167,19 +212,27 @@ class _mcpHost_class:
                 result = self.res_r.get()
                 break
 
-        if result:
-            logger.debug(f"(Host) ツール実行結果: {result[:100]}...")
-            try:
-                dummy = json.loads(result)
-                return result
-            except:
-                logger.debug("(Host) JSON解析失敗、文字列として返却")
-                res_dic = {'result': result}
-                return json.dumps(res_dic, ensure_ascii=False)
-        else:
+        if not result:
             logger.error("(Host) ツール実行タイムアウト")
             result = {'error': 'time out!'}
             return json.dumps(result, ensure_ascii=False)
+
+        try:
+            logger.debug(f"(Host) ツール実行結果: {result[:100]}...")
+
+            # チェック
+            is_json, json_data = self.json_check(result)
+            if is_json:
+                return json.dumps(json_data, ensure_ascii=False)
+            else:
+                logger.debug("(Host) JSON解析失敗、文字列として返却")
+                res_dic = {'result': result}
+                return json.dumps(res_dic, ensure_ascii=False)
+
+        except Exception as e:
+            logger.error(f"(Host) executeエラー: {e}")
+            res_dic = {'result': 'error!'}
+            return json.dumps(res_dic, ensure_ascii=False)
 
     # MCP停止
     def terminate(self):

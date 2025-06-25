@@ -644,12 +644,10 @@ class _ollamaAPI:
 
                 # API呼び出し
                 content_text = None
-                response = self.client.chat(
-                    model=res_api,
-                    messages=messages,
-                    options={"temperature": float(temperature)},
-                    stream=stream,
-                )
+                response = self.client.chat(model=res_api,
+                                            messages=messages,
+                                            options={"temperature": float(temperature)},
+                                            stream=stream)
 
                 # ストリーム表示
                 if (stream == True):
