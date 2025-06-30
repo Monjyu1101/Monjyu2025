@@ -117,10 +117,6 @@ class _data_class:
         self.live_setting = {}
         self.live_setting['freeai'] = {}
         self.live_setting['openai'] = {}
-        self.webOperator_models     = {}
-        self.webOperator_setting    = {}
-        self.researchAgent_models   = {}
-        self.researchAgent_setting  = {}
         self._reset()
 
         # スレッドロック
@@ -212,22 +208,6 @@ class _data_class:
         #self.live_models[ 'openai'] = {}
         #self.live_voices[ 'openai'] = {}
         self.live_setting['openai'] = self.live_setting['freeai']
-
-        # Agentの設定
-        self.webOperator_models['freeai'] = {}
-        self.webOperator_models['openai'] = {}
-        self.webOperator_models['claude'] = {}
-        self.webOperator_setting = {    "engine": "",
-                                        "model": "", 
-                                        "max_step": "", 
-                                        "browser": "", }
-        self.researchAgent_models['freeai'] = {}
-        self.researchAgent_models['openai'] = {}
-        self.researchAgent_models['claude'] = {}
-        self.researchAgent_setting = {  "engine": "",
-                                        "model": "", 
-                                        "max_step": "", 
-                                        "browser": "", }
 
     def update_subai_status(self, port: str):
         """

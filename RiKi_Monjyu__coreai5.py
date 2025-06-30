@@ -130,8 +130,6 @@ class coreai5_class:
         self.app.post("/post_clip_names")(self.post_clip_names)
         self.app.post("/post_clip_text")(self.post_clip_text)
         self.app.post("/post_live_request")(self.post_live_request)
-        self.app.post("/post_webOperator_request")(self.post_webOperator_request)
-        self.app.post("/post_researchAgent_request")(self.post_researchAgent_request)
 
     async def root(self, request: Request):
         # Web UI にリダイレクト
@@ -343,105 +341,6 @@ class coreai5_class:
             raise HTTPException(status_code=500, detail='post_live_request error:' + e)
 
         return JSONResponse({'message': 'post_live_request successfully'})
-
-    async def post_webOperator_request(self, data: agentRequestModel):
-        request_text  = str(data.request_text) if data.request_text else ""
-        try:
-            # Agent
-            addin_module = None
-            for module_dic in self.botFunc.function_modules.values():
-                if (module_dic['script'] == '認証済_web操作Agent'):
-                    addin_module = module_dic
-                    break
-            if (addin_module is not None):
-                dic = {}
-                dic['runMode']  = self.runMode
-                dic['request_text'] = request_text
-                json_dump = json.dumps(dic, ensure_ascii=False, )
-                addin_func_proc  = addin_module['func_proc']
-                res_json = addin_func_proc( json_dump )
-                args_dic = json.loads(res_json)
-                result_text = args_dic.get('result_text')
-
-                #return JSONResponse(content={"result_text": result_text})
-
-                with self.thread_lock:
-                    user_id = 'admin'
-                    from_port = '8000'
-                    to_port = '8000'
-                    req_mode = 'agent'
-                    system_text = ''
-                    input_text = ''
-                    key_val = f"{user_id}:{from_port}:{to_port}"
-                    now_time = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-                    self.data.subai_input_log_key += 1
-                    self.data.subai_input_log_all[self.data.subai_input_log_key] = {
-                            "user_id": user_id, "from_port": from_port, "to_post": to_port,
-                            "req_mode": req_mode,
-                            "inp_time": now_time, "sys_text": system_text, "req_text": request_text, "inp_text": input_text,
-                            "upd_time": now_time, "dsp_time": None, }
-                    self.data.subai_output_log_key += 1
-                    self.data.subai_output_log_all[self.data.subai_output_log_key] = {
-                            "key_val": key_val,
-                            "user_id": user_id, "from_port": from_port, "to_post": to_port,
-                            "req_mode": req_mode,
-                            "out_time": now_time, "out_text": '... Now Processing ...', "out_data": '... Now Processing ...',
-                            "status": None,
-                            "upd_time": now_time, "dsp_time": None, }
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail='post_webOperator_request error:' + e)
-        return JSONResponse({'message': 'post_webOperator_request successfully'})
-
-    async def post_researchAgent_request(self, data: agentRequestModel):
-        request_text  = str(data.request_text) if data.request_text else ""
-        try:
-            # Agent
-            addin_module = None
-            for module_dic in self.botFunc.function_modules.values():
-                if (module_dic['script'] == '認証済_research操作Agent'):
-                    addin_module = module_dic
-                    break
-            if (addin_module is not None):
-                dic = {}
-                dic['runMode']  = self.runMode
-                dic['request_text'] = request_text
-                json_dump = json.dumps(dic, ensure_ascii=False, )
-                addin_func_proc  = addin_module['func_proc']
-                res_json = addin_func_proc( json_dump )
-                args_dic = json.loads(res_json)
-                result_text = args_dic.get('result_text')
-
-                #return JSONResponse(content={"result_text": result_text})
-
-                with self.thread_lock:
-                    user_id = 'admin'
-                    from_port = '8000'
-                    to_port = '8000'
-                    req_mode = 'agent'
-                    system_text = ''
-                    input_text = ''
-                    key_val = f"{user_id}:{from_port}:{to_port}"
-                    now_time = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-                    self.data.subai_input_log_key += 1
-                    self.data.subai_input_log_all[self.data.subai_input_log_key] = {
-                            "user_id": user_id, "from_port": from_port, "to_post": to_port,
-                            "req_mode": req_mode,
-                            "inp_time": now_time, "sys_text": system_text, "req_text": request_text, "inp_text": input_text,
-                            "upd_time": now_time, "dsp_time": None, }
-                    self.data.subai_output_log_key += 1
-                    self.data.subai_output_log_all[self.data.subai_output_log_key] = {
-                            "key_val": key_val,
-                            "user_id": user_id, "from_port": from_port, "to_post": to_port,
-                            "req_mode": req_mode,
-                            "out_time": now_time, "out_text": '... Now Processing ...', "out_data": '... Now Processing ...',
-                            "status": None,
-                            "upd_time": now_time, "dsp_time": None, }
-
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=500, detail='post_researchAgent_request error:' + e)
-        return JSONResponse({'message': 'post_researchAgent_request successfully'})
 
     def run(self):
         """

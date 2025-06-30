@@ -19,6 +19,13 @@
       "env": {
         "PERPLEXITY_API_KEY": "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"
       }
+    },
+
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
     }
 
   }

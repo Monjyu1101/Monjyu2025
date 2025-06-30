@@ -95,19 +95,6 @@ class postLiveDataModel(BaseModel):
     shot_interval_sec: str
     clip_interval_sec: str
 
-# Agent engine設定データモデル
-class postAgentEngine(BaseModel):
-    agent: str
-    engine: str
-
-# Agent setting設定データモデル
-class postAgentSetting(BaseModel):
-    agent: str
-    engine: str
-    model: str
-    max_step: str
-    browser: str
-
 # set react json 文字列モデル
 class setReactModel(BaseModel):
     filename: str
@@ -181,10 +168,6 @@ class coreai4_class:
         self.app.get("/get_live_voices")(self.get_live_voices)
         self.app.get("/get_live_setting")(self.get_live_setting)
         self.app.post("/post_live_setting")(self.post_live_setting)
-        self.app.get("/get_agent_engine")(self.get_agent_engine)
-        self.app.get("/get_agent_setting")(self.get_agent_setting)
-        self.app.post("/post_agent_engine")(self.post_agent_engine)
-        self.app.post("/post_agent_setting")(self.post_agent_setting)
         self.app.post("/post_set_react")(self.post_set_react)
 
     async def root(self, request: Request):
@@ -683,91 +666,6 @@ class coreai4_class:
                                                 "shot_interval_sec": shot_interval_sec,
                                                 "clip_interval_sec": clip_interval_sec, }
         return JSONResponse(content={'message': 'post_live_setting successfully'})
-
-    async def get_agent_engine(self, agent: str):
-        result = {}
-        if (self.data is not None):
-
-            # webOperator設定情報を返す
-            if   (agent == 'webOperator'):
-                engine = self.data.webOperator_setting['engine']
-                models = {}
-                if (engine != ''):
-                    models = self.data.webOperator_models[engine]
-                result = {  "engine": engine,
-                            "models": models, }
-
-            # researchAgent設定情報を返す
-            elif (agent == 'researchAgent'):
-                engine = self.data.researchAgent_setting['engine']
-                models = {}
-                if (engine != ''):
-                    models = self.data.researchAgent_models[engine]
-                result = {  "engine": engine,
-                            "models": models, }
-
-        return JSONResponse(content=result)
-
-    async def get_agent_setting(self, agent: str):
-        result = {}
-        if (self.data is not None):
-
-            # webOperator設定情報を返す
-            if   (agent == 'webOperator'):
-                result = self.data.webOperator_setting
-
-            # researchAgent設定情報を返す
-            elif (agent == 'researchAgent'):
-                result = self.data.researchAgent_setting
-
-        return JSONResponse(content=result)
-
-    async def post_agent_engine(self, data: postAgentEngine):
-        agent = str(data.agent) if data.agent else ""
-        engine = str(data.engine) if data.engine else ""
-        if (self.data is not None):
-
-            # webOperator設定
-            if   (agent == 'webOperator'):
-                self.data.webOperator_setting['engine'] = engine
-                if (engine != ''):
-                    self.data.webOperator_setting['model'] = list( self.data.webOperator_models[engine].keys() )[0]
-                else:
-                    self.data.webOperator_setting['model'] = ''
-
-            # researchAgent設定
-            elif (agent == 'researchAgent'):
-                self.data.researchAgent_setting['engine'] = engine
-                if (engine != ''):
-                    self.data.researchAgent_setting['model'] = list( self.data.researchAgent_models[engine].keys() )[0]
-                else:
-                    self.data.researchAgent_setting['model'] = ''
-
-        return JSONResponse(content={'message': 'post_agent_engine successfully'})
-
-    async def post_agent_setting(self, data: postAgentSetting):
-        agent = str(data.agent) if data.agent else ""
-        engine = str(data.engine) if data.engine else ""
-        model = str(data.model) if data.model else ""
-        max_step = str(data.max_step) if data.max_step else ""
-        browser = str(data.browser) if data.browser else ""
-        if (self.data is not None):
-
-            # webOperator設定
-            if   (agent == 'webOperator'):
-                self.data.webOperator_setting = {   "engine": engine,
-                                                    "model": model,
-                                                    "max_step": max_step,
-                                                    "browser": browser, }
-
-            # researchAgent設定
-            elif (agent == 'researchAgent'):
-                self.data.researchAgent_setting = { "engine": engine,
-                                                    "model": model,
-                                                    "max_step": max_step,
-                                                    "browser": browser, }
-
-        return JSONResponse(content={'message': 'post_agent_setting successfully'})
 
     async def post_set_react(self, data: setReactModel):
         filename = data.filename

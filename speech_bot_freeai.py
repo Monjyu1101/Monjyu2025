@@ -526,6 +526,11 @@ class _freeaiAPI:
             parm_kwargs["tools"] = tools
             parm_kwargs["response_mime_type"] = "application/json"
 
+        # reasoningモデル
+        if (res_name in [self.v_nick_name, self.x_nick_name]):
+            if (res_api.find('image-gen') < 0):
+                parm_kwargs["thinking_config"] = types.ThinkingConfig(thinking_budget=-1)
+
         # API設定(config)
         generation_config = types.GenerateContentConfig(**parm_kwargs)
 
@@ -554,6 +559,7 @@ class _freeaiAPI:
 
                 # 結果初期化
                 content_text = ''
+                response_content = None
                 content_parts = None
 
                 # ストリーミング実行
@@ -600,6 +606,7 @@ class _freeaiAPI:
 
                         # コンテンツパーツの処理
                         if (content_text == '') and (res_path == ''):
+                            response_content = chunk.candidates[0].content
                             content_parts = chunk.candidates[0].content.parts
 
                     # 改行処理
@@ -645,6 +652,7 @@ class _freeaiAPI:
 
                     # コンテンツパーツの処理
                     if (content_text == '') and (res_path == ''):
+                        response_content = response.candidates[0].content
                         content_parts = response.candidates[0].content.parts
 
                 # テキスト処理
@@ -691,7 +699,7 @@ class _freeaiAPI:
                 else:
 
                     # 新しいリクエスト作成
-                    request = []
+                    #request = []
 
                     # 各関数呼び出しを処理
                     for tc in tool_calls:
@@ -734,7 +742,14 @@ class _freeaiAPI:
                             res_list = []
                             for key, value in res_dic.items():
                                 res_list.append({"key": key, "value": {"string_value": value}})
-                            parts = {"function_response": {"name": f_name, "response": {"fields": res_list} } }
+                            if (response_content is not None):
+                                request.append(response_content)
+                                response_content = None
+                            function_response_part = types.Part.from_function_response(
+                                name=f_name,
+                                response={"result": res_list},
+                            )
+                            parts = types.Content(role="user", parts=[function_response_part])
                             request.append(parts)
 
                             # 履歴に関数結果を追加
@@ -945,7 +960,8 @@ if __name__ == '__main__':
         if function_modules:
             sysText = None
             reqText = ''
-            inpText = 'freeai-x,toolsで兵庫県三木市の天気を調べて'
+            #inpText = 'freeai-x,toolsで兵庫県三木市の天気を調べて'
+            inpText = 'freeai-b,toolsで兵庫県三木市の天気を調べて'
             #inpText = 'freeai-x,データベース名"管理"の、テーブル名"M仕入先"の、全件検索してください。'
             filePath = []
             if reqText:

@@ -82,6 +82,7 @@ OUTPUT_RATE = 24000
 CORE_PORT = '8000'
 CONNECTION_TIMEOUT = 15
 REQUEST_TIMEOUT = 30
+ALIVE_BEAT_SEC = 300
 
 
 
@@ -333,6 +334,7 @@ class _live_api_openai:
         self.image_input_number = None
 
         # バッファ
+        self.audio_last_time = time.time()
         self.audio_input_time = None
         self.audio_input_buffer = []
         self.audio_output_time = None
@@ -380,13 +382,16 @@ class _live_api_openai:
                     if data_max > (base_avg + self.live_voice_level):
                         self.audio_send_queue.put(audio_data)
                         self.graph_input_queue.put(audio_data)
+                        self.audio_last_time = time.time()
                         if (self.audio_input_time == None):
                             self.audio_input_time = datetime.datetime.now()
                         self.audio_input_buffer.append(audio_data)
                         last_zero_count = 0
                     else:
-                        if last_zero_count <= vad_count:
+                        if (time.time() - self.audio_last_time) > ALIVE_BEAT_SEC \
+                        or last_zero_count <= vad_count:
                             self.audio_send_queue.put(audio_data)
+                            self.audio_last_time = time.time()
                             if len(self.audio_input_buffer) > 0:
                                 if last_zero_count <= 5:
                                     self.audio_input_buffer.append(audio_data)
@@ -1009,7 +1014,8 @@ Agentic AI Web-Operator(ウェブオペレーター:web_operation_agent) が利�
                         thread.start()
 
                     # 待機
-                    print(" Live(openai) : [RUN] Waiting... ")
+                    print(" Live(openai) : [INFO] Shift+PrtScrn to start/stop screen capture. ")
+                    print(" Live(openai) : [RUN]  Waiting... ")
                     self.inp_flag = False
                     self.inp_zero = True
                     self.out_flag = False

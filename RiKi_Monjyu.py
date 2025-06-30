@@ -389,48 +389,6 @@ if __name__ == '__main__':
             except Exception as e:
                 print(e)
 
-        # web操作Agent
-        webOperator_enable = False
-        module_dic = botFunc.function_modules.get('web_operation_agent', None)
-        if (module_dic is not None):
-            try:
-                if (module_dic['onoff'] == 'on'):
-                    func_reset = module_dic['func_reset']
-                    res  = func_reset(main=main, data=data, addin=addin, botFunc=botFunc, )
-                    print('reset', 'web_operation_agent')
-                    webOperator_enable = True
-
-                    data.webOperator_models['freeai'] = module_dic['class'].agent_models['freeai']
-                    data.webOperator_models['openai'] = module_dic['class'].agent_models['openai']
-                    data.webOperator_models['claude'] = module_dic['class'].agent_models['claude']
-                    data.webOperator_setting = {    'engine':   module_dic['class'].agent_engine,
-                                                    'model':    module_dic['class'].agent_model,
-                                                    'max_step': module_dic['class'].agent_max_step,
-                                                    'browser':  module_dic['class'].agent_browser, }
-            except Exception as e:
-                print(e)
-
-        # research操作Agent
-        researchAgent_enable = False
-        module_dic = botFunc.function_modules.get('research_operation_agent', None)
-        if (module_dic is not None):
-            try:
-                if (module_dic['onoff'] == 'on'):
-                    func_reset = module_dic['func_reset']
-                    res  = func_reset(main=main, data=data, addin=addin, botFunc=botFunc, )
-                    print('reset', 'research_operation_agent')
-                    researchAgent_enable = True
-
-                    data.researchAgent_models['freeai'] = module_dic['class'].agent_models['freeai']
-                    data.researchAgent_models['openai'] = module_dic['class'].agent_models['openai']
-                    data.researchAgent_models['claude'] = module_dic['class'].agent_models['claude']
-                    data.researchAgent_setting = {  'engine':   module_dic['class'].agent_engine,
-                                                    'model':    module_dic['class'].agent_model,
-                                                    'max_step': module_dic['class'].agent_max_step,
-                                                    'browser':  module_dic['class'].agent_browser, }
-            except Exception as e:
-                print(e)
-
     # mcpHost起動
     if True:
         mcpHost = RiKi_Monjyu__mcpHost._mcpHost_class(  runMode=runMode, qLog_fn=qLog_fn,
@@ -521,10 +479,6 @@ if __name__ == '__main__':
         logger.info(" Multiple AI Platforms with MCP, Monjyu (もんじゅ), 'http://localhost:8008/'.")
         if (liveai_enable == True):
             logger.info(" Live AI 力/RiKi(りき), Press ctrl-l or ctrl-r three times.")
-        if (webOperator_enable == True):
-            logger.info(" Agentic AI Web-Operator(ウェブオペレーター), Specify use at the prompt.")
-        if (researchAgent_enable == True):
-            logger.info(" Agentic AI Research-Agent(リサーチエージェント), Specify use at the prompt.")
         logger.info("=============================================================================")
         print()
 

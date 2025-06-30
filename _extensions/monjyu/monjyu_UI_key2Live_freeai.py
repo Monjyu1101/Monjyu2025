@@ -60,15 +60,44 @@ qIO_agent2live = 'temp/monjyu_io_agent2live.txt'
 # モデル設定 (freeai)
 LIVE_MODELS = { "gemini-2.0-flash-exp": "gemini-2.0-flash-exp",
                 "gemini-2.0-flash-live-001": "gemini-2.0-flash-live-001",
+                "gemini-live-2.5-flash-preview": "gemini-live-2.5-flash-preview",
                 "gemini-2.5-flash-exp-native-audio-thinking-dialog": "gemini-2.5-flash-exp-native-audio-thinking-dialog",
                 "gemini-2.5-flash-preview-native-audio-dialog": "gemini-2.5-flash-preview-native-audio-dialog", }
-LIVE_VOICES = { "Puck": "Puck",
-                "Charon": "Charon", 
-                "Kore": "Kore", 
-                "Fenrir": "Fenrir", 
-                "Aoede": "Aoede", }
-LIVE_MODEL = "gemini-2.0-flash-exp"
-LIVE_VOICE = "Aoede"
+LIVE_VOICES = { "Puck": "(2.0) Puck",
+                "Charon": "(2.0) Charon", 
+                "Kore": "(2.0) Kore Female", 
+                "Fenrir": "(2.0) Fenrir", 
+                "Aoede": "*** (2.0) Aoede Female", 
+
+                "Leda": "(2.5) Leda Female", 
+                "Orus": "(2.5) Orus", 
+                "Zephyr": "*** (2.5) Zephyr Female", 
+
+                "Callirrhoe": "Callirrhoe Female", 
+                "Autonoe": "Autonoe Female", 
+                "Enceladus": "Enceladus", 
+                "Lapetus": "Lapetus", 
+                "Umbriel": "Umbriel", 
+                "Algieba": "Algieba", 
+                "Despina": "Despina Female", 
+                "Erinome": "Erinome Female", 
+                "Algenib": "Algenib", 
+                "Rasalgethi": "Rasalgethi", 
+                "Laomedeia": "Laomedeia Female", 
+                "Achernar": "Achernar Female", 
+                "Alnilam": "Alnilam", 
+                "Schedar": "Schedar", 
+                "Gacrux": "Gacrux Female", 
+                "Pulcherrima": "Pulcherrima", 
+                "Achird": "Achird", 
+                "Zubenelgenubi": "Zubenelgenubi", 
+                "Vindemiatrix": "Vindemiatrix Female", 
+                "Sadachbia": "Sadachbia", 
+                "Sadaltager": "Sadaltager",
+                "Sulafat": "Sulafat Female", }
+
+LIVE_MODEL = "gemini-live-2.5-flash-preview"
+LIVE_VOICE = "Zephyr"
 
 # 音声ストリーム 設定
 INPUT_CHUNK = 2048
@@ -82,6 +111,7 @@ OUTPUT_RATE = 24000
 CORE_PORT = '8000'
 CONNECTION_TIMEOUT = 15
 REQUEST_TIMEOUT = 30
+ALIVE_BEAT_SEC = 300
 
 
 
@@ -333,6 +363,7 @@ class _live_api_freeai:
         self.image_input_number = None
 
         # バッファ
+        self.audio_last_time = time.time()
         self.audio_input_time = None
         self.audio_input_buffer = []
         self.audio_output_time = None
@@ -397,13 +428,16 @@ class _live_api_freeai:
                     if data_max > (base_avg + self.live_voice_level):
                         await self.audio_send_queue.put(audio_data)
                         await self.graph_input_queue.put(audio_data)
+                        self.audio_last_time = time.time()
                         if (self.audio_input_time == None):
                             self.audio_input_time = datetime.datetime.now()
                         self.audio_input_buffer.append(audio_data)
                         last_zero_count = 0
                     else:
-                        if last_zero_count <= vad_count:
+                        if (time.time() - self.audio_last_time) > ALIVE_BEAT_SEC \
+                        or last_zero_count <= vad_count:
                             await self.audio_send_queue.put(audio_data)
+                            self.audio_last_time = time.time()
                             if len(self.audio_input_buffer) > 0:
                                 if last_zero_count <= 5:
                                     self.audio_input_buffer.append(audio_data)
@@ -656,6 +690,7 @@ class _live_api_freeai:
                 async for response in self.session.receive():
                     server_content = response.server_content
                     tool_call = response.tool_call
+                    go_away = response.go_away
 
                     # server_content
                     if server_content is not None:
@@ -676,8 +711,14 @@ class _live_api_freeai:
                     # 例外レスポンス
                     if  server_content is None \
                     and tool_call is None:
-                        print('response ???')
-                        print(response)
+
+                        if go_away is not None:
+                            print(f" Live(freeai) : [GO_AWAY] { go_away }")
+                            self.error_flag = False  # 自動復帰のためエラー解除にしておく
+                            break
+                        else:
+                            print('response ???')
+                            print(response)
 
         except Exception as e:
             if ("received 1011" in str(e)):
@@ -693,6 +734,8 @@ class _live_api_freeai:
         try:
             model_turn = server_content.model_turn
             turn_complete = server_content.turn_complete
+            interrupted = server_content.interrupted
+            generation_complete = server_content.generation_complete
 
             # model_turn
             if model_turn is not None:
@@ -742,8 +785,24 @@ class _live_api_freeai:
             # 例外レスポンス server_content
             if  model_turn is None \
             and not turn_complete:
-                print(' server_content.??? ')
-                print(server_content)
+
+                # interrupted = True
+                if interrupted:
+                    print(' server_content.interrupted !')
+                    while not self.audio_receive_queue.empty():
+                        await self.audio_receive_queue.get()
+                    #if not self.graph_output_queue.empty():
+                    #    self.graph_output_queue.queue.clear()
+                    self.audio_output_time = None
+                    self.audio_output_buffer = []
+
+                # generation_complete = True
+                elif generation_complete:
+                    print(' server_content.generation_complete !')
+
+                else:
+                    print(' server_content.??? ')
+                    print(server_content)
 
         except Exception as e:
             print(f"_server_content: {e}")
@@ -975,41 +1034,32 @@ Agentic AI Web-Operator(ウェブオペレーター:web_operation_agent) が利�
 
                 # ツール設定 通常はexecute_monjyu_requestのみ有効として処理
                 tools = []
-                tools.append({"code_execution": {}, })
                 tools.append({"google_search": {}, })
-                function_declarations = []
-                if self.botFunc is not None:
-                    for module_dic in self.botFunc.function_modules.values():
-                        func_dic = module_dic['function']
-                        #func_str = json.dumps(func_dic, ensure_ascii=False, )
-                        #func_str = func_str.replace('"type"', '"type_"')
-                        #func_str = func_str.replace('"object"', '"OBJECT"')
-                        #func_str = func_str.replace('"string"', '"STRING"')
-                        #func     = json.loads(func_str)
-                        if (self.monjyu_enable == True) \
-                        or (self.webOperator_enable == True) \
-                        or (self.researchAgent_enable == True):
-                            if (module_dic['func_name'] == 'execute_monjyu_request') \
-                            or (module_dic['func_name'] == 'web_operation_agent') \
-                            or (module_dic['func_name'] == 'research_operation_agent'):
-                                function_declarations.append(func_dic)
-                        else:
-                                function_declarations.append(func_dic)
-                if (len(function_declarations) > 0):
-                    tools.append({"function_declarations": function_declarations })
+
+
+                if (self.live_model.lower().find('thinking') < 0):
+                    tools.append({"code_execution": {}, })
+                    function_declarations = []
+                    if self.botFunc is not None:
+                        for module_dic in self.botFunc.function_modules.values():
+                            func_dic = module_dic['function']
+                            if (self.monjyu_enable == True) \
+                            or (self.webOperator_enable == True) \
+                            or (self.researchAgent_enable == True):
+                                if (module_dic['func_name'] == 'execute_monjyu_request') \
+                                or (module_dic['func_name'] == 'web_operation_agent') \
+                                or (module_dic['func_name'] == 'research_operation_agent'):
+                                    function_declarations.append(func_dic)
+                            else:
+                                    function_declarations.append(func_dic)
+                    if (len(function_declarations) > 0):
+                        tools.append({"function_declarations": function_declarations })
 
                 # config 設定
-                #speech_config = {"voice_config": {"prebuilt_voice_config": {"voice_name": self.live_voice }}}
-                #config =    {"generation_config": {
-                #                "response_modalities": ["AUDIO"],
-                #                "speech_config": speech_config,
-                #                },
-                #            "system_instruction": instructions,
-                #            "tools": tools,
-                #            }
                 speech_config = types.LiveConnectConfig(
                             response_modalities=["AUDIO"],
                             speech_config=types.SpeechConfig(
+                                language_code="ja-JP",
                                 voice_config=types.VoiceConfig(
                                     prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=self.live_voice)
                                 )
@@ -1062,7 +1112,8 @@ Agentic AI Web-Operator(ウェブオペレーター:web_operation_agent) が利�
                         t.add_done_callback(cleanup)
 
                     # 待機
-                    print(" Live(freeai) : [RUN] Waiting... ")
+                    print(" Live(freeai) : [INFO] Shift+PrtScrn to start/stop screen capture. ")
+                    print(" Live(freeai) : [RUN]  Waiting... ")
                     while (not self.break_flag):
                         await asyncio.sleep(0.10)
 
