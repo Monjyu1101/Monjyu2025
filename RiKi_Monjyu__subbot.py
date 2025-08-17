@@ -54,7 +54,7 @@ class ChatClass:
     """
     def __init__(self,  runMode: str = 'debug', qLog_fn: str = '',
                         main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
-                        coreai=None,
+                        coreAPI=None,
                         core_port: str = '8000', self_port: str = '8101', ):
         """
         コンストラクタ
@@ -80,16 +80,16 @@ class ChatClass:
         self.conf       = conf
         self.data       = data
         self.addin      = addin
-        self.coreai     = coreai
+        self.coreAPI     = coreAPI
         self.botFunc    = botFunc
         self.mcpHost    = mcpHost
         self.core_port  = core_port
         self.self_port  = self_port
-        self.local_endpoint = f'http://localhost:{ self.core_port }'
-        self.core_endpoint = self.local_endpoint.replace('localhost', qHOSTNAME)
+        self.local_endpoint1 = f'http://localhost:{ int(self.core_port) + 1 }'
+        self.core_endpoint1 = self.local_endpoint1.replace('localhost', qHOSTNAME)
         self.llm = RiKi_Monjyu__llm.llm_class(  runMode=runMode, qLog_fn=qLog_fn, 
                                                 main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
-                                                coreai=coreai)
+                                                coreAPI=coreAPI)
 
         # CANCEL要求
         self.bot_cancel_request = False
@@ -105,7 +105,7 @@ class ChatClass:
         res_port = None
         try:
             response = requests.post(
-                self.local_endpoint + '/post_req',
+                self.local_endpoint1 + '/post_req',
                 json={'user_id': user_id, 'from_port': from_port, 'to_port': to_port,
                       'req_mode': req_mode, 
                       'system_text': system_text, 'request_text': request_text, 'input_text': input_text,
@@ -139,7 +139,7 @@ class ChatClass:
             try:
                 all_done = False
                 response = requests.get(
-                    self.local_endpoint + '/get_sessions_port?user_id=' + user_id + '&from_port=' + self.self_port,
+                    self.local_endpoint1 + '/get_sessions_port?user_id=' + user_id + '&from_port=' + self.self_port,
                     timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
                 )
                 if response.status_code == 200:
@@ -777,7 +777,7 @@ $$$ inpBase2 $$$
 
             # AIメンバー情報取得
             try:
-                endpoint = self.local_endpoint.replace( f':{ self.core_port }', f':{ member_port[n] }' )
+                endpoint = self.local_endpoint1.replace( f':{ int(self.core_port) + 1 }', f':{ member_port[n] }' )
                 response = requests.get(
                     endpoint + '/get_info',
                     timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)

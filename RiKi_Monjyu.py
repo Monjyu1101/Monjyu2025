@@ -135,13 +135,13 @@ import RiKi_Monjyu__conf
 import RiKi_Monjyu__data
 import RiKi_Monjyu__addin
 import RiKi_Monjyu__mcpHost
-import RiKi_Monjyu__coreai0
-import RiKi_Monjyu__coreai1
-import RiKi_Monjyu__coreai2
-import RiKi_Monjyu__coreai4
-import RiKi_Monjyu__coreai5
+import RiKi_Monjyu__coreAPI1
+import RiKi_Monjyu__coreAPI2
+import RiKi_Monjyu__coreAPI3
+import RiKi_Monjyu__coreAPI4
+import RiKi_Monjyu__coreAPI5
 import RiKi_Monjyu__subai
-import RiKi_Monjyu__webui
+import RiKi_Monjyu__webUI
 import speech_bot__function
 
 # シグナル処理
@@ -248,7 +248,7 @@ if __name__ == '__main__':
     if True:
          # ライセンス制限
         if (dateinfo_today >= dateinfo_start):
-            logger.warning(f'利用ライセンス(Python3.10support)は、 {limit_date} まで有効です。')
+            logger.warning(f'利用ライセンス(Python3.10サポート)は、 {limit_date} まで有効です。')
         if (dateinfo_today > limit_date):
             time.sleep(60)
             sys.exit(0)
@@ -293,7 +293,7 @@ if __name__ == '__main__':
     if True:
         addin = RiKi_Monjyu__addin._addin_class()
         addin.init(runMode=runMode, qLog_fn=qLog_fn,
-                   addins_path='_extensions/monjyu/', secure_level='low')
+                   addins_path='_extensions/Monjyu/', secure_level='low')
         res, msg = addin.addins_load()
         if res != True or msg != '':
             print(msg)
@@ -328,13 +328,13 @@ if __name__ == '__main__':
                 print(e)
 
         # ClipnMonjyu
-        addin_module = addin.addin_modules.get('monjyu_UI_ClipnMonjyu')
+        addin_module = addin.addin_modules.get('Monjyu_UI_ClipnMonjyu')
         if (addin_module is not None):
             try:
                 if (addin_module['onoff'] == 'on'):
                     func_reset = addin_module['func_reset']
                     res  = func_reset(main=main, data=data, addin=addin, botFunc=botFunc, )
-                    print('reset', 'monjyu_UI_ClipnMonjyu')
+                    print('reset', 'Monjyu_UI_ClipnMonjyu')
             except Exception as e:
                 print(e)
 
@@ -399,44 +399,44 @@ if __name__ == '__main__':
 
     # コアAI起動
     if True:
-        coreai0 = RiKi_Monjyu__coreai0.coreai0_class(   runMode=runMode, qLog_fn=qLog_fn,
+        coreAPI1 = RiKi_Monjyu__coreAPI1.coreAPI1_class(   runMode=runMode, qLog_fn=qLog_fn,
                                                         main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
                                                         core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
-        coreai0_thread = threading.Thread(target=coreai0.run)
-        coreai0_thread.daemon = True
-        coreai0_thread.start()
+        coreAPI1_thread = threading.Thread(target=coreAPI1.run)
+        coreAPI1_thread.daemon = True
+        coreAPI1_thread.start()
 
-        coreai1 = RiKi_Monjyu__coreai1.coreai1_class(   runMode=runMode, qLog_fn=qLog_fn,
+        coreAPI2 = RiKi_Monjyu__coreAPI2.coreAPI2_class(   runMode=runMode, qLog_fn=qLog_fn,
                                                         main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
-                                                        coreai=coreai0, 
+                                                        coreAPI=coreAPI1, 
                                                         core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
-        coreai1_thread = threading.Thread(target=coreai1.run)
-        coreai1_thread.daemon = True
-        coreai1_thread.start()
+        coreAPI2_thread = threading.Thread(target=coreAPI2.run)
+        coreAPI2_thread.daemon = True
+        coreAPI2_thread.start()
 
-        coreai2 = RiKi_Monjyu__coreai2.coreai2_class(   runMode=runMode, qLog_fn=qLog_fn,
+        coreAPI3 = RiKi_Monjyu__coreAPI3.coreAPI3_class(   runMode=runMode, qLog_fn=qLog_fn,
                                                         main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
-                                                        coreai=coreai0, 
+                                                        coreAPI=coreAPI1, 
                                                         core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
-        coreai2_thread = threading.Thread(target=coreai2.run)
-        coreai2_thread.daemon = True
-        coreai2_thread.start()
+        coreAPI3_thread = threading.Thread(target=coreAPI3.run)
+        coreAPI3_thread.daemon = True
+        coreAPI3_thread.start()
 
-        coreai4 = RiKi_Monjyu__coreai4.coreai4_class(   runMode=runMode, qLog_fn=qLog_fn,
+        coreAPI4 = RiKi_Monjyu__coreAPI4.coreAPI4_class(   runMode=runMode, qLog_fn=qLog_fn,
                                                         main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
-                                                        coreai=coreai0, 
+                                                        coreAPI=coreAPI1, 
                                                         core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
-        coreai4_thread = threading.Thread(target=coreai4.run)
-        coreai4_thread.daemon = True
-        coreai4_thread.start()
+        coreAPI4_thread = threading.Thread(target=coreAPI4.run)
+        coreAPI4_thread.daemon = True
+        coreAPI4_thread.start()
 
-        coreai5 = RiKi_Monjyu__coreai5.coreai5_class(   runMode=runMode, qLog_fn=qLog_fn,
+        coreAPI5 = RiKi_Monjyu__coreAPI5.coreAPI5_class(   runMode=runMode, qLog_fn=qLog_fn,
                                                         main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
-                                                        coreai=coreai0, 
+                                                        coreAPI=coreAPI1, 
                                                         core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
-        coreai5_thread = threading.Thread(target=coreai5.run)
-        coreai5_thread.daemon = True
-        coreai5_thread.start()
+        coreAPI5_thread = threading.Thread(target=coreAPI5.run)
+        coreAPI5_thread.daemon = True
+        coreAPI5_thread.start()
 
     # サブAI起動
     if True:
@@ -449,7 +449,7 @@ if __name__ == '__main__':
             self_port = str(SUB_BASE + n + 1)
             subai_class[n] = RiKi_Monjyu__subai.SubAiClass( runMode=runMode, qLog_fn=qLog_fn,
                                                             main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
-                                                            coreai=coreai0, 
+                                                            coreAPI=coreAPI1, 
                                                             core_port=core_port, sub_base=sub_base, num_subais=numSubAIs,
                                                             self_port=self_port, profile_number=subai_profiles[n])
             subai_thread[n] = threading.Thread(target=subai_class[n].run)
@@ -457,16 +457,16 @@ if __name__ == '__main__':
             subai_thread[n].start()
 
     # ウェブUI起動
+    webUI_port = str(CORE_PORT + 8)
     if True:
-        self_port = str(CORE_PORT + 8)
-        webui_class = RiKi_Monjyu__webui.WebUiClass(runMode=runMode, qLog_fn=qLog_fn,
+        webUI_class = RiKi_Monjyu__webUI.webUIClass(runMode=runMode, qLog_fn=qLog_fn,
                                                     main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
-                                                    coreai=coreai0, 
+                                                    coreAPI=coreAPI1, 
                                                     core_port=core_port, sub_base=sub_base, num_subais=numSubAIs,
-                                                    self_port=self_port)
-        webui_thread = threading.Thread(target=webui_class.run)
-        webui_thread.daemon = True
-        webui_thread.start()
+                                                    self_port=webUI_port)
+        webUI_thread = threading.Thread(target=webUI_class.run)
+        webUI_thread.daemon = True
+        webUI_thread.start()
 
     # 起動メッセージ
     if True:
@@ -476,14 +476,14 @@ if __name__ == '__main__':
         print()
         logger.info("=============================================================================")
         logger.info(" Thank you for using our systems.")
-        logger.info(" Multiple AI Platforms with MCP, Monjyu (もんじゅ), 'http://localhost:8008/'.")
+        logger.info(f" Multiple AI Platforms with MCP, Monjyu (もんじゅ), 'http://localhost:{ webUI_port }/'.")
         if (liveai_enable == True):
             logger.info(" Live AI 力/RiKi(りき), Press ctrl-l or ctrl-r three times.")
         logger.info("=============================================================================")
         print()
 
     # モデル情報設定
-    asyncio.run( coreai0.get_models(req_mode='chat') )
+    asyncio.run( coreAPI1.get_models(req_mode='chat') )
 
     # 15秒待機
     time.sleep(15)

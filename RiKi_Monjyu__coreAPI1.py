@@ -9,7 +9,7 @@
 # ------------------------------------------------
 
 # モジュール名
-MODULE_NAME = 'coreai:0'
+MODULE_NAME = 'coreAPI(1)'
 
 # ロガーの設定
 import logging
@@ -37,9 +37,6 @@ from pydantic import BaseModel
 
 import random
 import threading
-
-import socket
-qHOSTNAME = socket.gethostname().lower()
 
 # パスの設定
 qPath_temp    = 'temp/'
@@ -102,16 +99,16 @@ class main_class:
                         main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
                         core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', ):
         # コアAIクラスの初期化とスレッドの開始
-        coreai0 = coreai0_class(runMode=runMode, qLog_fn=qLog_fn,
+        coreAPI1 = coreAPI1_class(runMode=runMode, qLog_fn=qLog_fn,
                                 main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
                                 core_port=core_port, sub_base=sub_base, num_subais=num_subais, )
-        coreai0_thread = threading.Thread(target=coreai0.run, daemon=True, )
-        coreai0_thread.start()
+        coreAPI1_thread = threading.Thread(target=coreAPI1.run, daemon=True, )
+        coreAPI1_thread.start()
         while True:
             time.sleep(5)
 
 
-class coreai0_class:
+class coreAPI1_class:
     """
     コアAIクラス
     サブAIとの通信や結果管理、FastAPIサーバーの管理を行う。
@@ -120,7 +117,7 @@ class coreai0_class:
                         main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
                         core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', ):
         self.runMode = runMode
-        self_port = core_port
+        self_port = str(int(core_port) + 1)
 
         # ログファイル名の生成
         if qLog_fn == '':
@@ -142,13 +139,12 @@ class coreai0_class:
         self.sub_base   = sub_base
         self.num_subais = int(num_subais)
         self.self_port  = self_port
-        self.local_endpoint2 = f'http://localhost:{ int(self.core_port) + 2 }'
-        self.webui_endpoint8 = f'http://{ qHOSTNAME }:{ int(self.core_port) + 8 }'
+        self.core_port3 = str(int(core_port) + 3)
 
         # 自己bot設定
         self.subbot = RiKi_Monjyu__subbot.ChatClass(runMode=runMode, qLog_fn=qLog_fn, 
                                                     main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
-                                                    coreai=None,
+                                                    coreAPI=None,
                                                     core_port=core_port, self_port=self_port)
         self.history    = []
 
@@ -180,8 +176,10 @@ class coreai0_class:
         self.app.post("/post_request")(self.post_request)
 
     async def root(self, request: Request):
-        # Web UI にリダイレクト
-        return RedirectResponse(url=self.webui_endpoint8 + '/')
+        # Web UI にリダイレクト（動的URL生成）
+        req_url = f"{request.url.scheme}://{request.url.hostname}"
+        webUI_url = f"{req_url}:{self.core_port}/"
+        return RedirectResponse(url=webUI_url)
 
     async def get_ready_count(self):
         """
@@ -708,8 +706,10 @@ class coreai0_class:
 
         # 完了通知
         try:
+            #endpoint3 = f"{request.url.scheme}://{request.url.hostname}:{ self.core_port3 }"
+            endpoint3 = f"http://localhost:{ self.core_port3 }"
             response = requests.post(
-                self.local_endpoint2 + '/post_complete', 
+                endpoint3 + '/post_complete', 
                 json={'user_id': user_id, 'from_port': from_port, 'to_port': to_port,
                       'req_mode': req_mode,
                       'system_text': system_text, 'request_text': request_text, 'input_text': input_text,
@@ -827,7 +827,7 @@ class coreai0_class:
                     key_val = f"{user_id}:{from_port}:{to_port}"
                     now_time = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
                     if (begin_bye_flag != True):
-                        if (from_port == self.core_port):
+                        if (from_port in [self.core_port, self.self_port]):
                             self.data.subai_input_log_key += 1
                             self.data.subai_input_log_all[self.data.subai_input_log_key] = {
                                     "user_id": user_id, "from_port": from_port, "to_post": to_port,
@@ -927,7 +927,7 @@ if __name__ == '__main__':
     sub_base  = '8100'
     numSubAIs = '48'
 
-    coreai0 = main_class(   runMode='debug', qLog_fn='', 
+    coreAPI1 = main_class(   runMode='debug', qLog_fn='', 
                             core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
 
     #while True:

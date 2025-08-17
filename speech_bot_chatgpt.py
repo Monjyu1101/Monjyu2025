@@ -489,8 +489,8 @@ class _chatgptAPI:
                     "stream": stream,
                 }
 
-                # o1,o3,o4以外
-                if (res_api[:2] not in ['o1', 'o3', 'o4']):
+                # gpt-4のみ
+                if (res_api[:5] in ['gpt-4']):
                     parm_kwargs["temperature"] = float(temperature)
 
                 # reasoningモデル o3,o4

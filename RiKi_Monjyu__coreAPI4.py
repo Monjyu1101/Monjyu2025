@@ -9,7 +9,7 @@
 # ------------------------------------------------
 
 # モジュール名
-MODULE_NAME = 'coreai:4'
+MODULE_NAME = 'coreAPI(4)'
 
 # ロガーの設定
 import logging
@@ -36,9 +36,6 @@ import uvicorn
 from pydantic import BaseModel
 
 import threading
-
-import socket
-qHOSTNAME = socket.gethostname().lower()
 
 # パスの設定
 qPath_log     = 'temp/_log/'
@@ -105,26 +102,26 @@ class main_class:
                         main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
                         core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', ):
         # コアAIクラスの初期化とスレッドの開始
-        coreai4 = coreai4_class(runMode=runMode, qLog_fn=qLog_fn,
+        coreAPI4 = coreAPI4_class(runMode=runMode, qLog_fn=qLog_fn,
                                 main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
                                 core_port=core_port, sub_base=sub_base, num_subais=num_subais, )
-        coreai4_thread = threading.Thread(target=coreai4.run, daemon=True, )
-        coreai4_thread.start()
+        coreAPI4_thread = threading.Thread(target=coreAPI4.run, daemon=True, )
+        coreAPI4_thread.start()
         while True:
             time.sleep(5)
 
 
-class coreai4_class:
+class coreAPI4_class:
     """
     コアAIクラス(4)
     FastAPIサーバーの管理を行う。
     """
     def __init__(self,  runMode: str = 'debug', qLog_fn: str = '',
                         main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
-                        coreai=None,
+                        coreAPI=None,
                         core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', ):
         self.runMode = runMode
-        self_port = str(int(core_port)+4)
+        self_port = str(int(core_port) + 4)
 
         # ログファイル名の生成
         if qLog_fn == '':
@@ -142,12 +139,11 @@ class coreai4_class:
         self.addin      = addin
         self.botFunc    = botFunc
         self.mcpHost    = mcpHost
-        self.coreai     = coreai
+        self.coreAPI     = coreAPI
         self.core_port  = core_port
         self.sub_base   = sub_base
         self.num_subais = int(num_subais)
         self.self_port  = self_port
-        self.webui_endpoint8 = f'http://{ qHOSTNAME }:{ int(self.core_port) + 8 }'
 
         # スレッドロック
         self.thread_lock = threading.Lock()
@@ -171,8 +167,10 @@ class coreai4_class:
         self.app.post("/post_set_react")(self.post_set_react)
 
     async def root(self, request: Request):
-        # Web UI にリダイレクト
-        return RedirectResponse(url=self.webui_endpoint8 + '/')
+        # Web UI にリダイレクト（動的URL生成）
+        req_url = f"{request.url.scheme}://{request.url.hostname}"
+        webUI_url = f"{req_url}:{self.core_port}/"
+        return RedirectResponse(url=webUI_url)
 
     async def get_mode_setting(self, req_mode: str):
         # 設定情報を返す
@@ -208,97 +206,97 @@ class coreai4_class:
     async def get_engine_models(self, engine: str) -> Dict[str, str]:
         # 設定情報を返す
         try:
-            if (self.data is not None) and (self.coreai is not None):
+            if (self.data is not None) and (self.coreAPI is not None):
 
                 if (engine == 'chatgpt'):
-                    if (len(self.data.engine_models['chatgpt']) != len(self.coreai.subbot.llm.chatgptAPI.models)):
+                    if (len(self.data.engine_models['chatgpt']) != len(self.coreAPI.subbot.llm.chatgptAPI.models)):
                         self.data.engine_models['chatgpt'] = {}
-                        for key,value in self.coreai.subbot.llm.chatgptAPI.models.items():
-                            self.data.engine_models['chatgpt'][key]      = self.coreai.subbot.llm.chatgptAPI.models[key]["date"] + " : " \
-                                                                         + self.coreai.subbot.llm.chatgptAPI.models[key]["id"] + ", " \
-                                                                         + str(self.coreai.subbot.llm.chatgptAPI.models[key]["token"]) + ", " \
-                                                                         + self.coreai.subbot.llm.chatgptAPI.models[key]["modality"] + ", "
+                        for key,value in self.coreAPI.subbot.llm.chatgptAPI.models.items():
+                            self.data.engine_models['chatgpt'][key]      = self.coreAPI.subbot.llm.chatgptAPI.models[key]["date"] + " : " \
+                                                                         + self.coreAPI.subbot.llm.chatgptAPI.models[key]["id"] + ", " \
+                                                                         + str(self.coreAPI.subbot.llm.chatgptAPI.models[key]["token"]) + ", " \
+                                                                         + self.coreAPI.subbot.llm.chatgptAPI.models[key]["modality"] + ", "
 
                 elif (engine == 'respo'):
-                    if (len(self.data.engine_models['respo']) != len(self.coreai.subbot.llm.respoAPI.models)):
+                    if (len(self.data.engine_models['respo']) != len(self.coreAPI.subbot.llm.respoAPI.models)):
                         self.data.engine_models['respo'] = {}
-                        for key,value in self.coreai.subbot.llm.respoAPI.models.items():
-                            self.data.engine_models['respo'][key]      = self.coreai.subbot.llm.respoAPI.models[key]["date"] + " : " \
-                                                                        + self.coreai.subbot.llm.respoAPI.models[key]["id"] + ", " \
-                                                                        + str(self.coreai.subbot.llm.respoAPI.models[key]["token"]) + ", " \
-                                                                        + self.coreai.subbot.llm.respoAPI.models[key]["modality"] + ", "
+                        for key,value in self.coreAPI.subbot.llm.respoAPI.models.items():
+                            self.data.engine_models['respo'][key]      = self.coreAPI.subbot.llm.respoAPI.models[key]["date"] + " : " \
+                                                                        + self.coreAPI.subbot.llm.respoAPI.models[key]["id"] + ", " \
+                                                                        + str(self.coreAPI.subbot.llm.respoAPI.models[key]["token"]) + ", " \
+                                                                        + self.coreAPI.subbot.llm.respoAPI.models[key]["modality"] + ", "
 
                 elif (engine == 'gemini'):
-                    if (len(self.data.engine_models['gemini']) != len(self.coreai.subbot.llm.geminiAPI.models)):
+                    if (len(self.data.engine_models['gemini']) != len(self.coreAPI.subbot.llm.geminiAPI.models)):
                         self.data.engine_models['gemini'] = {}
-                        for key,value in self.coreai.subbot.llm.geminiAPI.models.items():
-                            self.data.engine_models['gemini'][key]      = self.coreai.subbot.llm.geminiAPI.models[key]["date"] + " : " \
-                                                                        + self.coreai.subbot.llm.geminiAPI.models[key]["id"] + ", " \
-                                                                        + str(self.coreai.subbot.llm.geminiAPI.models[key]["token"]) + ", " \
-                                                                        + self.coreai.subbot.llm.geminiAPI.models[key]["modality"] + ", "
+                        for key,value in self.coreAPI.subbot.llm.geminiAPI.models.items():
+                            self.data.engine_models['gemini'][key]      = self.coreAPI.subbot.llm.geminiAPI.models[key]["date"] + " : " \
+                                                                        + self.coreAPI.subbot.llm.geminiAPI.models[key]["id"] + ", " \
+                                                                        + str(self.coreAPI.subbot.llm.geminiAPI.models[key]["token"]) + ", " \
+                                                                        + self.coreAPI.subbot.llm.geminiAPI.models[key]["modality"] + ", "
 
                 elif (engine == 'freeai'):
-                    if (len(self.data.engine_models['freeai']) != len(self.coreai.subbot.llm.freeaiAPI.models)):
+                    if (len(self.data.engine_models['freeai']) != len(self.coreAPI.subbot.llm.freeaiAPI.models)):
                         self.data.engine_models['freeai'] = {}
-                        for key,value in self.coreai.subbot.llm.freeaiAPI.models.items():
-                            self.data.engine_models['freeai'][key]      = self.coreai.subbot.llm.freeaiAPI.models[key]["date"] + " : " \
-                                                                        + self.coreai.subbot.llm.freeaiAPI.models[key]["id"] + ", " \
-                                                                        + str(self.coreai.subbot.llm.freeaiAPI.models[key]["token"]) + ", " \
-                                                                        + self.coreai.subbot.llm.freeaiAPI.models[key]["modality"] + ", "
+                        for key,value in self.coreAPI.subbot.llm.freeaiAPI.models.items():
+                            self.data.engine_models['freeai'][key]      = self.coreAPI.subbot.llm.freeaiAPI.models[key]["date"] + " : " \
+                                                                        + self.coreAPI.subbot.llm.freeaiAPI.models[key]["id"] + ", " \
+                                                                        + str(self.coreAPI.subbot.llm.freeaiAPI.models[key]["token"]) + ", " \
+                                                                        + self.coreAPI.subbot.llm.freeaiAPI.models[key]["modality"] + ", "
 
                 elif (engine == 'claude'):
-                    if (len(self.data.engine_models['claude']) != len(self.coreai.subbot.llm.claudeAPI.models)):
+                    if (len(self.data.engine_models['claude']) != len(self.coreAPI.subbot.llm.claudeAPI.models)):
                         self.data.engine_models['claude'] = {}
-                        for key,value in self.coreai.subbot.llm.claudeAPI.models.items():
-                            self.data.engine_models['claude'][key]      = self.coreai.subbot.llm.claudeAPI.models[key]["date"] + " : " \
-                                                                        + self.coreai.subbot.llm.claudeAPI.models[key]["id"] + ", " \
-                                                                        + str(self.coreai.subbot.llm.claudeAPI.models[key]["token"]) + ", " \
-                                                                        + self.coreai.subbot.llm.claudeAPI.models[key]["modality"] + ", "
+                        for key,value in self.coreAPI.subbot.llm.claudeAPI.models.items():
+                            self.data.engine_models['claude'][key]      = self.coreAPI.subbot.llm.claudeAPI.models[key]["date"] + " : " \
+                                                                        + self.coreAPI.subbot.llm.claudeAPI.models[key]["id"] + ", " \
+                                                                        + str(self.coreAPI.subbot.llm.claudeAPI.models[key]["token"]) + ", " \
+                                                                        + self.coreAPI.subbot.llm.claudeAPI.models[key]["modality"] + ", "
 
                 elif (engine == 'openrt'):
-                    if (len(self.data.engine_models['openrt']) != len(self.coreai.subbot.llm.openrtAPI.models)):
+                    if (len(self.data.engine_models['openrt']) != len(self.coreAPI.subbot.llm.openrtAPI.models)):
                         self.data.engine_models['openrt'] = {}
-                        for key,value in self.coreai.subbot.llm.openrtAPI.models.items():
-                            self.data.engine_models['openrt'][key]      = self.coreai.subbot.llm.openrtAPI.models[key]["date"] + " : " \
-                                                                        + self.coreai.subbot.llm.openrtAPI.models[key]["id"] + ", " \
-                                                                        + str(self.coreai.subbot.llm.openrtAPI.models[key]["token"]) + ", " \
-                                                                        + self.coreai.subbot.llm.openrtAPI.models[key]["modality"] + ", "
+                        for key,value in self.coreAPI.subbot.llm.openrtAPI.models.items():
+                            self.data.engine_models['openrt'][key]      = self.coreAPI.subbot.llm.openrtAPI.models[key]["date"] + " : " \
+                                                                        + self.coreAPI.subbot.llm.openrtAPI.models[key]["id"] + ", " \
+                                                                        + str(self.coreAPI.subbot.llm.openrtAPI.models[key]["token"]) + ", " \
+                                                                        + self.coreAPI.subbot.llm.openrtAPI.models[key]["modality"] + ", "
 
                 elif (engine == 'perplexity'):
-                    if (len(self.data.engine_models['perplexity']) != len(self.coreai.subbot.llm.perplexityAPI.models)):
+                    if (len(self.data.engine_models['perplexity']) != len(self.coreAPI.subbot.llm.perplexityAPI.models)):
                         self.data.engine_models['perplexity'] = {}
-                        for key,value in self.coreai.subbot.llm.perplexityAPI.models.items():
-                            self.data.engine_models['perplexity'][key]  = self.coreai.subbot.llm.perplexityAPI.models[key]["date"] + " : " \
-                                                                        + self.coreai.subbot.llm.perplexityAPI.models[key]["id"] + ", " \
-                                                                        + str(self.coreai.subbot.llm.perplexityAPI.models[key]["token"]) + ", " \
-                                                                        + self.coreai.subbot.llm.perplexityAPI.models[key]["modality"] + ", "
+                        for key,value in self.coreAPI.subbot.llm.perplexityAPI.models.items():
+                            self.data.engine_models['perplexity'][key]  = self.coreAPI.subbot.llm.perplexityAPI.models[key]["date"] + " : " \
+                                                                        + self.coreAPI.subbot.llm.perplexityAPI.models[key]["id"] + ", " \
+                                                                        + str(self.coreAPI.subbot.llm.perplexityAPI.models[key]["token"]) + ", " \
+                                                                        + self.coreAPI.subbot.llm.perplexityAPI.models[key]["modality"] + ", "
 
                 elif (engine == 'grok'):
-                    if (len(self.data.engine_models['grok']) != len(self.coreai.subbot.llm.grokAPI.models)):
+                    if (len(self.data.engine_models['grok']) != len(self.coreAPI.subbot.llm.grokAPI.models)):
                         self.data.engine_models['grok'] = {}
-                        for key,value in self.coreai.subbot.llm.grokAPI.models.items():
-                            self.data.engine_models['grok'][key]        = self.coreai.subbot.llm.grokAPI.models[key]["date"] + " : " \
-                                                                        + self.coreai.subbot.llm.grokAPI.models[key]["id"] + ", " \
-                                                                        + str(self.coreai.subbot.llm.grokAPI.models[key]["token"]) + ", " \
-                                                                        + self.coreai.subbot.llm.grokAPI.models[key]["modality"] + ", "
+                        for key,value in self.coreAPI.subbot.llm.grokAPI.models.items():
+                            self.data.engine_models['grok'][key]        = self.coreAPI.subbot.llm.grokAPI.models[key]["date"] + " : " \
+                                                                        + self.coreAPI.subbot.llm.grokAPI.models[key]["id"] + ", " \
+                                                                        + str(self.coreAPI.subbot.llm.grokAPI.models[key]["token"]) + ", " \
+                                                                        + self.coreAPI.subbot.llm.grokAPI.models[key]["modality"] + ", "
 
                 elif (engine == 'groq'):
-                    if (len(self.data.engine_models['groq']) != len(self.coreai.subbot.llm.groqAPI.models)):
+                    if (len(self.data.engine_models['groq']) != len(self.coreAPI.subbot.llm.groqAPI.models)):
                         self.data.engine_models['groq'] = {}
-                        for key,value in self.coreai.subbot.llm.groqAPI.models.items():
-                            self.data.engine_models['groq'][key]        = self.coreai.subbot.llm.groqAPI.models[key]["date"] + " : " \
-                                                                        + self.coreai.subbot.llm.groqAPI.models[key]["id"] + ", " \
-                                                                        + str(self.coreai.subbot.llm.groqAPI.models[key]["token"]) + ", " \
-                                                                        + self.coreai.subbot.llm.groqAPI.models[key]["modality"] + ", "
+                        for key,value in self.coreAPI.subbot.llm.groqAPI.models.items():
+                            self.data.engine_models['groq'][key]        = self.coreAPI.subbot.llm.groqAPI.models[key]["date"] + " : " \
+                                                                        + self.coreAPI.subbot.llm.groqAPI.models[key]["id"] + ", " \
+                                                                        + str(self.coreAPI.subbot.llm.groqAPI.models[key]["token"]) + ", " \
+                                                                        + self.coreAPI.subbot.llm.groqAPI.models[key]["modality"] + ", "
 
                 elif (engine == 'ollama'):
-                    if (len(self.data.engine_models['ollama']) != len(self.coreai.subbot.llm.ollamaAPI.models)):
+                    if (len(self.data.engine_models['ollama']) != len(self.coreAPI.subbot.llm.ollamaAPI.models)):
                         self.data.engine_models['ollama'] = {}
-                        for key,value in self.coreai.subbot.llm.ollamaAPI.models.items():
-                            self.data.engine_models['ollama'][key]      = self.coreai.subbot.llm.ollamaAPI.models[key]["date"] + " : " \
-                                                                        + self.coreai.subbot.llm.ollamaAPI.models[key]["id"] + ", " \
-                                                                        + str(self.coreai.subbot.llm.ollamaAPI.models[key]["token"]) + ", " \
-                                                                        + self.coreai.subbot.llm.ollamaAPI.models[key]["modality"] + ", "
+                        for key,value in self.coreAPI.subbot.llm.ollamaAPI.models.items():
+                            self.data.engine_models['ollama'][key]      = self.coreAPI.subbot.llm.ollamaAPI.models[key]["date"] + " : " \
+                                                                        + self.coreAPI.subbot.llm.ollamaAPI.models[key]["id"] + ", " \
+                                                                        + str(self.coreAPI.subbot.llm.ollamaAPI.models[key]["token"]) + ", " \
+                                                                        + self.coreAPI.subbot.llm.ollamaAPI.models[key]["modality"] + ", "
 
                 result = self.data.engine_models[engine]
             else:
@@ -313,176 +311,176 @@ class coreai4_class:
     async def get_engine_setting(self, engine: str):
         # 設定情報を返す
         try:
-            if (self.data is not None) and (self.coreai is not None):
+            if (self.data is not None) and (self.coreAPI is not None):
 
                 if (engine == 'chatgpt'):
                     self.data.engine_setting['chatgpt'] = {
-                        "a_nick_name": self.coreai.subbot.llm.chatgptAPI.a_nick_name,
-                        "b_nick_name": self.coreai.subbot.llm.chatgptAPI.b_nick_name,
-                        "v_nick_name": self.coreai.subbot.llm.chatgptAPI.v_nick_name,
-                        "x_nick_name": self.coreai.subbot.llm.chatgptAPI.x_nick_name,
-                        "max_wait_sec": str(self.coreai.subbot.llm.chatgptAPI.max_wait_sec),
-                        "a_model": self.coreai.subbot.llm.chatgptAPI.a_model,
-                        "a_use_tools": self.coreai.subbot.llm.chatgptAPI.a_use_tools,
-                        "b_model": self.coreai.subbot.llm.chatgptAPI.b_model,
-                        "b_use_tools": self.coreai.subbot.llm.chatgptAPI.b_use_tools,
-                        "v_model": self.coreai.subbot.llm.chatgptAPI.v_model,
-                        "v_use_tools": self.coreai.subbot.llm.chatgptAPI.v_use_tools,
-                        "x_model": self.coreai.subbot.llm.chatgptAPI.x_model,
-                        "x_use_tools": self.coreai.subbot.llm.chatgptAPI.x_use_tools,
+                        "a_nick_name": self.coreAPI.subbot.llm.chatgptAPI.a_nick_name,
+                        "b_nick_name": self.coreAPI.subbot.llm.chatgptAPI.b_nick_name,
+                        "v_nick_name": self.coreAPI.subbot.llm.chatgptAPI.v_nick_name,
+                        "x_nick_name": self.coreAPI.subbot.llm.chatgptAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreAPI.subbot.llm.chatgptAPI.max_wait_sec),
+                        "a_model": self.coreAPI.subbot.llm.chatgptAPI.a_model,
+                        "a_use_tools": self.coreAPI.subbot.llm.chatgptAPI.a_use_tools,
+                        "b_model": self.coreAPI.subbot.llm.chatgptAPI.b_model,
+                        "b_use_tools": self.coreAPI.subbot.llm.chatgptAPI.b_use_tools,
+                        "v_model": self.coreAPI.subbot.llm.chatgptAPI.v_model,
+                        "v_use_tools": self.coreAPI.subbot.llm.chatgptAPI.v_use_tools,
+                        "x_model": self.coreAPI.subbot.llm.chatgptAPI.x_model,
+                        "x_use_tools": self.coreAPI.subbot.llm.chatgptAPI.x_use_tools,
                     }
 
                 elif (engine == 'respo'):
                     self.data.engine_setting['respo'] = {
-                        "a_nick_name": self.coreai.subbot.llm.respoAPI.a_nick_name,
-                        "b_nick_name": self.coreai.subbot.llm.respoAPI.b_nick_name,
-                        "v_nick_name": self.coreai.subbot.llm.respoAPI.v_nick_name,
-                        "x_nick_name": self.coreai.subbot.llm.respoAPI.x_nick_name,
-                        "max_wait_sec": str(self.coreai.subbot.llm.respoAPI.max_wait_sec),
-                        "a_model": self.coreai.subbot.llm.respoAPI.a_model,
-                        "a_use_tools": self.coreai.subbot.llm.respoAPI.a_use_tools,
-                        "b_model": self.coreai.subbot.llm.respoAPI.b_model,
-                        "b_use_tools": self.coreai.subbot.llm.respoAPI.b_use_tools,
-                        "v_model": self.coreai.subbot.llm.respoAPI.v_model,
-                        "v_use_tools": self.coreai.subbot.llm.respoAPI.v_use_tools,
-                        "x_model": self.coreai.subbot.llm.respoAPI.x_model,
-                        "x_use_tools": self.coreai.subbot.llm.respoAPI.x_use_tools,
+                        "a_nick_name": self.coreAPI.subbot.llm.respoAPI.a_nick_name,
+                        "b_nick_name": self.coreAPI.subbot.llm.respoAPI.b_nick_name,
+                        "v_nick_name": self.coreAPI.subbot.llm.respoAPI.v_nick_name,
+                        "x_nick_name": self.coreAPI.subbot.llm.respoAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreAPI.subbot.llm.respoAPI.max_wait_sec),
+                        "a_model": self.coreAPI.subbot.llm.respoAPI.a_model,
+                        "a_use_tools": self.coreAPI.subbot.llm.respoAPI.a_use_tools,
+                        "b_model": self.coreAPI.subbot.llm.respoAPI.b_model,
+                        "b_use_tools": self.coreAPI.subbot.llm.respoAPI.b_use_tools,
+                        "v_model": self.coreAPI.subbot.llm.respoAPI.v_model,
+                        "v_use_tools": self.coreAPI.subbot.llm.respoAPI.v_use_tools,
+                        "x_model": self.coreAPI.subbot.llm.respoAPI.x_model,
+                        "x_use_tools": self.coreAPI.subbot.llm.respoAPI.x_use_tools,
                     }
 
                 elif (engine == 'gemini'):
                     self.data.engine_setting['gemini'] = {
-                        "a_nick_name": self.coreai.subbot.llm.geminiAPI.a_nick_name,
-                        "b_nick_name": self.coreai.subbot.llm.geminiAPI.b_nick_name,
-                        "v_nick_name": self.coreai.subbot.llm.geminiAPI.v_nick_name,
-                        "x_nick_name": self.coreai.subbot.llm.geminiAPI.x_nick_name,
-                        "max_wait_sec": str(self.coreai.subbot.llm.geminiAPI.max_wait_sec),
-                        "a_model": self.coreai.subbot.llm.geminiAPI.a_model,
-                        "a_use_tools": self.coreai.subbot.llm.geminiAPI.a_use_tools,
-                        "b_model": self.coreai.subbot.llm.geminiAPI.b_model,
-                        "b_use_tools": self.coreai.subbot.llm.geminiAPI.b_use_tools,
-                        "v_model": self.coreai.subbot.llm.geminiAPI.v_model,
-                        "v_use_tools": self.coreai.subbot.llm.geminiAPI.v_use_tools,
-                        "x_model": self.coreai.subbot.llm.geminiAPI.x_model,
-                        "x_use_tools": self.coreai.subbot.llm.geminiAPI.x_use_tools,
+                        "a_nick_name": self.coreAPI.subbot.llm.geminiAPI.a_nick_name,
+                        "b_nick_name": self.coreAPI.subbot.llm.geminiAPI.b_nick_name,
+                        "v_nick_name": self.coreAPI.subbot.llm.geminiAPI.v_nick_name,
+                        "x_nick_name": self.coreAPI.subbot.llm.geminiAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreAPI.subbot.llm.geminiAPI.max_wait_sec),
+                        "a_model": self.coreAPI.subbot.llm.geminiAPI.a_model,
+                        "a_use_tools": self.coreAPI.subbot.llm.geminiAPI.a_use_tools,
+                        "b_model": self.coreAPI.subbot.llm.geminiAPI.b_model,
+                        "b_use_tools": self.coreAPI.subbot.llm.geminiAPI.b_use_tools,
+                        "v_model": self.coreAPI.subbot.llm.geminiAPI.v_model,
+                        "v_use_tools": self.coreAPI.subbot.llm.geminiAPI.v_use_tools,
+                        "x_model": self.coreAPI.subbot.llm.geminiAPI.x_model,
+                        "x_use_tools": self.coreAPI.subbot.llm.geminiAPI.x_use_tools,
                     }
 
                 elif (engine == 'freeai'):
                     self.data.engine_setting['freeai'] = {
-                        "a_nick_name": self.coreai.subbot.llm.freeaiAPI.a_nick_name,
-                        "b_nick_name": self.coreai.subbot.llm.freeaiAPI.b_nick_name,
-                        "v_nick_name": self.coreai.subbot.llm.freeaiAPI.v_nick_name,
-                        "x_nick_name": self.coreai.subbot.llm.freeaiAPI.x_nick_name,
-                        "max_wait_sec": str(self.coreai.subbot.llm.freeaiAPI.max_wait_sec),
-                        "a_model": self.coreai.subbot.llm.freeaiAPI.a_model,
-                        "a_use_tools": self.coreai.subbot.llm.freeaiAPI.a_use_tools,
-                        "b_model": self.coreai.subbot.llm.freeaiAPI.b_model,
-                        "b_use_tools": self.coreai.subbot.llm.freeaiAPI.b_use_tools,
-                        "v_model": self.coreai.subbot.llm.freeaiAPI.v_model,
-                        "v_use_tools": self.coreai.subbot.llm.freeaiAPI.v_use_tools,
-                        "x_model": self.coreai.subbot.llm.freeaiAPI.x_model,
-                        "x_use_tools": self.coreai.subbot.llm.freeaiAPI.x_use_tools,
+                        "a_nick_name": self.coreAPI.subbot.llm.freeaiAPI.a_nick_name,
+                        "b_nick_name": self.coreAPI.subbot.llm.freeaiAPI.b_nick_name,
+                        "v_nick_name": self.coreAPI.subbot.llm.freeaiAPI.v_nick_name,
+                        "x_nick_name": self.coreAPI.subbot.llm.freeaiAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreAPI.subbot.llm.freeaiAPI.max_wait_sec),
+                        "a_model": self.coreAPI.subbot.llm.freeaiAPI.a_model,
+                        "a_use_tools": self.coreAPI.subbot.llm.freeaiAPI.a_use_tools,
+                        "b_model": self.coreAPI.subbot.llm.freeaiAPI.b_model,
+                        "b_use_tools": self.coreAPI.subbot.llm.freeaiAPI.b_use_tools,
+                        "v_model": self.coreAPI.subbot.llm.freeaiAPI.v_model,
+                        "v_use_tools": self.coreAPI.subbot.llm.freeaiAPI.v_use_tools,
+                        "x_model": self.coreAPI.subbot.llm.freeaiAPI.x_model,
+                        "x_use_tools": self.coreAPI.subbot.llm.freeaiAPI.x_use_tools,
                     }
 
                 elif (engine == 'claude'):
                     self.data.engine_setting['claude'] = {
-                        "a_nick_name": self.coreai.subbot.llm.claudeAPI.a_nick_name,
-                        "b_nick_name": self.coreai.subbot.llm.claudeAPI.b_nick_name,
-                        "v_nick_name": self.coreai.subbot.llm.claudeAPI.v_nick_name,
-                        "x_nick_name": self.coreai.subbot.llm.claudeAPI.x_nick_name,
-                        "max_wait_sec": str(self.coreai.subbot.llm.claudeAPI.max_wait_sec),
-                        "a_model": self.coreai.subbot.llm.claudeAPI.a_model,
-                        "a_use_tools": self.coreai.subbot.llm.claudeAPI.a_use_tools,
-                        "b_model": self.coreai.subbot.llm.claudeAPI.b_model,
-                        "b_use_tools": self.coreai.subbot.llm.claudeAPI.b_use_tools,
-                        "v_model": self.coreai.subbot.llm.claudeAPI.v_model,
-                        "v_use_tools": self.coreai.subbot.llm.claudeAPI.v_use_tools,
-                        "x_model": self.coreai.subbot.llm.claudeAPI.x_model,
-                        "x_use_tools": self.coreai.subbot.llm.claudeAPI.x_use_tools,
+                        "a_nick_name": self.coreAPI.subbot.llm.claudeAPI.a_nick_name,
+                        "b_nick_name": self.coreAPI.subbot.llm.claudeAPI.b_nick_name,
+                        "v_nick_name": self.coreAPI.subbot.llm.claudeAPI.v_nick_name,
+                        "x_nick_name": self.coreAPI.subbot.llm.claudeAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreAPI.subbot.llm.claudeAPI.max_wait_sec),
+                        "a_model": self.coreAPI.subbot.llm.claudeAPI.a_model,
+                        "a_use_tools": self.coreAPI.subbot.llm.claudeAPI.a_use_tools,
+                        "b_model": self.coreAPI.subbot.llm.claudeAPI.b_model,
+                        "b_use_tools": self.coreAPI.subbot.llm.claudeAPI.b_use_tools,
+                        "v_model": self.coreAPI.subbot.llm.claudeAPI.v_model,
+                        "v_use_tools": self.coreAPI.subbot.llm.claudeAPI.v_use_tools,
+                        "x_model": self.coreAPI.subbot.llm.claudeAPI.x_model,
+                        "x_use_tools": self.coreAPI.subbot.llm.claudeAPI.x_use_tools,
                     }
 
                 elif (engine == 'openrt'):
                     self.data.engine_setting['openrt'] = {
-                        "a_nick_name": self.coreai.subbot.llm.openrtAPI.a_nick_name,
-                        "b_nick_name": self.coreai.subbot.llm.openrtAPI.b_nick_name,
-                        "v_nick_name": self.coreai.subbot.llm.openrtAPI.v_nick_name,
-                        "x_nick_name": self.coreai.subbot.llm.openrtAPI.x_nick_name,
-                        "max_wait_sec": str(self.coreai.subbot.llm.openrtAPI.max_wait_sec),
-                        "a_model": self.coreai.subbot.llm.openrtAPI.a_model,
-                        "a_use_tools": self.coreai.subbot.llm.openrtAPI.a_use_tools,
-                        "b_model": self.coreai.subbot.llm.openrtAPI.b_model,
-                        "b_use_tools": self.coreai.subbot.llm.openrtAPI.b_use_tools,
-                        "v_model": self.coreai.subbot.llm.openrtAPI.v_model,
-                        "v_use_tools": self.coreai.subbot.llm.openrtAPI.v_use_tools,
-                        "x_model": self.coreai.subbot.llm.openrtAPI.x_model,
-                        "x_use_tools": self.coreai.subbot.llm.openrtAPI.x_use_tools,
+                        "a_nick_name": self.coreAPI.subbot.llm.openrtAPI.a_nick_name,
+                        "b_nick_name": self.coreAPI.subbot.llm.openrtAPI.b_nick_name,
+                        "v_nick_name": self.coreAPI.subbot.llm.openrtAPI.v_nick_name,
+                        "x_nick_name": self.coreAPI.subbot.llm.openrtAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreAPI.subbot.llm.openrtAPI.max_wait_sec),
+                        "a_model": self.coreAPI.subbot.llm.openrtAPI.a_model,
+                        "a_use_tools": self.coreAPI.subbot.llm.openrtAPI.a_use_tools,
+                        "b_model": self.coreAPI.subbot.llm.openrtAPI.b_model,
+                        "b_use_tools": self.coreAPI.subbot.llm.openrtAPI.b_use_tools,
+                        "v_model": self.coreAPI.subbot.llm.openrtAPI.v_model,
+                        "v_use_tools": self.coreAPI.subbot.llm.openrtAPI.v_use_tools,
+                        "x_model": self.coreAPI.subbot.llm.openrtAPI.x_model,
+                        "x_use_tools": self.coreAPI.subbot.llm.openrtAPI.x_use_tools,
                     }
 
                 elif (engine == 'perplexity'):
                     self.data.engine_setting['perplexity'] = {
-                        "a_nick_name": self.coreai.subbot.llm.perplexityAPI.a_nick_name,
-                        "b_nick_name": self.coreai.subbot.llm.perplexityAPI.b_nick_name,
-                        "v_nick_name": self.coreai.subbot.llm.perplexityAPI.v_nick_name,
-                        "x_nick_name": self.coreai.subbot.llm.perplexityAPI.x_nick_name,
-                        "max_wait_sec": str(self.coreai.subbot.llm.perplexityAPI.max_wait_sec),
-                        "a_model": self.coreai.subbot.llm.perplexityAPI.a_model,
-                        "a_use_tools": self.coreai.subbot.llm.perplexityAPI.a_use_tools,
-                        "b_model": self.coreai.subbot.llm.perplexityAPI.b_model,
-                        "b_use_tools": self.coreai.subbot.llm.perplexityAPI.b_use_tools,
-                        "v_model": self.coreai.subbot.llm.perplexityAPI.v_model,
-                        "v_use_tools": self.coreai.subbot.llm.perplexityAPI.v_use_tools,
-                        "x_model": self.coreai.subbot.llm.perplexityAPI.x_model,
-                        "x_use_tools": self.coreai.subbot.llm.perplexityAPI.x_use_tools,
+                        "a_nick_name": self.coreAPI.subbot.llm.perplexityAPI.a_nick_name,
+                        "b_nick_name": self.coreAPI.subbot.llm.perplexityAPI.b_nick_name,
+                        "v_nick_name": self.coreAPI.subbot.llm.perplexityAPI.v_nick_name,
+                        "x_nick_name": self.coreAPI.subbot.llm.perplexityAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreAPI.subbot.llm.perplexityAPI.max_wait_sec),
+                        "a_model": self.coreAPI.subbot.llm.perplexityAPI.a_model,
+                        "a_use_tools": self.coreAPI.subbot.llm.perplexityAPI.a_use_tools,
+                        "b_model": self.coreAPI.subbot.llm.perplexityAPI.b_model,
+                        "b_use_tools": self.coreAPI.subbot.llm.perplexityAPI.b_use_tools,
+                        "v_model": self.coreAPI.subbot.llm.perplexityAPI.v_model,
+                        "v_use_tools": self.coreAPI.subbot.llm.perplexityAPI.v_use_tools,
+                        "x_model": self.coreAPI.subbot.llm.perplexityAPI.x_model,
+                        "x_use_tools": self.coreAPI.subbot.llm.perplexityAPI.x_use_tools,
                     }
 
                 elif (engine == 'grok'):
                     self.data.engine_setting['grok'] = {
-                        "a_nick_name": self.coreai.subbot.llm.grokAPI.a_nick_name,
-                        "b_nick_name": self.coreai.subbot.llm.grokAPI.b_nick_name,
-                        "v_nick_name": self.coreai.subbot.llm.grokAPI.v_nick_name,
-                        "x_nick_name": self.coreai.subbot.llm.grokAPI.x_nick_name,
-                        "max_wait_sec": str(self.coreai.subbot.llm.grokAPI.max_wait_sec),
-                        "a_model": self.coreai.subbot.llm.grokAPI.a_model,
-                        "a_use_tools": self.coreai.subbot.llm.grokAPI.a_use_tools,
-                        "b_model": self.coreai.subbot.llm.grokAPI.b_model,
-                        "b_use_tools": self.coreai.subbot.llm.grokAPI.b_use_tools,
-                        "v_model": self.coreai.subbot.llm.grokAPI.v_model,
-                        "v_use_tools": self.coreai.subbot.llm.grokAPI.v_use_tools,
-                        "x_model": self.coreai.subbot.llm.grokAPI.x_model,
-                        "x_use_tools": self.coreai.subbot.llm.grokAPI.x_use_tools,
+                        "a_nick_name": self.coreAPI.subbot.llm.grokAPI.a_nick_name,
+                        "b_nick_name": self.coreAPI.subbot.llm.grokAPI.b_nick_name,
+                        "v_nick_name": self.coreAPI.subbot.llm.grokAPI.v_nick_name,
+                        "x_nick_name": self.coreAPI.subbot.llm.grokAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreAPI.subbot.llm.grokAPI.max_wait_sec),
+                        "a_model": self.coreAPI.subbot.llm.grokAPI.a_model,
+                        "a_use_tools": self.coreAPI.subbot.llm.grokAPI.a_use_tools,
+                        "b_model": self.coreAPI.subbot.llm.grokAPI.b_model,
+                        "b_use_tools": self.coreAPI.subbot.llm.grokAPI.b_use_tools,
+                        "v_model": self.coreAPI.subbot.llm.grokAPI.v_model,
+                        "v_use_tools": self.coreAPI.subbot.llm.grokAPI.v_use_tools,
+                        "x_model": self.coreAPI.subbot.llm.grokAPI.x_model,
+                        "x_use_tools": self.coreAPI.subbot.llm.grokAPI.x_use_tools,
                     }
 
                 elif (engine == 'groq'):
                     self.data.engine_setting['groq'] = {
-                        "a_nick_name": self.coreai.subbot.llm.groqAPI.a_nick_name,
-                        "b_nick_name": self.coreai.subbot.llm.groqAPI.b_nick_name,
-                        "v_nick_name": self.coreai.subbot.llm.groqAPI.v_nick_name,
-                        "x_nick_name": self.coreai.subbot.llm.groqAPI.x_nick_name,
-                        "max_wait_sec": str(self.coreai.subbot.llm.groqAPI.max_wait_sec),
-                        "a_model": self.coreai.subbot.llm.groqAPI.a_model,
-                        "a_use_tools": self.coreai.subbot.llm.groqAPI.a_use_tools,
-                        "b_model": self.coreai.subbot.llm.groqAPI.b_model,
-                        "b_use_tools": self.coreai.subbot.llm.groqAPI.b_use_tools,
-                        "v_model": self.coreai.subbot.llm.groqAPI.v_model,
-                        "v_use_tools": self.coreai.subbot.llm.groqAPI.v_use_tools,
-                        "x_model": self.coreai.subbot.llm.groqAPI.x_model,
-                        "x_use_tools": self.coreai.subbot.llm.groqAPI.x_use_tools,
+                        "a_nick_name": self.coreAPI.subbot.llm.groqAPI.a_nick_name,
+                        "b_nick_name": self.coreAPI.subbot.llm.groqAPI.b_nick_name,
+                        "v_nick_name": self.coreAPI.subbot.llm.groqAPI.v_nick_name,
+                        "x_nick_name": self.coreAPI.subbot.llm.groqAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreAPI.subbot.llm.groqAPI.max_wait_sec),
+                        "a_model": self.coreAPI.subbot.llm.groqAPI.a_model,
+                        "a_use_tools": self.coreAPI.subbot.llm.groqAPI.a_use_tools,
+                        "b_model": self.coreAPI.subbot.llm.groqAPI.b_model,
+                        "b_use_tools": self.coreAPI.subbot.llm.groqAPI.b_use_tools,
+                        "v_model": self.coreAPI.subbot.llm.groqAPI.v_model,
+                        "v_use_tools": self.coreAPI.subbot.llm.groqAPI.v_use_tools,
+                        "x_model": self.coreAPI.subbot.llm.groqAPI.x_model,
+                        "x_use_tools": self.coreAPI.subbot.llm.groqAPI.x_use_tools,
                     }
 
                 elif (engine == 'ollama'):
                     self.data.engine_setting['ollama'] = {
-                        "a_nick_name": self.coreai.subbot.llm.ollamaAPI.a_nick_name,
-                        "b_nick_name": self.coreai.subbot.llm.ollamaAPI.b_nick_name,
-                        "v_nick_name": self.coreai.subbot.llm.ollamaAPI.v_nick_name,
-                        "x_nick_name": self.coreai.subbot.llm.ollamaAPI.x_nick_name,
-                        "max_wait_sec": str(self.coreai.subbot.llm.ollamaAPI.max_wait_sec),
-                        "a_model": self.coreai.subbot.llm.ollamaAPI.a_model,
-                        "a_use_tools": self.coreai.subbot.llm.ollamaAPI.a_use_tools,
-                        "b_model": self.coreai.subbot.llm.ollamaAPI.b_model,
-                        "b_use_tools": self.coreai.subbot.llm.ollamaAPI.b_use_tools,
-                        "v_model": self.coreai.subbot.llm.ollamaAPI.v_model,
-                        "v_use_tools": self.coreai.subbot.llm.ollamaAPI.v_use_tools,
-                        "x_model": self.coreai.subbot.llm.ollamaAPI.x_model,
-                        "x_use_tools": self.coreai.subbot.llm.ollamaAPI.x_use_tools,
+                        "a_nick_name": self.coreAPI.subbot.llm.ollamaAPI.a_nick_name,
+                        "b_nick_name": self.coreAPI.subbot.llm.ollamaAPI.b_nick_name,
+                        "v_nick_name": self.coreAPI.subbot.llm.ollamaAPI.v_nick_name,
+                        "x_nick_name": self.coreAPI.subbot.llm.ollamaAPI.x_nick_name,
+                        "max_wait_sec": str(self.coreAPI.subbot.llm.ollamaAPI.max_wait_sec),
+                        "a_model": self.coreAPI.subbot.llm.ollamaAPI.a_model,
+                        "a_use_tools": self.coreAPI.subbot.llm.ollamaAPI.a_use_tools,
+                        "b_model": self.coreAPI.subbot.llm.ollamaAPI.b_model,
+                        "b_use_tools": self.coreAPI.subbot.llm.ollamaAPI.b_use_tools,
+                        "v_model": self.coreAPI.subbot.llm.ollamaAPI.v_model,
+                        "v_use_tools": self.coreAPI.subbot.llm.ollamaAPI.v_use_tools,
+                        "x_model": self.coreAPI.subbot.llm.ollamaAPI.x_model,
+                        "x_use_tools": self.coreAPI.subbot.llm.ollamaAPI.x_use_tools,
                     }
 
                 result = self.data.engine_setting[engine]
@@ -513,11 +511,11 @@ class coreai4_class:
                                                     "b_model": b_model, "b_use_tools": b_use_tools,
                                                     "v_model": v_model, "v_use_tools": v_use_tools,
                                                     "x_model": x_model, "x_use_tools": x_use_tools, }
-                if (self.coreai is not None):
+                if (self.coreAPI is not None):
 
                     if (engine == 'chatgpt'):
                         engine_set_thread = threading.Thread(
-                            target=self.coreai.subbot.llm.chatgptAPI.set_models,
+                            target=self.coreAPI.subbot.llm.chatgptAPI.set_models,
                             args=(max_wait_sec, a_model, a_use_tools, b_model, b_use_tools,
                                                 v_model, v_use_tools, x_model, x_use_tools, ),
                             daemon=True, )
@@ -525,7 +523,7 @@ class coreai4_class:
 
                     elif (engine == 'respo'):
                         engine_set_thread = threading.Thread(
-                            target=self.coreai.subbot.llm.respoAPI.set_models,
+                            target=self.coreAPI.subbot.llm.respoAPI.set_models,
                             args=(max_wait_sec, a_model, a_use_tools, b_model, b_use_tools,
                                                 v_model, v_use_tools, x_model, x_use_tools, ),
                             daemon=True, )
@@ -533,7 +531,7 @@ class coreai4_class:
 
                     elif (engine == 'gemini'):
                         engine_set_thread = threading.Thread(
-                            target=self.coreai.subbot.llm.geminiAPI.set_models,
+                            target=self.coreAPI.subbot.llm.geminiAPI.set_models,
                             args=(max_wait_sec, a_model, a_use_tools, b_model, b_use_tools,
                                                 v_model, v_use_tools, x_model, x_use_tools, ),
                             daemon=True, )
@@ -541,7 +539,7 @@ class coreai4_class:
 
                     elif (engine == 'freeai'):
                         engine_set_thread = threading.Thread(
-                            target=self.coreai.subbot.llm.freeaiAPI.set_models,
+                            target=self.coreAPI.subbot.llm.freeaiAPI.set_models,
                             args=(max_wait_sec, a_model, a_use_tools, b_model, b_use_tools,
                                                 v_model, v_use_tools, x_model, x_use_tools, ),
                             daemon=True, )
@@ -549,7 +547,7 @@ class coreai4_class:
 
                     elif (engine == 'claude'):
                         engine_set_thread = threading.Thread(
-                            target=self.coreai.subbot.llm.claudeAPI.set_models,
+                            target=self.coreAPI.subbot.llm.claudeAPI.set_models,
                             args=(max_wait_sec, a_model, a_use_tools, b_model, b_use_tools,
                                                 v_model, v_use_tools, x_model, x_use_tools, ),
                             daemon=True, )
@@ -557,7 +555,7 @@ class coreai4_class:
 
                     elif (engine == 'openrt'):
                         engine_set_thread = threading.Thread(
-                            target=self.coreai.subbot.llm.openrtAPI.set_models,
+                            target=self.coreAPI.subbot.llm.openrtAPI.set_models,
                             args=(max_wait_sec, a_model, a_use_tools, b_model, b_use_tools,
                                                 v_model, v_use_tools, x_model, x_use_tools, ),
                             daemon=True, )
@@ -565,7 +563,7 @@ class coreai4_class:
 
                     elif (engine == 'perplexity'):
                         engine_set_thread = threading.Thread(
-                            target=self.coreai.subbot.llm.perplexityAPI.set_models,
+                            target=self.coreAPI.subbot.llm.perplexityAPI.set_models,
                             args=(max_wait_sec, a_model, a_use_tools, b_model, b_use_tools,
                                                 v_model, v_use_tools, x_model, x_use_tools, ),
                             daemon=True, )
@@ -573,7 +571,7 @@ class coreai4_class:
 
                     elif (engine == 'grok'):
                         engine_set_thread = threading.Thread(
-                            target=self.coreai.subbot.llm.grokAPI.set_models,
+                            target=self.coreAPI.subbot.llm.grokAPI.set_models,
                             args=(max_wait_sec, a_model, a_use_tools, b_model, b_use_tools,
                                                 v_model, v_use_tools, x_model, x_use_tools, ),
                             daemon=True, )
@@ -581,7 +579,7 @@ class coreai4_class:
 
                     elif (engine == 'groq'):
                         engine_set_thread = threading.Thread(
-                            target=self.coreai.subbot.llm.groqAPI.set_models,
+                            target=self.coreAPI.subbot.llm.groqAPI.set_models,
                             args=(max_wait_sec, a_model, a_use_tools, b_model, b_use_tools,
                                                 v_model, v_use_tools, x_model, x_use_tools, ),
                             daemon=True, )
@@ -589,7 +587,7 @@ class coreai4_class:
 
                     elif (engine == 'ollama'):
                         engine_set_thread = threading.Thread(
-                            target=self.coreai.subbot.llm.ollamaAPI.set_models,
+                            target=self.coreAPI.subbot.llm.ollamaAPI.set_models,
                             args=(max_wait_sec, a_model, a_use_tools, b_model, b_use_tools,
                                                 v_model, v_use_tools, x_model, x_use_tools, ),
                             daemon=True, )
@@ -740,7 +738,7 @@ if __name__ == '__main__':
     sub_base  = '8100'
     numSubAIs = '48'
 
-    coreai4 = main_class(   runMode='debug', qLog_fn='', 
+    coreAPI4 = main_class(   runMode='debug', qLog_fn='', 
                             core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
 
     #while True:

@@ -52,11 +52,12 @@ class sandbox_class:
         if (not os.path.isdir(qPath_sandbox)):
             os.makedirs(qPath_sandbox)
 
-        # main,data,addin,botFunc,
+        # main,data,addin,botFunc,mcpHost,
         self.main    = None
         self.data    = None
         self.addin   = None
         self.botFunc = None
+        self.mcpHost = None
 
         # react 準備
         self.abs_path     = os.path.abspath(qPath_sandbox)
@@ -385,7 +386,7 @@ class _class:
         self.last_reset = 0
         self.func_reset()
 
-    def func_reset(self, main=None, data=None, addin=None, botFunc=None, ):
+    def func_reset(self, main=None, data=None, addin=None, botFunc=None, mcpHost=None, ):
         if (main is not None):
             self.sandbox.main = main
         if (data is not None):
@@ -394,6 +395,8 @@ class _class:
             self.sandbox.addin = addin
         if (botFunc is not None):
             self.sandbox.botFunc = botFunc
+        if (mcpHost is not None):
+            self.sandbox.mcpHost = mcpHost
 
         # 連続リセットは無視
         if ((time.time() - self.last_reset) < 60):

@@ -1,5 +1,11 @@
 // development.js
 
+const CORE_ENDPOINT1 = 'http://localhost:8001';
+const CORE_ENDPOINT2 = 'http://localhost:8002';
+const CORE_ENDPOINT3 = 'http://localhost:8003';
+const CORE_ENDPOINT4 = 'http://localhost:8004';
+const CORE_ENDPOINT5 = 'http://localhost:8005';
+
 // 親ウィンドウにメッセージを送信する関数
 function sendMessageToParent(action, method, data) {
     window.parent.postMessage({ action: action, method: method, data: data }, '*');
@@ -45,7 +51,7 @@ function get_ready_count() {
     var isReady = -1;
     var isBusy = -1;
     $.ajax({
-        url: $('#core_endpoint0').val() + '/get_ready_count',
+        url: CORE_ENDPOINT1 + '/get_ready_count',
         method: 'GET',
         async: false, // 同期処理
         dataType: 'json',

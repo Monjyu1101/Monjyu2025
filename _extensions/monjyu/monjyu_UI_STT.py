@@ -218,7 +218,8 @@ class _monjyu_class:
         self.runMode   = runMode
 
         # ポート設定等
-        self.local_endpoint0 = f'http://localhost:{ CORE_PORT }'
+        self.core_port1 = str(int(CORE_PORT) + 1)
+        self.local_endpoint1 = f'http://localhost:{ self.core_port1 }'
 
     def request(self, req_mode='chat', user_id='admin', sysText='', reqText='', inpText='', ):
         res_port = None
@@ -227,7 +228,7 @@ class _monjyu_class:
         file_names = []
         try:
             response = requests.get(
-                self.local_endpoint0 + '/get_input_list',
+                self.local_endpoint1 + '/get_input_list',
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )
             if response.status_code == 200:
@@ -236,14 +237,14 @@ class _monjyu_class:
                     if (f['checked'] == True):
                         file_names.append(f['file_name'])
             else:
-                print('Monjyu_STT :', f"Error response (webui/get_input_list) : {response.status_code} - {response.text}")
+                print('Monjyu_STT :', f"Error response ({ self.core_port1 }/get_input_list) : {response.status_code} - {response.text}")
         except Exception as e:
-            print('Monjyu_STT :', f"Error communicating (webui/get_input_list) : {e}")
+            print('Monjyu_STT :', f"Error communicating ({ self.core_port1 }/get_input_list) : {e}")
 
         # AI要求送信
         try:
             response = requests.post(
-                self.local_endpoint0 + '/post_req',
+                self.local_endpoint1 + '/post_req',
                 json={'user_id': user_id, 'from_port': CORE_PORT, 'to_port': CORE_PORT,
                     'req_mode': req_mode,
                     'system_text': sysText, 'request_text': reqText, 'input_text': inpText,
@@ -253,9 +254,9 @@ class _monjyu_class:
             if response.status_code == 200:
                 res_port = str(response.json()['port'])
             else:
-                print('Monjyu_STT :', f"Error response ({ CORE_PORT }/post_request) : {response.status_code} - {response.text}")
+                print('Monjyu_STT :', f"Error response ({ self.core_port1 }/post_request) : {response.status_code} - {response.text}")
         except Exception as e:
-            print('Monjyu_STT :', f"Error communicating ({ CORE_PORT }/post_request) : {e}")
+            print('Monjyu_STT :', f"Error communicating ({ self.core_port1 }/post_request) : {e}")
         return res_port
 
 

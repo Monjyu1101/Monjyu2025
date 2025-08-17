@@ -9,7 +9,7 @@
 # ------------------------------------------------
 
 # モジュール名
-MODULE_NAME = 'coreai:2'
+MODULE_NAME = 'coreAPI(3)'
 
 # ロガーの設定
 import logging
@@ -38,9 +38,6 @@ from pydantic import BaseModel
 
 import threading
 
-import socket
-qHOSTNAME = socket.gethostname().lower()
-
 # パスの設定
 qPath_temp    = 'temp/'
 qPath_log     = 'temp/_log/'
@@ -49,8 +46,8 @@ qPath_output  = 'temp/output/'
 qPath_tts     = 'temp/s6_5tts_txt/'
 qPath_sandbox = 'temp/sandbox/'
 
-qPath_static    = '_webui/monjyu/static'
-DEFAULT_ICON    = qPath_static + '/' + "icon_monjyu.gif"
+qPath_static    = '_webUI/Monjyu/static'
+DEFAULT_ICON    = qPath_static + '/' + "icon_Monjyu.gif"
 
 # 定数の定義
 DELETE_OUTPUTLOG_SEC  = 600
@@ -104,26 +101,26 @@ class main_class:
                         main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
                         core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', ):
         # コアAIクラスの初期化とスレッドの開始
-        coreai2 = coreai2_class(runMode=runMode, qLog_fn=qLog_fn,
+        coreAPI3 = coreAPI3_class(runMode=runMode, qLog_fn=qLog_fn,
                                 main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
                                 core_port=core_port, sub_base=sub_base, num_subais=num_subais, )
-        coreai2_thread = threading.Thread(target=coreai2.run, daemon=True, )
-        coreai2_thread.start()
+        coreAPI3_thread = threading.Thread(target=coreAPI3.run, daemon=True, )
+        coreAPI3_thread.start()
         while True:
             time.sleep(5)
 
 
-class coreai2_class:
+class coreAPI3_class:
     """
     コアAIクラス(2)
     FastAPIサーバーの管理を行う。
     """
     def __init__(self,  runMode: str = 'debug', qLog_fn: str = '',
                         main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
-                        coreai=None,
+                        coreAPI=None,
                         core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', ):
         self.runMode = runMode
-        self_port = str(int(core_port)+2)
+        self_port = str(int(core_port) + 3)
 
         # ログファイル名の生成
         if qLog_fn == '':
@@ -141,12 +138,11 @@ class coreai2_class:
         self.addin      = addin
         self.botFunc    = botFunc
         self.mcpHost    = mcpHost
-        self.coreai     = coreai
+        self.coreAPI     = coreAPI
         self.core_port  = core_port
         self.sub_base   = sub_base
         self.num_subais = int(num_subais)
         self.self_port  = self_port
-        self.webui_endpoint8 = f'http://{ qHOSTNAME }:{ int(self.core_port) + 8 }'
 
         # スレッドロック
         self.thread_lock = threading.Lock()
@@ -170,8 +166,10 @@ class coreai2_class:
         self.app.get("/get_output_list")(self.get_output_list)
 
     async def root(self, request: Request):
-        # Web UI にリダイレクト
-        return RedirectResponse(url=self.webui_endpoint8 + '/')
+        # Web UI にリダイレクト（動的URL生成）
+        req_url = f"{request.url.scheme}://{request.url.hostname}"
+        webUI_url = f"{req_url}:{self.core_port}/"
+        return RedirectResponse(url=webUI_url)
 
     async def get_output_log_user(self, user_id: str):
         """
@@ -261,14 +259,14 @@ class coreai2_class:
         # 次回表示する画像データの取得
         image_data = None
         image_ext  = None
-        if (self.coreai is not None):
-            if ((time.time() - self.coreai.last_image_time) > 60):
-                self.coreai.last_image_file = None
-                self.coreai.last_image_time = 0
-            if (self.coreai.last_image_file is not None):
-                image_data = self._get_image_data(self.coreai.last_image_file)
+        if (self.coreAPI is not None):
+            if ((time.time() - self.coreAPI.last_image_time) > 60):
+                self.coreAPI.last_image_file = None
+                self.coreAPI.last_image_time = 0
+            if (self.coreAPI.last_image_file is not None):
+                image_data = self._get_image_data(self.coreAPI.last_image_file)
                 if (image_data is not None):
-                    _, image_ext = os.path.splitext(self.coreai.last_image_file.lower())
+                    _, image_ext = os.path.splitext(self.coreAPI.last_image_file.lower())
         return JSONResponse(content={"image_data": image_data, "image_ext": image_ext})
 
     def _get_image_data(self, image_path):
@@ -431,13 +429,13 @@ class coreai2_class:
                     if (len(text) >= 2) and (len(text) <= 100):
                         nowTime  = datetime.datetime.now()
                         stamp    = nowTime.strftime('%Y%m%d.%H%M%S')
-                        filename = qPath_tts + stamp + '.coreai_tts.txt'
+                        filename = qPath_tts + stamp + '.coreAPI_tts.txt'
                         txtsWrite(filename, txts=[text], encoding='utf-8', mode='w', )
                 except Exception as e:
                     print(e)
 
     def to_memo(self, user_id: str, output_text: str, output_data: str, ):
-        addin_module = self.addin.addin_modules.get('monjyu_UI_ClipnMonjyu', None)
+        addin_module = self.addin.addin_modules.get('Monjyu_UI_ClipnMonjyu', None)
         if (addin_module is not None):
             if (addin_module['onoff'] == 'on'):
                 try:
@@ -617,9 +615,9 @@ class coreai2_class:
         
         if (self.last_output_files != output_files):
             self.last_output_files = output_files
-            if (self.coreai is not None):
-                self.coreai.last_image_file = image_file
-                self.coreai.last_image_time = time.time()
+            if (self.coreAPI is not None):
+                self.coreAPI.last_image_file = image_file
+                self.coreAPI.last_image_time = time.time()
         return JSONResponse(content={"files": output_files})
 
     def run(self):
@@ -648,7 +646,7 @@ if __name__ == '__main__':
     sub_base  = '8100'
     numSubAIs = '48'
 
-    coreai2 = main_class(   runMode='debug', qLog_fn='', 
+    coreAPI3 = main_class(   runMode='debug', qLog_fn='', 
                             core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
 
     #while True:

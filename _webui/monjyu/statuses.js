@@ -1,10 +1,16 @@
 // statuses.js
 
+const CORE_ENDPOINT1 = 'http://localhost:8001';
+const CORE_ENDPOINT2 = 'http://localhost:8002';
+const CORE_ENDPOINT3 = 'http://localhost:8003';
+const CORE_ENDPOINT4 = 'http://localhost:8004';
+const CORE_ENDPOINT5 = 'http://localhost:8005';
+
 // サブAIの情報を取得する関数
 function getSubAiInfo() {
     // AJAXを使ってサブAIの情報を取得
     $.ajax({
-        url: $('#core_endpoint0').val() + '/get_subai_info_all',
+        url: CORE_ENDPOINT1 + '/get_subai_info_all',
         type: 'GET',
         success: function(data) {
             // 取得したデータの各ポートに対して処理を行う
@@ -38,7 +44,7 @@ function getSubAiStatuses() {
 
     // AJAXを使ってサブAIのステータスを取得
     $.ajax({
-        url: $('#core_endpoint0').val() + '/get_subai_statuses_all',
+        url: CORE_ENDPOINT1 + '/get_subai_statuses_all',
         type: 'GET',
         success: function(data) {
 

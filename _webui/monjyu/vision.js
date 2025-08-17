@@ -1,5 +1,11 @@
 // vision.js
 
+const CORE_ENDPOINT1 = 'http://localhost:8001';
+const CORE_ENDPOINT2 = 'http://localhost:8002';
+const CORE_ENDPOINT3 = 'http://localhost:8003';
+const CORE_ENDPOINT4 = 'http://localhost:8004';
+const CORE_ENDPOINT5 = 'http://localhost:8005';
+
 // 入力ファイルのリストを保持する配列
 let currentInputFiles = []; 
 
@@ -46,7 +52,7 @@ function post_drop_files(files) {
 // サーバーから入力ファイルリストを取得し、更新する関数
 function get_input_list() {
     $.ajax({
-        url: $('#core_endpoint0').val() + '/get_input_list', // ファイルリスト取得のエンドポイント
+        url: CORE_ENDPOINT1 + '/get_input_list', // ファイルリスト取得のエンドポイント
         method: 'GET',
         success: function(data) {
             // ファイルリストが更新された場合のみ、リストを更新
@@ -90,7 +96,7 @@ function get_image_info() {
     
     // サーバーからイメージ情報を取得するAJAXリクエスト
     $.ajax({
-        url: $('#core_endpoint2').val() + '/get_image_info',
+        url: CORE_ENDPOINT3 + '/get_image_info',
         method: 'GET',
         success: function(data) {
             if (data.image_data !== last_image_data) {
@@ -141,7 +147,7 @@ function post_request(req_mode, system_text, request_text, input_text, result_sa
     };
     // サーバーにリクエストを送信
     $.ajax({
-        url: $('#core_endpoint0').val() + '/post_req',
+        url: CORE_ENDPOINT1 + '/post_req',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData), // フォームデータをJSON形式に変換
@@ -160,7 +166,7 @@ let lastOutputData = {};
 function get_output_log_user() {
     // サーバーからユーザーの出力履歴を取得するAJAXリクエスト
     $.ajax({
-        url: $('#core_endpoint2').val() + '/get_output_log_user',
+        url: CORE_ENDPOINT3 + '/get_output_log_user',
         type: 'GET',
         data: { user_id: $('#user_id').val() },
         success: function(data) {
@@ -510,7 +516,7 @@ $(document).ready(function() {
         $('#vision_request').val('');
         // クリア通知をサーバーに送信
         $.ajax({
-            url: $('#core_endpoint1').val() + '/post_clear',
+            url: CORE_ENDPOINT2 + '/post_clear',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ user_id: $('#user_id').val() }), // ユーザーIDを送信

@@ -1,5 +1,11 @@
 // output.js
 
+const CORE_ENDPOINT1 = 'http://localhost:8001';
+const CORE_ENDPOINT2 = 'http://localhost:8002';
+const CORE_ENDPOINT3 = 'http://localhost:8003';
+const CORE_ENDPOINT4 = 'http://localhost:8004';
+const CORE_ENDPOINT5 = 'http://localhost:8005';
+
 // 親ウィンドウにメッセージを送信する関数
 function sendMessageToParent(action, method, data) {
     window.parent.postMessage({ action: action, method: method, data: data }, '*');
@@ -15,7 +21,7 @@ let currentOutputFiles = [];
 function get_default_image() {
     // サーバーからデフォルト画像を取得するAJAXリクエスト
     $.ajax({
-        url: $('#core_endpoint2').val() + '/get_default_image',
+        url: CORE_ENDPOINT3 + '/get_default_image',
         method: 'GET',
         success: function(data) {
             // 画像情報を更新
@@ -34,7 +40,7 @@ function get_default_image() {
 function get_image_info() {
     // サーバーからイメージ情報を取得するAJAXリクエスト
     $.ajax({
-        url: $('#core_endpoint2').val() + '/get_image_info',
+        url: CORE_ENDPOINT3 + '/get_image_info',
         method: 'GET',
         success: function(data) {
             if (data.image_data !== last_image_data) {
@@ -75,7 +81,7 @@ let lastOutputData = {};
 function get_output_log_user() {
     // サーバーからユーザーの出力履歴を取得するAJAXリクエスト
     $.ajax({
-        url: $('#core_endpoint2').val() + '/get_output_log_user',
+        url: CORE_ENDPOINT3 + '/get_output_log_user',
         type: 'GET',
         data: { user_id: $('#user_id').val() },
         success: function(data) {
@@ -155,7 +161,7 @@ function updateOutputFileList(files) {
 function get_output_list() {
     // サーバーから出力ファイルリストを取得するAJAXリクエスト
     $.ajax({
-        url: $('#core_endpoint2').val() + '/get_output_list',
+        url: CORE_ENDPOINT3 + '/get_output_list',
         method: 'GET',
         success: function(data) {
             // ファイルリストが更新された場合

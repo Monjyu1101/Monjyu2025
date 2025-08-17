@@ -9,7 +9,7 @@
 # ------------------------------------------------
 
 # モジュール名
-MODULE_NAME = 'webui:8'
+MODULE_NAME = 'webUI(8)'
 
 # ロガーの設定
 import logging
@@ -46,16 +46,13 @@ import chardet
 import threading
 import subprocess
 
-import socket
-qHOSTNAME = socket.gethostname().lower()
-
 # 各種ディレクトリパスの設定
 qPath_log       = 'temp/_log/'
 qPath_input     = 'temp/input/'
 qPath_output    = 'temp/output/'
 qPath_tts       = 'temp/s6_5tts_txt/'
-qPath_templates = '_webui/monjyu'
-qPath_static    = '_webui/monjyu/static'
+qPath_templates = '_webUI/Monjyu'
+qPath_static    = '_webUI/Monjyu/static'
 win_code_path   = 'C:/Program Files/Microsoft VS Code/Code.exe'
 
 
@@ -90,37 +87,37 @@ def txtsWrite(filename, txts=[''], encoding='utf-8', mode='w', ):
         return False
 
 
-class WebUiProcess:
+class webUIProcess:
     """
     Web UIプロセスの管理クラス
     """
     def __init__(self,  runMode: str = 'debug', qLog_fn: str = '',
                         main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
-                        coreai=None,
+                        coreAPI=None,
                         core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', 
                         self_port: str = '8008'):
 
         # Web UIクラスのインスタンス化とスレッドの開始
-        webui_class = WebUiClass(   runMode=runMode, qLog_fn=qLog_fn,
+        webUI_class = webUIClass(   runMode=runMode, qLog_fn=qLog_fn,
                                     main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
-                                    coreai=coreai,
+                                    coreAPI=coreAPI,
                                     core_port=core_port, sub_base=sub_base, num_subais=num_subais, 
                                     self_port=self_port, )
-        webui_thread = threading.Thread(target=webui_class.run)
-        webui_thread.daemon = True
-        webui_thread.start()
+        webUI_thread = threading.Thread(target=webUI_class.run)
+        webUI_thread.daemon = True
+        webUI_thread.start()
 
         # 永続的な実行
         while True:
             time.sleep(5)
 
-class WebUiClass:
+class webUIClass:
     """
     ウェブUIクラス
     """
     def __init__(self,  runMode: str = 'debug', qLog_fn: str = '',
                         main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
-                        coreai=None,
+                        coreAPI=None,
                         core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', 
                         self_port: str = '8008', ):
         self.runMode = runMode
@@ -141,21 +138,16 @@ class WebUiClass:
         self.addin      = addin
         self.botFunc    = botFunc
         self.mcpHost    = mcpHost
-        self.coreai     = coreai
+        self.coreAPI     = coreAPI
         self.core_port  = core_port
-        self.core_port0 = str(int(core_port) + 0)
         self.core_port1 = str(int(core_port) + 1)
         self.core_port2 = str(int(core_port) + 2)
+        self.core_port3 = str(int(core_port) + 3)
         self.core_port4 = str(int(core_port) + 4)
         self.core_port5 = str(int(core_port) + 5)
         self.sub_base  = sub_base
         self.self_port = self_port
         self.num_subais = int(num_subais)
-        self.core_endpoint0 = f'http://{ qHOSTNAME }:{ self.core_port0 }'
-        self.core_endpoint1 = f'http://{ qHOSTNAME }:{ self.core_port1 }'
-        self.core_endpoint2 = f'http://{ qHOSTNAME }:{ self.core_port2 }'
-        self.core_endpoint4 = f'http://{ qHOSTNAME }:{ self.core_port4 }'
-        self.core_endpoint5 = f'http://{ qHOSTNAME }:{ self.core_port5 }'
 
         # スレッドロックの初期化
         self.thread_lock = threading.Lock()
@@ -166,6 +158,7 @@ class WebUiClass:
         # APIエンドポイントの設定
         self.app.get("/")(self.root)
         self.app.get("/{filename}.html")(self.html_serve)
+        self.app.get("/{filename}.js")(self.js_serve)
         self.app.post("/post_text_files")(self.post_text_files)
         self.app.post("/post_drop_files")(self.post_drop_files)
         self.app.get("/get_output_file/{filename}")(self.get_output_file)
@@ -188,25 +181,44 @@ class WebUiClass:
 
     async def html_serve(self, filename: str, request: Request):
         # HTMLファイルのパスを構築
-        file_path = f"_webui/monjyu/{filename}.html"        
+        file_path = qPath_templates + f"/{filename}.html"
         # ファイルが存在するか確認
         if not os.path.isfile(file_path):
             return HTMLResponse(content="File not found", status_code=404)
         # ファイルを読み込む
         with open(file_path, "r", encoding="utf-8") as file:
             html_content = file.read()
-        # コンテンツ一部書き換え
-        html_content = html_content.replace("http://localhost:8000", self.core_endpoint0)
-        html_content = html_content.replace("http://localhost:8001", self.core_endpoint1)
-        html_content = html_content.replace("http://localhost:8002", self.core_endpoint2)
-        html_content = html_content.replace("http://localhost:8004", self.core_endpoint4)
-        html_content = html_content.replace("http://localhost:8005", self.core_endpoint5)
-        if (filename == 'statuses'):
-            subai_ports = [str(port) for port in range(int(self.sub_base) + 1, int(self.sub_base) + 1 + self.num_subais)]
-            subai_divs = "\n".join([f'<div class="subai NONE" id="subai-{port}">{port}<span class="tooltip"></span></div>' for port in subai_ports])
-            html_content = html_content.replace("{subai_divs}", subai_divs)
         # 返信
         return HTMLResponse(content=html_content)
+
+    async def js_serve(self, filename: str, request: Request):
+        # JSファイルのパスを構築
+        file_path = qPath_templates + f"/{filename}.js"
+        # ファイルが存在するか確認
+        if not os.path.isfile(file_path):
+            return HTMLResponse(content="File not found", status_code=404)
+        # ファイルを読み込む
+        with open(file_path, "r", encoding="utf-8") as file:
+            js_content = file.read()
+        
+        # 動的なエンドポイント生成: リクエストURLからベースURLを抽出
+        req_url = f"{request.url.scheme}://{request.url.hostname}"
+        core_endpoint1 = f"{req_url}:{self.core_port1}"
+        core_endpoint2 = f"{req_url}:{self.core_port2}"
+        core_endpoint3 = f"{req_url}:{self.core_port3}"
+        core_endpoint4 = f"{req_url}:{self.core_port4}"
+        core_endpoint5 = f"{req_url}:{self.core_port5}"
+        
+        # JSファイル用の動的localhost置き換え処理
+        js_content = js_content.replace("http://localhost:8001", core_endpoint1)
+        js_content = js_content.replace("http://localhost:8002", core_endpoint2)
+        js_content = js_content.replace("http://localhost:8003", core_endpoint3)
+        js_content = js_content.replace("http://localhost:8004", core_endpoint4)
+        js_content = js_content.replace("http://localhost:8005", core_endpoint5)
+
+        # 返信（JavaScriptファイルとして）
+        from fastapi.responses import Response
+        return Response(content=js_content, media_type="application/javascript")
 
     async def post_text_files(self, drop_target: str = Form(...), files: list[UploadFile] = File(...)):
         # アップロードされた複数ファイルを解析してテキストを返す
@@ -548,7 +560,7 @@ if __name__ == '__main__':
     numSubAIs = '48'
 
     # Web UIプロセスの開始
-    webui = WebUiProcess(   runMode='debug', qLog_fn='', 
+    webUI = webUIProcess(   runMode='debug', qLog_fn='', 
                             core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
 
 

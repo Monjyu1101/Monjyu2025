@@ -43,9 +43,6 @@ import threading
 import requests
 import pandas as pd
 
-import socket
-qHOSTNAME = socket.gethostname().lower()
-
 # ファイルパス定義
 qPath_temp   = 'temp/'
 qPath_log    = 'temp/_log/'
@@ -88,7 +85,7 @@ class RequestDataModel(BaseModel):
 class SubAiProcess:
     def __init__(self, runMode: str = 'debug', qLog_fn: str = '', 
                  main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
-                 coreai=None,
+                 coreAPI=None,
                  core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48'):
 
         # 各種設定の初期化
@@ -98,7 +95,7 @@ class SubAiProcess:
         self.addin      = addin
         self.botFunc    = botFunc
         self.mcpHost    = mcpHost
-        self.coreai     = coreai
+        self.coreAPI     = coreAPI
 
         """ サブAIプロセスの初期化 """
         self.num_subais = int(num_subais)
@@ -110,7 +107,7 @@ class SubAiProcess:
             self_port = str(int(sub_base) + n + 1)
             subai_class[n] = SubAiClass(runMode=runMode, qLog_fn=qLog_fn, 
                                         main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
-                                        coreai=coreai,
+                                        coreAPI=coreAPI,
                                         core_port=core_port, sub_base=sub_base, num_subais=str(num_subais),
                                         self_port=self_port, profile_number=random_profile[n])
             subai_thread[n] = threading.Thread(target=subai_class[n].run)
@@ -124,7 +121,7 @@ class SubAiClass:
     """ サブAIクラス """
     def __init__(self, runMode: str = 'debug', qLog_fn: str = '', 
                  main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
-                 coreai=None,
+                 coreAPI=None,
                  core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48',
                  self_port: str = '8101', profile_number: Optional[int] = None):
         self.runMode = runMode
@@ -145,16 +142,17 @@ class SubAiClass:
         self.addin      = addin
         self.botFunc    = botFunc
         self.mcpHost    = mcpHost
-        self.coreai     = coreai
+        self.coreAPI     = coreAPI
         self.core_port  = core_port
         self.sub_base   = sub_base
         self.self_port  = self_port
-        self.local_endpoint2 = f'http://localhost:{ int(self.core_port) + 2 }'
-        self.webui_endpoint8 = f'http://{ qHOSTNAME }:{ int(self.core_port) + 8 }'
+        self.core_port3 = str(int(core_port) + 3)
+        self.webUI_port8 = str(int(core_port) + 8)
+        self.local_endpoint3 = f'http://localhost:{ self.core_port3 }'
         self.profile_number = profile_number
         self.chat_class = RiKi_Monjyu__subbot.ChatClass(runMode=runMode, qLog_fn=qLog_fn, 
                                                         main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
-                                                        coreai=coreai,
+                                                        coreAPI=coreAPI,
                                                         core_port=core_port, self_port=self_port)
         # スレッドロック
         self.thread_lock = threading.Lock()
@@ -209,8 +207,10 @@ class SubAiClass:
             logger.error(f"Error retrieving profile info: {e}")
 
     async def root(self, request: Request):
-        """ ルートエンドポイントのリダイレクト """
-        return RedirectResponse(url=self.webui_endpoint8 + '/')
+        # Web UI にリダイレクト（動的URL生成）
+        req_url = f"{request.url.scheme}://{request.url.hostname}"
+        webUI_url = f"{req_url}:{self.core_port}/"
+        return RedirectResponse(url=webUI_url)
 
     async def get_info(self) -> Dict[str, str]:
         """ サブAIの情報取得(応答) """
@@ -350,7 +350,7 @@ class SubAiClass:
 
         try:
             response = requests.post(
-                self.local_endpoint2 + '/post_complete', 
+                self.local_endpoint3 + '/post_complete', 
                 json={'user_id': user_id, 'from_port': from_port, 'to_port': to_port,
                       'req_mode': req_mode,
                       'system_text': system_text, 'request_text': request_text, 'input_text': input_text,
@@ -361,10 +361,10 @@ class SubAiClass:
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )
             if response.status_code != 200:
-                logger.error(f"Error response ({self.core_port}/post_complete) : {response.status_code}")
+                logger.error(f"Error response ({self.core_port3}/post_complete) : {response.status_code}")
                 status = 'ERROR'
         except Exception as e:
-            logger.error(f"Error communicating ({self.core_port}/post_complete) : {e}")
+            logger.error(f"Error communicating ({self.core_port3}/post_complete) : {e}")
             status = 'ERROR'
 
         # ステータスを更新
@@ -383,7 +383,7 @@ class SubAiClass:
         self.last_proc_time = time.time()
         try:
             response = requests.post(
-                self.local_endpoint2 + '/post_debug_log', 
+                self.local_endpoint3 + '/post_debug_log', 
                 json={'user_id': user_id, 'from_port': from_port, 'to_port': to_port,
                       'req_mode': req_mode,
                       'system_text': system_text, 'request_text': request_text, 'input_text': input_text,
@@ -394,10 +394,10 @@ class SubAiClass:
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )
             if response.status_code != 200:
-                logger.error(f"Error response ({self.core_port}/post_debug_log) : {response.status_code}")
+                logger.error(f"Error response ({self.core_port3}/post_debug_log) : {response.status_code}")
                 status = 'ERROR'
         except Exception as e:
-            logger.error(f"Error communicating ({self.core_port}/post_debug_log) : {e}")
+            logger.error(f"Error communicating ({self.core_port3}/post_debug_log) : {e}")
             status = 'ERROR'
         return status
 

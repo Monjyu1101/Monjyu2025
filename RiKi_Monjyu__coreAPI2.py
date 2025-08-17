@@ -9,7 +9,7 @@
 # ------------------------------------------------
 
 # モジュール名
-MODULE_NAME = 'coreai:1'
+MODULE_NAME = 'coreAPI(2)'
 
 # ロガーの設定
 import logging
@@ -32,9 +32,6 @@ import uvicorn
 from pydantic import BaseModel
 
 import threading
-
-import socket
-qHOSTNAME = socket.gethostname().lower()
 
 # パスの設定
 qPath_temp    = 'temp/'
@@ -60,26 +57,26 @@ class main_class:
                         main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
                         core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', ):
         # コアAIクラスの初期化とスレッドの開始
-        coreai1 = coreai1_class(runMode=runMode, qLog_fn=qLog_fn,
+        coreAPI2 = coreAPI2_class(runMode=runMode, qLog_fn=qLog_fn,
                                 main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
                                 core_port=core_port, sub_base=sub_base, num_subais=num_subais, )
-        coreai1_thread = threading.Thread(target=coreai1.run, daemon=True, )
-        coreai1_thread.start()
+        coreAPI2_thread = threading.Thread(target=coreAPI2.run, daemon=True, )
+        coreAPI2_thread.start()
         while True:
             time.sleep(5)
 
 
-class coreai1_class:
+class coreAPI2_class:
     """
     コアAIクラス(0)
     FastAPIサーバーの管理を行う。
     """
     def __init__(self,  runMode: str = 'debug', qLog_fn: str = '',
                         main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
-                        coreai=None,
+                        coreAPI=None,
                         core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', ):
         self.runMode = runMode
-        self_port = str(int(core_port)+1)
+        self_port = str(int(core_port) + 2)
 
         # ログファイル名の生成
         if qLog_fn == '':
@@ -97,12 +94,11 @@ class coreai1_class:
         self.addin      = addin
         self.botFunc    = botFunc
         self.mcpHost    = mcpHost
-        self.coreai     = coreai
+        self.coreAPI     = coreAPI
         self.core_port  = core_port
         self.sub_base   = sub_base
         self.num_subais = int(num_subais)
         self.self_port  = self_port
-        self.webui_endpoint8 = f'http://{ qHOSTNAME }:{ int(self.core_port) + 8 }'
 
         # スレッドロック
         self.thread_lock = threading.Lock()
@@ -120,8 +116,10 @@ class coreai1_class:
         self.app.post("/post_input_log")(self.post_input_log)
 
     async def root(self, request: Request):
-        # Web UI にリダイレクト
-        return RedirectResponse(url=self.webui_endpoint8 + '/')
+        # Web UI にリダイレクト（動的URL生成）
+        req_url = f"{request.url.scheme}://{request.url.hostname}"
+        webUI_url = f"{req_url}:{self.core_port}/"
+        return RedirectResponse(url=webUI_url)
 
     async def get_input_log_user(self, user_id: str):
         """
@@ -294,7 +292,7 @@ if __name__ == '__main__':
     sub_base  = '8100'
     numSubAIs = '48'
 
-    coreai1 = main_class(   runMode='debug', qLog_fn='', 
+    coreAPI2 = main_class(   runMode='debug', qLog_fn='', 
                             core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
 
     #while True:

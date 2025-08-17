@@ -91,6 +91,7 @@ rem python -m pip  install --upgrade wave
 rem python -m pip  install --upgrade chardet
 rem python -m pip  install --upgrade botocore
 
+    python -m pip  install --upgrade sqlite3
     python -m pip  install --upgrade pandas
     python -m pip  install --upgrade openpyxl
     python -m pip  install --upgrade pyodbc

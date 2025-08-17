@@ -1,5 +1,11 @@
 // chat.js
 
+const CORE_ENDPOINT1 = 'http://localhost:8001';
+const CORE_ENDPOINT2 = 'http://localhost:8002';
+const CORE_ENDPOINT3 = 'http://localhost:8003';
+const CORE_ENDPOINT4 = 'http://localhost:8004';
+const CORE_ENDPOINT5 = 'http://localhost:8005';
+
 // HTMLエスケープ関数
 function escapeHtml(unsafe) {
     if (unsafe === null || unsafe === undefined) {
@@ -77,7 +83,7 @@ function displayChatHistory(histories) {
 // 履歴を取得して表示する関数
 function getAndDisplayChatHistory() {
     $.ajax({
-        url: $('#core_endpoint5').val() + '/get_histories_all',
+        url: CORE_ENDPOINT5 + '/get_histories_all',
         type: 'GET',
         data: { user_id: $('#user_id').val() },
         success: function(data) {
@@ -133,7 +139,7 @@ function post_request(req_mode, system_text, request_text, input_text, result_sa
     
     // サーバーにリクエストを送信
     $.ajax({
-        url: $('#core_endpoint0').val() + '/post_req',
+        url: CORE_ENDPOINT1 + '/post_req',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData),
@@ -158,7 +164,7 @@ function post_request(req_mode, system_text, request_text, input_text, result_sa
 // サーバーから応答を取得するポーリング関数
 function pollForResponse() {
     $.ajax({
-        url: $('#core_endpoint2').val() + '/get_output_log_user',
+        url: CORE_ENDPOINT3 + '/get_output_log_user',
         method: 'GET',
         data: { user_id: $('#user_id').val() },
         success: function(data) {
@@ -238,7 +244,7 @@ function post_drop_files(files) {
 // サーバーから入力ファイルリストを取得し、更新する関数
 function get_input_list() {
     $.ajax({
-        url: $('#core_endpoint0').val() + '/get_input_list',
+        url: CORE_ENDPOINT1 + '/get_input_list',
         method: 'GET',
         success: function(data) {
             if (JSON.stringify(data.files) !== JSON.stringify(currentInputFiles)) {
@@ -283,7 +289,7 @@ function post_text_files(files, dropArea) {
 // subai コンボ設定
 function get_subai_info_all() {
     $.ajax({
-        url: $('#core_endpoint0').val() + '/get_subai_info_all',
+        url: CORE_ENDPOINT1 + '/get_subai_info_all',
         method: 'GET',
         async: false,
         success: function(data) {
@@ -304,7 +310,7 @@ function clearChat() {
     
     // クリア通知をサーバーに送信
     $.ajax({
-        url: $('#core_endpoint1').val() + '/post_clear',
+        url: CORE_ENDPOINT2 + '/post_clear',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ user_id: $('#user_id').val() }),
@@ -422,7 +428,7 @@ $(document).ready(function() {
         $('#input_text').val('');
         // クリア通知をサーバーに送信
         $.ajax({
-            url: $('#core_endpoint1').val() + '/post_clear',
+            url: CORE_ENDPOINT2 + '/post_clear',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ user_id: $('#user_id').val() }), // ユーザーIDを送信

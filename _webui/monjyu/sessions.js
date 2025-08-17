@@ -1,5 +1,11 @@
 // sessions.js
 
+const CORE_ENDPOINT1 = 'http://localhost:8001';
+const CORE_ENDPOINT2 = 'http://localhost:8002';
+const CORE_ENDPOINT3 = 'http://localhost:8003';
+const CORE_ENDPOINT4 = 'http://localhost:8004';
+const CORE_ENDPOINT5 = 'http://localhost:8005';
+
 // HTMLエスケープ関数
 function escapeHtml(unsafe) {
     if (unsafe === null || unsafe === undefined) {
@@ -19,7 +25,7 @@ let lastMaxUpdTime = null;
 function get_sessions_all() {
     // サーバーから結果データを取得し、テーブルに表示する
     $.ajax({
-        url: $('#core_endpoint0').val() + '/get_sessions_all',
+        url: CORE_ENDPOINT1 + '/get_sessions_all',
         type: 'GET',
         data: { user_id: $('#user_id').val() },
         success: function(data) {

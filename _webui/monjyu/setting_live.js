@@ -1,5 +1,11 @@
 // setting_live.js
 
+const CORE_ENDPOINT1 = 'http://localhost:8001';
+const CORE_ENDPOINT2 = 'http://localhost:8002';
+const CORE_ENDPOINT3 = 'http://localhost:8003';
+const CORE_ENDPOINT4 = 'http://localhost:8004';
+const CORE_ENDPOINT5 = 'http://localhost:8005';
+
 // 最後の設定値を保持するオブジェクト
 let last_live_setting = {
     freeai: null,
@@ -9,7 +15,7 @@ let last_live_setting = {
 // Liveのmodel情報を取得してコンボボックスを設定する関数
 function get_live_models(engine) {
     $.ajax({
-        url: $('#core_endpoint4').val() + '/get_live_models',
+        url: CORE_ENDPOINT4 + '/get_live_models',
         method: 'GET',
         data: { engine: engine },
         dataType: 'json',
@@ -44,7 +50,7 @@ function get_live_models(engine) {
 // Liveのvoice情報を取得してコンボボックスを設定する関数
 function get_live_voices(engine) {
     $.ajax({
-        url: $('#core_endpoint4').val() + '/get_live_voices',
+        url: CORE_ENDPOINT4 + '/get_live_voices',
         method: 'GET',
         data: { engine: engine },
         dataType: 'json',
@@ -82,7 +88,7 @@ function get_live_setting_all() {
 function get_live_setting(engine) {
     // Live設定をサーバーから受信
     $.ajax({
-        url: $('#core_endpoint4').val() + '/get_live_setting',
+        url: CORE_ENDPOINT4 + '/get_live_setting',
         method: 'GET',
         data: { engine: engine },
         dataType: 'json',
@@ -145,7 +151,7 @@ function post_live_setting(engine) {
 
     // Live設定をサーバーに送信
     $.ajax({
-        url: $('#core_endpoint4').val() + '/post_live_setting',
+        url: CORE_ENDPOINT4 + '/post_live_setting',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData),
@@ -161,7 +167,7 @@ function post_live_setting(engine) {
 // Live出力(text)
 function post_live_request(live_req, live_text) {
     $.ajax({
-        url: $('#core_endpoint5').val() + '/post_live_request',
+        url: CORE_ENDPOINT5 + '/post_live_request',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ live_req: live_req, live_text: live_text }),
@@ -243,7 +249,7 @@ $(document).ready(function() {
         if (confirm("全ての設定をリセットしますか?")) {
             // リセット処理を実行
             $.ajax({
-                url: $('#core_endpoint1').val() + '/post_reset',
+                url: CORE_ENDPOINT2 + '/post_reset',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({ user_id: $('#user_id').val() }),

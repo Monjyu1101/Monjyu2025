@@ -1,5 +1,11 @@
 // input.js
 
+const CORE_ENDPOINT1 = 'http://localhost:8001';
+const CORE_ENDPOINT2 = 'http://localhost:8002';
+const CORE_ENDPOINT3 = 'http://localhost:8003';
+const CORE_ENDPOINT4 = 'http://localhost:8004';
+const CORE_ENDPOINT5 = 'http://localhost:8005';
+
 // 親ウィンドウにメッセージを送信する関数
 function sendMessageToParent(action, method, data) {
     window.parent.postMessage({ action: action, method: method, data: data }, '*');
@@ -20,7 +26,7 @@ function formatDateTime(dateTimeStr) {
 let lastInputData = {};
 function get_input_log_user() {
     $.ajax({
-        url: $('#core_endpoint1').val() + '/get_input_log_user',
+        url: CORE_ENDPOINT2 + '/get_input_log_user',
         method: 'GET',
         data: { user_id: $('#user_id').val() },
         success: function(data) {
@@ -84,7 +90,7 @@ function post_request(req_mode, system_text, request_text, input_text, result_sa
     };
     // サーバーにリクエストを送信
     $.ajax({
-        url: $('#core_endpoint0').val() + '/post_req',
+        url: CORE_ENDPOINT1 + '/post_req',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData), // フォームデータをJSON形式に変換
@@ -157,7 +163,7 @@ function post_drop_files(files) {
 // サーバーから入力ファイルリストを取得し、更新する関数
 function get_input_list() {
     $.ajax({
-        url: $('#core_endpoint0').val() + '/get_input_list', // ファイルリスト取得のエンドポイント
+        url: CORE_ENDPOINT1 + '/get_input_list', // ファイルリスト取得のエンドポイント
         method: 'GET',
         success: function(data) {
             // ファイルリストが更新された場合のみ、リストを更新
@@ -211,7 +217,7 @@ function post_text_files(files, dropArea) {
 // subai コンボ設定
 function get_subai_info_all() {
     $.ajax({
-        url: $('#core_endpoint0').val() + '/get_subai_info_all',
+        url: CORE_ENDPOINT1 + '/get_subai_info_all',
         method: 'GET',
         async: false, // 同期処理
         success: function(data) {
@@ -355,7 +361,7 @@ $(document).ready(function() {
         $('#input_text').val('');
         // クリア通知をサーバーに送信
         $.ajax({
-            url: $('#core_endpoint1').val() + '/post_clear',
+            url: CORE_ENDPOINT2 + '/post_clear',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ user_id: $('#user_id').val() }), // ユーザーIDを送信
@@ -381,7 +387,7 @@ $(document).ready(function() {
             
             // リセット通知をサーバーに送信
             $.ajax({
-                url: $('#core_endpoint1').val() + '/post_reset',
+                url: CORE_ENDPOINT2 + '/post_reset',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({ user_id: $('#user_id').val() }), // ユーザーIDを送信
@@ -400,7 +406,7 @@ $(document).ready(function() {
         if (confirm("実行中の要求を全てキャンセルしますか?")) {
             // キャンセル通知をサーバーに送信
             $.ajax({
-                url: $('#core_endpoint1').val() + '/post_cancel',
+                url: CORE_ENDPOINT2 + '/post_cancel',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({ user_id: $('#user_id').val() }), // ユーザーIDを送信

@@ -40,13 +40,13 @@ class _monjyu_class:
         self.runMode   = runMode
 
         # ポート設定等
-        self.local_endpoint0 = f'http://localhost:{ int(CORE_PORT) + 0 }'
+        self.local_endpoint1 = f'http://localhost:{ int(CORE_PORT) + 1 }'
 
     def get_ready(self):
         # ファイル添付
         try:
             response = requests.get(
-                self.local_endpoint0 + '/get_ready_count',
+                self.local_endpoint1 + '/get_ready_count',
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )
             if response.status_code == 200:
@@ -70,7 +70,7 @@ class _monjyu_class:
         file_names = []
         try:
             response = requests.get(
-                self.local_endpoint0 + '/get_input_list',
+                self.local_endpoint1 + '/get_input_list',
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )
             if response.status_code == 200:
@@ -94,7 +94,7 @@ class _monjyu_class:
             if (req_mode in ['clip', 'voice']):
                 res_port = CORE_PORT
             response = requests.post(
-                self.local_endpoint0 + '/post_req',
+                self.local_endpoint1 + '/post_req',
                 json={'user_id': user_id, 'from_port': CORE_PORT, 'to_port': res_port,
                     'req_mode': req_mode,
                     'system_text': sysText, 'request_text': reqText, 'input_text': inpText,
@@ -119,7 +119,7 @@ class _monjyu_class:
                 while time.time() < timeout:
 
                     response = requests.get(
-                        self.local_endpoint0 + '/get_sessions_port?user_id=' + user_id + '&from_port=' + CORE_PORT,
+                        self.local_endpoint1 + '/get_sessions_port?user_id=' + user_id + '&from_port=' + CORE_PORT,
                         timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
                     )
                     if response.status_code == 200:

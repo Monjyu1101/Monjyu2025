@@ -1,12 +1,18 @@
 // debug_step.js
 
+const CORE_ENDPOINT1 = 'http://localhost:8001';
+const CORE_ENDPOINT2 = 'http://localhost:8002';
+const CORE_ENDPOINT3 = 'http://localhost:8003';
+const CORE_ENDPOINT4 = 'http://localhost:8004';
+const CORE_ENDPOINT5 = 'http://localhost:8005';
+
 // デバッグログを取得し、デバッグテキストエリアを更新する関数
 let lastDebugData = {};
 function get_debug_log_user() {
 
     // ajaxでデバッグログを取得
     $.ajax({
-        url: $('#core_endpoint2').val() + '/get_debug_log_user',
+        url: CORE_ENDPOINT3 + '/get_debug_log_user',
         type: 'GET',
         data: { user_id: $('#user_id').val() },
         success: function(data) {

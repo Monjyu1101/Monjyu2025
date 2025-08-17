@@ -50,7 +50,7 @@ class _conf_class:
 
         # 設定項目
         self.cgpt_secure_level = 'medium'
-        self.cgpt_addins_path = '_extensions/monjyu/'
+        self.cgpt_addins_path = '_extensions/Monjyu/'
         self.cgpt_functions_path = '_extensions/function/'
         self.cgpt_engine_greeting = 'auto'
         self.cgpt_engine_chat = 'auto'

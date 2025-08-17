@@ -10,6 +10,8 @@ import shutil
 
 import requests
 
+CORE_PORT1 = 8001
+
 # 定数の定義
 CONNECTION_TIMEOUT = 15
 REQUEST_TIMEOUT = 30
@@ -18,8 +20,8 @@ REQUEST_TIMEOUT = 30
 def post_request(req_mode='chat'):
     try:
         response = requests.post(
-            f'http://localhost:{CORE_PORT}/post_req',
-            json={'user_id': 'debug', 'from_port': str(CORE_PORT), 'to_port': '',
+            f'http://localhost:{CORE_PORT1}/post_req',
+            json={'user_id': 'debug', 'from_port': str(CORE_PORT1), 'to_port': '',
                     'req_mode': req_mode,
                     'system_text': '', 'request_text': 'debug,', 'input_text': '',
                     'file_names': [], 'result_savepath': '', 'result_schema': '' },
@@ -37,8 +39,6 @@ def post_request(req_mode='chat'):
 
 
 if __name__ == '__main__':
-
-    CORE_PORT = 8000
 
     #time.sleep(60 + NUM_SUBAIS)
     while True:

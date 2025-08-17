@@ -1,5 +1,11 @@
 // setting_model.js
 
+const CORE_ENDPOINT1 = 'http://localhost:8001';
+const CORE_ENDPOINT2 = 'http://localhost:8002';
+const CORE_ENDPOINT3 = 'http://localhost:8003';
+const CORE_ENDPOINT4 = 'http://localhost:8004';
+const CORE_ENDPOINT5 = 'http://localhost:8005';
+
 // 最後の設定値を保持するオブジェクト
 let last_addins_setting = null;
 let last_engine_models = {
@@ -53,7 +59,7 @@ function add_wait_sec(key, value) {
 // エンジンのmodels情報を取得してコンボボックスを設定する関数
 function get_engine_models(engine) {
     $.ajax({
-        url: $('#core_endpoint4').val() + '/get_engine_models',
+        url: CORE_ENDPOINT4 + '/get_engine_models',
         method: 'GET',
         data: { engine: engine },
         dataType: 'json',
@@ -329,7 +335,7 @@ function get_engine_setting_all(engine) {
 function get_engine_setting(engine) {
     // 設定値をサーバーから受信
     $.ajax({
-        url: $('#core_endpoint4').val() + '/get_engine_setting',
+        url: CORE_ENDPOINT4 + '/get_engine_setting',
         method: 'GET',
         data: { engine: engine },
         dataType: 'json',
@@ -708,7 +714,7 @@ function post_engine_setting(engine) {
 
     // 設定値をサーバーに送信
     $.ajax({
-        url: $('#core_endpoint4').val() +  '/post_engine_setting',
+        url: CORE_ENDPOINT4 + '/post_engine_setting',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData),
@@ -897,7 +903,7 @@ $(document).ready(function() {
         if (confirm("全ての設定をリセットしますか?")) {
             // リセット処理を実行
             $.ajax({
-                url: $('#core_endpoint1').val() + '/post_reset',
+                url: CORE_ENDPOINT2 + '/post_reset',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({ user_id: $('#user_id').val() }),

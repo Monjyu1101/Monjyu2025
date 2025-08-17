@@ -65,7 +65,7 @@ class llm_class:
     """
     def __init__(self,  runMode: str = 'debug', qLog_fn: str = '',
                         main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
-                        coreai=None, ):
+                        coreAPI=None, ):
         """
         コンストラクタ
         Args:
@@ -88,7 +88,7 @@ class llm_class:
         self.conf       = conf
         self.data       = data
         self.addin      = addin
-        self.coreai     = coreai
+        self.coreAPI     = coreAPI
         self.botFunc    = botFunc
         self.mcpHost    = mcpHost
 
@@ -858,16 +858,16 @@ class llm_class:
                 try:
                     logger.info('### ChatGPT ###')
 
-                    if (self.coreai is not None):
-                        self.chatgptAPI.set_models( max_wait_sec=self.coreai.subbot.llm.chatgptAPI.max_wait_sec,
-                                                    a_model=self.coreai.subbot.llm.chatgptAPI.a_model,
-                                                    a_use_tools=self.coreai.subbot.llm.chatgptAPI.a_use_tools,
-                                                    b_model=self.coreai.subbot.llm.chatgptAPI.b_model,
-                                                    b_use_tools=self.coreai.subbot.llm.chatgptAPI.b_use_tools,
-                                                    v_model=self.coreai.subbot.llm.chatgptAPI.v_model,
-                                                    v_use_tools=self.coreai.subbot.llm.chatgptAPI.v_use_tools,
-                                                    x_model=self.coreai.subbot.llm.chatgptAPI.x_model,
-                                                    x_use_tools=self.coreai.subbot.llm.chatgptAPI.x_use_tools, )
+                    if (self.coreAPI is not None):
+                        self.chatgptAPI.set_models( max_wait_sec=self.coreAPI.subbot.llm.chatgptAPI.max_wait_sec,
+                                                    a_model=self.coreAPI.subbot.llm.chatgptAPI.a_model,
+                                                    a_use_tools=self.coreAPI.subbot.llm.chatgptAPI.a_use_tools,
+                                                    b_model=self.coreAPI.subbot.llm.chatgptAPI.b_model,
+                                                    b_use_tools=self.coreAPI.subbot.llm.chatgptAPI.b_use_tools,
+                                                    v_model=self.coreAPI.subbot.llm.chatgptAPI.v_model,
+                                                    v_use_tools=self.coreAPI.subbot.llm.chatgptAPI.v_use_tools,
+                                                    x_model=self.coreAPI.subbot.llm.chatgptAPI.x_model,
+                                                    x_use_tools=self.coreAPI.subbot.llm.chatgptAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.chatgptAPI.chatBot(    chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -955,16 +955,16 @@ class llm_class:
                 try:
                     logger.info('### Respo ###')
 
-                    if (self.coreai is not None):
-                        self.respoAPI.set_models(   max_wait_sec=self.coreai.subbot.llm.respoAPI.max_wait_sec,
-                                                    a_model=self.coreai.subbot.llm.respoAPI.a_model,
-                                                    a_use_tools=self.coreai.subbot.llm.respoAPI.a_use_tools,
-                                                    b_model=self.coreai.subbot.llm.respoAPI.b_model,
-                                                    b_use_tools=self.coreai.subbot.llm.respoAPI.b_use_tools,
-                                                    v_model=self.coreai.subbot.llm.respoAPI.v_model,
-                                                    v_use_tools=self.coreai.subbot.llm.respoAPI.v_use_tools,
-                                                    x_model=self.coreai.subbot.llm.respoAPI.x_model,
-                                                    x_use_tools=self.coreai.subbot.llm.respoAPI.x_use_tools, )
+                    if (self.coreAPI is not None):
+                        self.respoAPI.set_models(   max_wait_sec=self.coreAPI.subbot.llm.respoAPI.max_wait_sec,
+                                                    a_model=self.coreAPI.subbot.llm.respoAPI.a_model,
+                                                    a_use_tools=self.coreAPI.subbot.llm.respoAPI.a_use_tools,
+                                                    b_model=self.coreAPI.subbot.llm.respoAPI.b_model,
+                                                    b_use_tools=self.coreAPI.subbot.llm.respoAPI.b_use_tools,
+                                                    v_model=self.coreAPI.subbot.llm.respoAPI.v_model,
+                                                    v_use_tools=self.coreAPI.subbot.llm.respoAPI.v_use_tools,
+                                                    x_model=self.coreAPI.subbot.llm.respoAPI.x_model,
+                                                    x_use_tools=self.coreAPI.subbot.llm.respoAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.respoAPI.chatBot(      chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1045,16 +1045,16 @@ class llm_class:
                 try:
                     logger.info('### Gemini ###')
 
-                    if (self.coreai is not None):
-                        self.geminiAPI.set_models(  max_wait_sec=self.coreai.subbot.llm.geminiAPI.max_wait_sec,
-                                                    a_model=self.coreai.subbot.llm.geminiAPI.a_model,
-                                                    a_use_tools=self.coreai.subbot.llm.geminiAPI.a_use_tools,
-                                                    b_model=self.coreai.subbot.llm.geminiAPI.b_model,
-                                                    b_use_tools=self.coreai.subbot.llm.geminiAPI.b_use_tools,
-                                                    v_model=self.coreai.subbot.llm.geminiAPI.v_model,
-                                                    v_use_tools=self.coreai.subbot.llm.geminiAPI.v_use_tools,
-                                                    x_model=self.coreai.subbot.llm.geminiAPI.x_model,
-                                                    x_use_tools=self.coreai.subbot.llm.geminiAPI.x_use_tools, )
+                    if (self.coreAPI is not None):
+                        self.geminiAPI.set_models(  max_wait_sec=self.coreAPI.subbot.llm.geminiAPI.max_wait_sec,
+                                                    a_model=self.coreAPI.subbot.llm.geminiAPI.a_model,
+                                                    a_use_tools=self.coreAPI.subbot.llm.geminiAPI.a_use_tools,
+                                                    b_model=self.coreAPI.subbot.llm.geminiAPI.b_model,
+                                                    b_use_tools=self.coreAPI.subbot.llm.geminiAPI.b_use_tools,
+                                                    v_model=self.coreAPI.subbot.llm.geminiAPI.v_model,
+                                                    v_use_tools=self.coreAPI.subbot.llm.geminiAPI.v_use_tools,
+                                                    x_model=self.coreAPI.subbot.llm.geminiAPI.x_model,
+                                                    x_use_tools=self.coreAPI.subbot.llm.geminiAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.geminiAPI.chatBot(     chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1138,16 +1138,16 @@ class llm_class:
                 try:
                     logger.info('### Claude ###')
 
-                    if (self.coreai is not None):
-                        self.claudeAPI.set_models(  max_wait_sec=self.coreai.subbot.llm.claudeAPI.max_wait_sec,
-                                                    a_model=self.coreai.subbot.llm.claudeAPI.a_model,
-                                                    a_use_tools=self.coreai.subbot.llm.claudeAPI.a_use_tools,
-                                                    b_model=self.coreai.subbot.llm.claudeAPI.b_model,
-                                                    b_use_tools=self.coreai.subbot.llm.claudeAPI.b_use_tools,
-                                                    v_model=self.coreai.subbot.llm.claudeAPI.v_model,
-                                                    v_use_tools=self.coreai.subbot.llm.claudeAPI.v_use_tools,
-                                                    x_model=self.coreai.subbot.llm.claudeAPI.x_model,
-                                                    x_use_tools=self.coreai.subbot.llm.claudeAPI.x_use_tools, )
+                    if (self.coreAPI is not None):
+                        self.claudeAPI.set_models(  max_wait_sec=self.coreAPI.subbot.llm.claudeAPI.max_wait_sec,
+                                                    a_model=self.coreAPI.subbot.llm.claudeAPI.a_model,
+                                                    a_use_tools=self.coreAPI.subbot.llm.claudeAPI.a_use_tools,
+                                                    b_model=self.coreAPI.subbot.llm.claudeAPI.b_model,
+                                                    b_use_tools=self.coreAPI.subbot.llm.claudeAPI.b_use_tools,
+                                                    v_model=self.coreAPI.subbot.llm.claudeAPI.v_model,
+                                                    v_use_tools=self.coreAPI.subbot.llm.claudeAPI.v_use_tools,
+                                                    x_model=self.coreAPI.subbot.llm.claudeAPI.x_model,
+                                                    x_use_tools=self.coreAPI.subbot.llm.claudeAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.claudeAPI.chatBot(     chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1228,16 +1228,16 @@ class llm_class:
                 try:
                     logger.info('### OpenRouter ###')
 
-                    if (self.coreai is not None):
-                        self.openrtAPI.set_models(  max_wait_sec=self.coreai.subbot.llm.openrtAPI.max_wait_sec,
-                                                    a_model=self.coreai.subbot.llm.openrtAPI.a_model,
-                                                    a_use_tools=self.coreai.subbot.llm.openrtAPI.a_use_tools,
-                                                    b_model=self.coreai.subbot.llm.openrtAPI.b_model,
-                                                    b_use_tools=self.coreai.subbot.llm.openrtAPI.b_use_tools,
-                                                    v_model=self.coreai.subbot.llm.openrtAPI.v_model,
-                                                    v_use_tools=self.coreai.subbot.llm.openrtAPI.v_use_tools,
-                                                    x_model=self.coreai.subbot.llm.openrtAPI.x_model,
-                                                    x_use_tools=self.coreai.subbot.llm.openrtAPI.x_use_tools, )
+                    if (self.coreAPI is not None):
+                        self.openrtAPI.set_models(  max_wait_sec=self.coreAPI.subbot.llm.openrtAPI.max_wait_sec,
+                                                    a_model=self.coreAPI.subbot.llm.openrtAPI.a_model,
+                                                    a_use_tools=self.coreAPI.subbot.llm.openrtAPI.a_use_tools,
+                                                    b_model=self.coreAPI.subbot.llm.openrtAPI.b_model,
+                                                    b_use_tools=self.coreAPI.subbot.llm.openrtAPI.b_use_tools,
+                                                    v_model=self.coreAPI.subbot.llm.openrtAPI.v_model,
+                                                    v_use_tools=self.coreAPI.subbot.llm.openrtAPI.v_use_tools,
+                                                    x_model=self.coreAPI.subbot.llm.openrtAPI.x_model,
+                                                    x_use_tools=self.coreAPI.subbot.llm.openrtAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.openrtAPI.chatBot(     chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1325,16 +1325,16 @@ class llm_class:
                 try:
                     logger.info('### Perplexity ###')
 
-                    if (self.coreai is not None):
-                        self.perplexityAPI.set_models(  max_wait_sec=self.coreai.subbot.llm.perplexityAPI.max_wait_sec,
-                                                        a_model=self.coreai.subbot.llm.perplexityAPI.a_model,
-                                                        a_use_tools=self.coreai.subbot.llm.perplexityAPI.a_use_tools,
-                                                        b_model=self.coreai.subbot.llm.perplexityAPI.b_model,
-                                                        b_use_tools=self.coreai.subbot.llm.perplexityAPI.b_use_tools,
-                                                        v_model=self.coreai.subbot.llm.perplexityAPI.v_model,
-                                                        v_use_tools=self.coreai.subbot.llm.perplexityAPI.v_use_tools,
-                                                        x_model=self.coreai.subbot.llm.perplexityAPI.x_model,
-                                                        x_use_tools=self.coreai.subbot.llm.perplexityAPI.x_use_tools, )
+                    if (self.coreAPI is not None):
+                        self.perplexityAPI.set_models(  max_wait_sec=self.coreAPI.subbot.llm.perplexityAPI.max_wait_sec,
+                                                        a_model=self.coreAPI.subbot.llm.perplexityAPI.a_model,
+                                                        a_use_tools=self.coreAPI.subbot.llm.perplexityAPI.a_use_tools,
+                                                        b_model=self.coreAPI.subbot.llm.perplexityAPI.b_model,
+                                                        b_use_tools=self.coreAPI.subbot.llm.perplexityAPI.b_use_tools,
+                                                        v_model=self.coreAPI.subbot.llm.perplexityAPI.v_model,
+                                                        v_use_tools=self.coreAPI.subbot.llm.perplexityAPI.v_use_tools,
+                                                        x_model=self.coreAPI.subbot.llm.perplexityAPI.x_model,
+                                                        x_use_tools=self.coreAPI.subbot.llm.perplexityAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.perplexityAPI.chatBot(     chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1415,16 +1415,16 @@ class llm_class:
                 try:
                     logger.info('### Grok ###')
 
-                    if (self.coreai is not None):
-                        self.grokAPI.set_models(max_wait_sec=self.coreai.subbot.llm.grokAPI.max_wait_sec,
-                                                a_model=self.coreai.subbot.llm.grokAPI.a_model,
-                                                a_use_tools=self.coreai.subbot.llm.grokAPI.a_use_tools,
-                                                b_model=self.coreai.subbot.llm.grokAPI.b_model,
-                                                b_use_tools=self.coreai.subbot.llm.grokAPI.b_use_tools,
-                                                v_model=self.coreai.subbot.llm.grokAPI.v_model,
-                                                v_use_tools=self.coreai.subbot.llm.grokAPI.v_use_tools,
-                                                x_model=self.coreai.subbot.llm.grokAPI.x_model,
-                                                x_use_tools=self.coreai.subbot.llm.grokAPI.x_use_tools, )
+                    if (self.coreAPI is not None):
+                        self.grokAPI.set_models(max_wait_sec=self.coreAPI.subbot.llm.grokAPI.max_wait_sec,
+                                                a_model=self.coreAPI.subbot.llm.grokAPI.a_model,
+                                                a_use_tools=self.coreAPI.subbot.llm.grokAPI.a_use_tools,
+                                                b_model=self.coreAPI.subbot.llm.grokAPI.b_model,
+                                                b_use_tools=self.coreAPI.subbot.llm.grokAPI.b_use_tools,
+                                                v_model=self.coreAPI.subbot.llm.grokAPI.v_model,
+                                                v_use_tools=self.coreAPI.subbot.llm.grokAPI.v_use_tools,
+                                                x_model=self.coreAPI.subbot.llm.grokAPI.x_model,
+                                                x_use_tools=self.coreAPI.subbot.llm.grokAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.grokAPI.chatBot(   chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1505,16 +1505,16 @@ class llm_class:
                 try:
                     logger.info('### Groq ###')
 
-                    if (self.coreai is not None):
-                        self.groqAPI.set_models(max_wait_sec=self.coreai.subbot.llm.groqAPI.max_wait_sec,
-                                                a_model=self.coreai.subbot.llm.groqAPI.a_model,
-                                                a_use_tools=self.coreai.subbot.llm.groqAPI.a_use_tools,
-                                                b_model=self.coreai.subbot.llm.groqAPI.b_model,
-                                                b_use_tools=self.coreai.subbot.llm.groqAPI.b_use_tools,
-                                                v_model=self.coreai.subbot.llm.groqAPI.v_model,
-                                                v_use_tools=self.coreai.subbot.llm.groqAPI.v_use_tools,
-                                                x_model=self.coreai.subbot.llm.groqAPI.x_model,
-                                                x_use_tools=self.coreai.subbot.llm.groqAPI.x_use_tools, )
+                    if (self.coreAPI is not None):
+                        self.groqAPI.set_models(max_wait_sec=self.coreAPI.subbot.llm.groqAPI.max_wait_sec,
+                                                a_model=self.coreAPI.subbot.llm.groqAPI.a_model,
+                                                a_use_tools=self.coreAPI.subbot.llm.groqAPI.a_use_tools,
+                                                b_model=self.coreAPI.subbot.llm.groqAPI.b_model,
+                                                b_use_tools=self.coreAPI.subbot.llm.groqAPI.b_use_tools,
+                                                v_model=self.coreAPI.subbot.llm.groqAPI.v_model,
+                                                v_use_tools=self.coreAPI.subbot.llm.groqAPI.v_use_tools,
+                                                x_model=self.coreAPI.subbot.llm.groqAPI.x_model,
+                                                x_use_tools=self.coreAPI.subbot.llm.groqAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.groqAPI.chatBot(   chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1602,16 +1602,16 @@ class llm_class:
                 try:
                     logger.info('### Ollama ###')
 
-                    if (self.coreai is not None):
-                        self.ollamaAPI.set_models(  max_wait_sec=self.coreai.subbot.llm.ollamaAPI.max_wait_sec,
-                                                    a_model=self.coreai.subbot.llm.ollamaAPI.a_model,
-                                                    a_use_tools=self.coreai.subbot.llm.ollamaAPI.a_use_tools,
-                                                    b_model=self.coreai.subbot.llm.ollamaAPI.b_model,
-                                                    b_use_tools=self.coreai.subbot.llm.ollamaAPI.b_use_tools,
-                                                    v_model=self.coreai.subbot.llm.ollamaAPI.v_model,
-                                                    v_use_tools=self.coreai.subbot.llm.ollamaAPI.v_use_tools,
-                                                    x_model=self.coreai.subbot.llm.ollamaAPI.x_model,
-                                                    x_use_tools=self.coreai.subbot.llm.ollamaAPI.x_use_tools, )
+                    if (self.coreAPI is not None):
+                        self.ollamaAPI.set_models(  max_wait_sec=self.coreAPI.subbot.llm.ollamaAPI.max_wait_sec,
+                                                    a_model=self.coreAPI.subbot.llm.ollamaAPI.a_model,
+                                                    a_use_tools=self.coreAPI.subbot.llm.ollamaAPI.a_use_tools,
+                                                    b_model=self.coreAPI.subbot.llm.ollamaAPI.b_model,
+                                                    b_use_tools=self.coreAPI.subbot.llm.ollamaAPI.b_use_tools,
+                                                    v_model=self.coreAPI.subbot.llm.ollamaAPI.v_model,
+                                                    v_use_tools=self.coreAPI.subbot.llm.ollamaAPI.v_use_tools,
+                                                    x_model=self.coreAPI.subbot.llm.ollamaAPI.x_model,
+                                                    x_use_tools=self.coreAPI.subbot.llm.ollamaAPI.x_use_tools, )
 
                     res_text, res_path, res_files, res_name, res_api, res_history = \
                         self.ollamaAPI.chatBot(     chat_class=chat_class, model_select=model_select, session_id=session_id, 
@@ -1711,16 +1711,16 @@ class llm_class:
                         if (n == 1):
                             logger.info('### FreeAI ###')
 
-                            if (self.coreai is not None):
-                                self.freeaiAPI.set_models(  max_wait_sec=self.coreai.subbot.llm.freeaiAPI.max_wait_sec,
-                                                            a_model=self.coreai.subbot.llm.freeaiAPI.a_model,
-                                                            a_use_tools=self.coreai.subbot.llm.freeaiAPI.a_use_tools,
-                                                            b_model=self.coreai.subbot.llm.freeaiAPI.b_model,
-                                                            b_use_tools=self.coreai.subbot.llm.freeaiAPI.b_use_tools,
-                                                            v_model=self.coreai.subbot.llm.freeaiAPI.v_model,
-                                                            v_use_tools=self.coreai.subbot.llm.freeaiAPI.v_use_tools,
-                                                            x_model=self.coreai.subbot.llm.freeaiAPI.x_model,
-                                                            x_use_tools=self.coreai.subbot.llm.freeaiAPI.x_use_tools, )
+                            if (self.coreAPI is not None):
+                                self.freeaiAPI.set_models(  max_wait_sec=self.coreAPI.subbot.llm.freeaiAPI.max_wait_sec,
+                                                            a_model=self.coreAPI.subbot.llm.freeaiAPI.a_model,
+                                                            a_use_tools=self.coreAPI.subbot.llm.freeaiAPI.a_use_tools,
+                                                            b_model=self.coreAPI.subbot.llm.freeaiAPI.b_model,
+                                                            b_use_tools=self.coreAPI.subbot.llm.freeaiAPI.b_use_tools,
+                                                            v_model=self.coreAPI.subbot.llm.freeaiAPI.v_model,
+                                                            v_use_tools=self.coreAPI.subbot.llm.freeaiAPI.v_use_tools,
+                                                            x_model=self.coreAPI.subbot.llm.freeaiAPI.x_model,
+                                                            x_use_tools=self.coreAPI.subbot.llm.freeaiAPI.x_use_tools, )
 
                         else:
                             logger.warning(f"freeai retry = { n }/{ n_max },")

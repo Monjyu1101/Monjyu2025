@@ -329,8 +329,6 @@ class _live_api_openai:
         self.monjyu_once_flag = False
         self.monjyu_enable = False
         self.monjyu_funcinfo = ''
-        self.webOperator_enable = False
-        self.researchAgent_enable = False
         self.image_input_number = None
 
         # バッファ
@@ -343,11 +341,13 @@ class _live_api_openai:
         # スクリーンショット設定
         self.imageShot = _imageShot_class()
 
-        # main,data,addin,botFunc,
+        # main,data,addin,botFunc,mcpHost,
         self.main    = None
         self.data    = None
         self.addin   = None
         self.botFunc = None
+        self.mcpHost = None
+        self.function_modules = {}
 
         # monjyu
         self.monjyu = _monjyu_class(runMode='assistant', )
@@ -710,8 +710,8 @@ class _live_api_openai:
                             hit = False
 
                             #print()
-                            if self.botFunc is not None:
-                                for module_dic in self.botFunc.function_modules.values():
+                            if len(self.function_modules) > 0:
+                                for module_dic in self.function_modules.values():
                                     if (f_name == module_dic['func_name']):
                                         hit = True
                                         print(f" Live(openai) :   function_call '{ module_dic['script'] }' ({ f_name })")
@@ -720,7 +720,10 @@ class _live_api_openai:
                                         # function 実行
                                         try:
                                             ext_func_proc  = module_dic['func_proc']
-                                            res_json = ext_func_proc( f_kwargs )
+                                            if (module_dic['script'] != 'mcp'):
+                                                res_json = ext_func_proc(f_kwargs)
+                                            else:
+                                                res_json = ext_func_proc(f_name, f_kwargs)
                                         except Exception as e:
                                             print(e)
                                             # エラーメッセージ
@@ -823,16 +826,25 @@ class _live_api_openai:
             if (clip_interval_sec != ''):
                 self.clip_interval_sec = int(clip_interval_sec)
         print(f" Live(openai) : [START] ({ self.live_model }) ")
+
+        # function_modules 設定
+        self.function_modules = {}
+        if (self.botFunc is not None):
+            self.function_modules = self.botFunc.function_modules
+        # mcp tools 設定
+        if (self.mcpHost is not None):
+            mcp_modules = self.mcpHost.get_mcp_modules()
+            for key, mcp_module in mcp_modules.items():
+                self.function_modules[key] = mcp_module
+
         # Monjyu 確認
         if (self.monjyu_once_flag == False):
             self.monjyu_once_flag = True
             self.monjyu_enable = False
             self.monjyu_funcinfo = ''
-            self.webOperator_enable = False
-            self.researchAgent_enable = False
             # 有効確認
-            if self.botFunc is not None:
-                module_dic = self.botFunc.function_modules.get('execute_monjyu_request', None)
+            if len(self.function_modules) > 0:
+                module_dic = self.function_modules.get('execute_monjyu_request', None)
                 if (module_dic is not None):
 
                     # Monjyu function 実行
@@ -856,13 +868,6 @@ class _live_api_openai:
                         self.monjyu_funcinfo = res_text
                     except Exception as e:
                         print(e)
-
-                module_dic = self.botFunc.function_modules.get('web_operation_agent', None)
-                if (module_dic is not None):
-                    self.webOperator_enable = True
-                module_dic = self.botFunc.function_modules.get('research_operation_agent', None)
-                if (module_dic is not None):
-                    self.researchAgent_enable = True
 
         # 初期化
         self.image_send_queue = queue.Queue()
@@ -920,23 +925,6 @@ class _live_api_openai:
 複数人で会話をしていますので、会話の流れを把握するようにして、口出しは最小限にお願いします。
 あなたへの指示でない場合、相槌も必要ありません。できるだけ静かにお願いします。
 """
-                # researchAjent 有効
-                if (self.researchAgent_enable == True):
-                    print(" Live(freeai) : [READY] Agentic AI Research-Agent(リサーチエージェント:research_operation_agent) ")
-                    instructions += \
-"""
-Agentic AI Research-Agent(リサーチエージェント:research_operation_agent) が利用可能です。
-調査依頼は非同期で実行されます。このエージェントの実行報告は要約して報告するようにしてしてください。
-"""
-                # webOperator 有効
-                if (self.webOperator_enable == True):
-                    print(" Live(freeai) : [READY] Agentic AI Web-Operator(ウェブオペレーター:web_operation_agent) ")
-                    instructions += \
-"""
-Agentic AI Web-Operator(ウェブオペレーター:web_operation_agent) が利用可能です。
-社内システム操作以外のウェブ操作を依頼でき、依頼は非同期で実行されます。
-このエージェントの実行結果は音声で報告するようにしてしてください。
-"""
                 # Monjyu 有効
                 if (self.monjyu_enable == True):
                     print(" Live(openai) : [READY] 外部AI Monjyu(もんじゅ:execute_monjyu_request) ")
@@ -951,14 +939,11 @@ Agentic AI Web-Operator(ウェブオペレーター:web_operation_agent) が利�
 
                 # ツール設定 通常はexecute_monjyu_requestのみ有効として処理
                 tools = []
-                if self.botFunc is not None:
-                    for module_dic in self.botFunc.function_modules.values():
-                        if (self.monjyu_enable == True) \
-                        or (self.webOperator_enable == True) \
-                        or (self.researchAgent_enable == True):
+                if len(self.function_modules) > 0:
+                    for module_dic in self.function_modules.values():
+                        if (self.monjyu_enable == True):
                             if (module_dic['func_name'] == 'execute_monjyu_request') \
-                            or (module_dic['func_name'] == 'web_operation_agent') \
-                            or (module_dic['func_name'] == 'research_operation_agent'):
+                            or (module_dic['script'] == 'mcp'):
                                 tool = {'type': 'function'} | module_dic['function']
                                 tools.append( tool )
                         else:
@@ -1407,8 +1392,10 @@ class _monjyu_class:
             os.makedirs(self.path)
 
         # ポート設定等
-        self.local_endpoint1 = f'http://localhost:{ int(CORE_PORT) + 1 }'
-        self.local_endpoint2 = f'http://localhost:{ int(CORE_PORT) + 2 }'
+        self.core_port2 = str(int(CORE_PORT) + 2)
+        self.core_port3 = str(int(CORE_PORT) + 3)
+        self.local_endpoint2 = f'http://localhost:{ self.core_port2 }'
+        self.local_endpoint3 = f'http://localhost:{ self.core_port3 }'
         self.user_id = 'admin'
 
         # 履歴送信用
@@ -1505,16 +1492,16 @@ class _monjyu_class:
         # AI要求送信
         try:
             response = requests.post(
-                self.local_endpoint1 + '/post_input_log',
+                self.local_endpoint2 + '/post_input_log',
                 json={'user_id': self.user_id, 
                       'request_text': reqText,
                       'input_text': inpText, },
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )
             if response.status_code != 200:
-                print('error', f"Error response ({ CORE_PORT }/post_input_log) : {response.status_code} - {response.text}")
+                print('error', f"Error response ({ self.core_port2 }/post_input_log) : {response.status_code} - {response.text}")
         except Exception as e:
-            print('error', f"Error communicating ({ CORE_PORT }/post_input_log) : {e}")
+            print('error', f"Error communicating ({ self.core_port2 }/post_input_log) : {e}")
             return False
         return True
 
@@ -1524,16 +1511,16 @@ class _monjyu_class:
         # AI要求送信
         try:
             response = requests.post(
-                self.local_endpoint2 + '/post_output_log',
+                self.local_endpoint3 + '/post_output_log',
                 json={'user_id': self.user_id, 
                       'output_text': outText,
                       'output_data': outData, },
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )
             if response.status_code != 200:
-                print('error', f"Error response ({ CORE_PORT }/post_output_log) : {response.status_code} - {response.text}")
+                print('error', f"Error response ({ self.core_port3 }/post_output_log) : {response.status_code} - {response.text}")
         except Exception as e:
-            print('error', f"Error communicating ({ CORE_PORT }/post_output_log) : {e}")
+            print('error', f"Error communicating ({ self.core_port3 }/post_output_log) : {e}")
             return False
         return True
 
@@ -1541,7 +1528,7 @@ class _monjyu_class:
         # AI要求送信
         try:
             response = requests.post(
-                self.local_endpoint2 + '/post_histories',
+                self.local_endpoint3 + '/post_histories',
                 json={'user_id': self.user_id, 'from_port': "live", 'to_port': "live",
                       'req_mode': "live",
                       'system_text': "", 'request_text': self.last_reqText, 'input_text': self.last_inpText,
@@ -1552,9 +1539,9 @@ class _monjyu_class:
                 timeout=(CONNECTION_TIMEOUT, REQUEST_TIMEOUT)
             )
             if response.status_code != 200:
-                print('error', f"Error response ({ CORE_PORT }/post_histories) : {response.status_code} - {response.text}")
+                print('error', f"Error response ({ self.core_port3 }/post_histories) : {response.status_code} - {response.text}")
         except Exception as e:
-            print('error', f"Error communicating ({ CORE_PORT }/post_histories) : {e}")
+            print('error', f"Error communicating ({ self.core_port3 }/post_histories) : {e}")
             self.last_reqText = ''
             self.last_inpText = ''
             self.last_outText = ''
@@ -1604,7 +1591,7 @@ class _class:
         # 初期化
         self.func_reset()
 
-    def func_reset(self, main=None, data=None, addin=None, botFunc=None, ):
+    def func_reset(self, main=None, data=None, addin=None, botFunc=None, mcpHost=None, ):
         if (main is not None):
             self.sub_proc.liveAPI.main = main
         if (data is not None):
@@ -1613,6 +1600,8 @@ class _class:
             self.sub_proc.liveAPI.addin = addin
         if (botFunc is not None):
             self.sub_proc.liveAPI.botFunc = botFunc
+        if (mcpHost is not None):
+            self.sub_proc.liveAPI.mcpHost = mcpHost
         return True
 
     def func_proc(self, json_kwargs=None, ):

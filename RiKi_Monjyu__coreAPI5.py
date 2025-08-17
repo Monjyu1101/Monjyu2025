@@ -9,7 +9,7 @@
 # ------------------------------------------------
 
 # モジュール名
-MODULE_NAME = 'coreai:5'
+MODULE_NAME = 'coreAPI(5)'
 
 # ロガーの設定
 import logging
@@ -36,16 +36,12 @@ from pydantic import BaseModel
 
 import threading
 
-import socket
-qHOSTNAME = socket.gethostname().lower()
-
-
 # パスの設定
 qPath_temp    = 'temp/'
 qPath_log     = 'temp/_log/'
 
 # インターフェース
-qIO_agent2live  = 'temp/monjyu_io_agent2live.txt'
+qIO_agent2live  = 'temp/Monjyu_io_agent2live.txt'
 
 # 定数の定義
 DELETE_HISTORIES_SEC  = 3600
@@ -76,25 +72,25 @@ class main_class:
                         main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
                         core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', ):
         # コアAIクラスの初期化とスレッドの開始
-        coreai5 = coreai5_class(runMode=runMode, qLog_fn=qLog_fn,
+        coreAPI5 = coreAPI5_class(runMode=runMode, qLog_fn=qLog_fn,
                                 main=main, conf=conf, data=data, addin=addin, botFunc=botFunc, mcpHost=mcpHost,
                                 core_port=core_port, sub_base=sub_base, num_subais=num_subais, )
-        coreai5_thread = threading.Thread(target=coreai5.run, daemon=True, )
-        coreai5_thread.start()
+        coreAPI5_thread = threading.Thread(target=coreAPI5.run, daemon=True, )
+        coreAPI5_thread.start()
         while True:
             time.sleep(5)
 
 
-class coreai5_class:
+class coreAPI5_class:
     """
     コアAIクラス(5)
     """
     def __init__(self,  runMode: str = 'debug', qLog_fn: str = '',
                         main=None, conf=None, data=None, addin=None, botFunc=None, mcpHost=None,
-                        coreai=None,
+                        coreAPI=None,
                         core_port: str = '8000', sub_base: str = '8100', num_subais: str = '48', ):
         self.runMode = runMode
-        self_port = str(int(core_port)+5)
+        self_port = str(int(core_port) + 5)
 
         # ログファイル名の生成
         if qLog_fn == '':
@@ -112,12 +108,11 @@ class coreai5_class:
         self.addin      = addin
         self.botFunc    = botFunc
         self.mcpHost    = mcpHost
-        self.coreai     = coreai
+        self.coreAPI     = coreAPI
         self.core_port  = core_port
         self.sub_base   = sub_base
         self.num_subais = int(num_subais)
         self.self_port  = self_port
-        self.webui_endpoint8 = f'http://{ qHOSTNAME }:{ int(self.core_port) + 8 }'
 
         # スレッドロック
         self.thread_lock = threading.Lock()
@@ -132,8 +127,10 @@ class coreai5_class:
         self.app.post("/post_live_request")(self.post_live_request)
 
     async def root(self, request: Request):
-        # Web UI にリダイレクト
-        return RedirectResponse(url=self.webui_endpoint8 + '/')
+        # Web UI にリダイレクト（動的URL生成）
+        req_url = f"{request.url.scheme}://{request.url.hostname}"
+        webUI_url = f"{req_url}:{self.core_port}/"
+        return RedirectResponse(url=webUI_url)
 
     async def get_histories_all(self, user_id: str):
         """
@@ -368,7 +365,7 @@ if __name__ == '__main__':
     sub_base  = '8100'
     numSubAIs = '48'
 
-    coreai5 = main_class(   runMode='debug', qLog_fn='', 
+    coreAPI5 = main_class(   runMode='debug', qLog_fn='', 
                             core_port=core_port, sub_base=sub_base, num_subais=numSubAIs)
 
     #while True:

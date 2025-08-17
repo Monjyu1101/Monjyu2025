@@ -1,5 +1,11 @@
 // index.js
 
+const CORE_ENDPOINT1 = 'http://localhost:8001';
+const CORE_ENDPOINT2 = 'http://localhost:8002';
+const CORE_ENDPOINT3 = 'http://localhost:8003';
+const CORE_ENDPOINT4 = 'http://localhost:8004';
+const CORE_ENDPOINT5 = 'http://localhost:8005';
+
 // 処理中の状態を表す変数
 let isReady = -1;
 let isBusy = -1;
@@ -7,7 +13,7 @@ let isBusy = -1;
 // 処理中の状態を取得する
 function get_ready_count() {
     $.ajax({
-        url: $('#core_endpoint0').val() + '/get_ready_count',
+        url: CORE_ENDPOINT1 + '/get_ready_count',
         method: 'GET',
         dataType: 'json',
         success: function(data) {

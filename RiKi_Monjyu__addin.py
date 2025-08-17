@@ -45,7 +45,7 @@ class _addin_class:
     # 初期化
     def __init__(self):
         self.runMode = 'debug'
-        self.addins_path = '_extensions/monjyu/'
+        self.addins_path = '_extensions/Monjyu/'
         self.secure_level = 'medium'
         self.organization_auth = ''
         self.addin_modules = {}
@@ -59,7 +59,7 @@ class _addin_class:
 
     # 初期化メソッド
     def init(self, runMode='debug', qLog_fn='',
-             addins_path='_extensions/monjyu/',
+             addins_path='_extensions/Monjyu/',
              secure_level='medium', 
              organization_auth=''):
         self.runMode = runMode
@@ -227,7 +227,7 @@ if __name__ == '__main__':
     # addin 初期化
     runMode = 'debug'
     addin.init(qLog_fn='', runMode=runMode,
-               addins_path='_extensions/monjyu/', secure_level='low',
+               addins_path='_extensions/Monjyu/', secure_level='low',
                organization_auth='')
 
     # アドインのロード

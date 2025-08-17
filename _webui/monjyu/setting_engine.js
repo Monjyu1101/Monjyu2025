@@ -1,9 +1,15 @@
 // setting_engine.js
 
+const CORE_ENDPOINT1 = 'http://localhost:8001';
+const CORE_ENDPOINT2 = 'http://localhost:8002';
+const CORE_ENDPOINT3 = 'http://localhost:8003';
+const CORE_ENDPOINT4 = 'http://localhost:8004';
+const CORE_ENDPOINT5 = 'http://localhost:8005';
+
 // サブAI設定のコンボボックスを取得する関数
 function get_subai_info_all() {
     $.ajax({
-        url: $('#core_endpoint0').val() + '/get_subai_info_all',
+        url: CORE_ENDPOINT1 + '/get_subai_info_all',
         method: 'GET',
         async: false, // 同期処理
         success: function(data) {
@@ -26,7 +32,7 @@ function get_subai_info_all() {
 function get_models() {
     // serial
     $.ajax({
-        url: $('#core_endpoint0').val() + '/get_models',
+        url: CORE_ENDPOINT1 + '/get_models',
         method: 'GET',
         data: { req_mode: 'serial' },
         dataType: 'json',
@@ -46,7 +52,7 @@ function get_models() {
     });
     // parallel, session
     $.ajax({
-        url: $('#core_endpoint0').val() + '/get_models',
+        url: CORE_ENDPOINT1 + '/get_models',
         method: 'GET',
         data: { req_mode: 'parallel' },
         dataType: 'json',
@@ -70,7 +76,7 @@ function get_models() {
     });
     // chat, vision, websearch, clip, voice
     $.ajax({
-        url: $('#core_endpoint0').val() + '/get_models',
+        url: CORE_ENDPOINT1 + '/get_models',
         method: 'GET',
         data: { req_mode: 'chat' },
         dataType: 'json',
@@ -148,7 +154,7 @@ function get_mode_setting_all() {
 function get_mode_setting(req_mode) {
     // 設定値をサーバーから受信
     $.ajax({
-        url: $('#core_endpoint4').val() + '/get_mode_setting',
+        url: CORE_ENDPOINT4 + '/get_mode_setting',
         method: 'GET',
         data: { req_mode: req_mode },
         dataType: 'json',
@@ -455,7 +461,7 @@ function post_mode_setting(req_mode) {
 
     // 設定値をサーバーに送信
     $.ajax({
-        url: $('#core_endpoint4').val() + '/post_mode_setting',
+        url: CORE_ENDPOINT4 + '/post_mode_setting',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(formData),
@@ -611,7 +617,7 @@ $(document).ready(function() {
         if (confirm("全ての設定をリセットしますか?")) {
             // リセット処理を実行
             $.ajax({
-                url: $('#core_endpoint1').val() + '/post_reset',
+                url: CORE_ENDPOINT2 + '/post_reset',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({ user_id: $('#user_id').val() }),

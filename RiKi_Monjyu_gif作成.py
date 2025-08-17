@@ -102,7 +102,7 @@ def prepare_overlay_image(image_path, transparency=0.5, blue_threshold=150):
 
 # 画像ファイルを読み込む（パスは適切に変更してください）
 # 例：透過したい青い画像のパス
-overlay_image_path = "_webui/monjyu/static/blue_monjyu.png"  # この部分は実際の画像パスに変更
+overlay_image_path = "_webUI/Monjyu/static/blue_Monjyu.png"  # この部分は実際の画像パスに変更
 
 # 画像が存在するか確認
 if os.path.exists(overlay_image_path):
@@ -238,8 +238,8 @@ print("Creating pulsating seamless loop GIF with image overlay...")
 all_images = forward_images + forward_images[-2:0:-1]  # 最初と最後のフレームが重複しないように
 
 # GIFを作成
-imageio.mimsave('_webui/monjyu/static/icon_monjyu.gif', all_images, duration=0.2)  # 0.2秒/フレーム = 5 FPS でより速く
-print("GIF animation has been created as '_webui/monjyu/static/icon_monjyu.gif'")
+imageio.mimsave('_webUI/Monjyu/static/icon_Monjyu.gif', all_images, duration=0.2)  # 0.2秒/フレーム = 5 FPS でより速く
+print("GIF animation has been created as '_webUI/Monjyu/static/icon_Monjyu.gif'")
 
 # 最終結果を表示
 plt.figure(figsize=(8, 8))
