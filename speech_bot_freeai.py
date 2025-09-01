@@ -528,7 +528,7 @@ class _freeaiAPI:
 
         # reasoningモデル
         if (res_name in [self.v_nick_name, self.x_nick_name]):
-            if (res_api.find('image-gen') < 0):
+            if (res_api.find('image') < 0):
                 parm_kwargs["thinking_config"] = types.ThinkingConfig(thinking_budget=-1)
 
         # API設定(config)
