@@ -856,7 +856,7 @@ if __name__ == '__main__':
         if function_modules:
             sysText = None
             reqText = ''
-            inpText = 'gpt4,toolsで兵庫県三木市の天気を調べて'
+            inpText = 'gpt5,toolsで兵庫県三木市の天気を調べて'
             filePath = []
             if reqText:
                 logger.info(f"ReqText : {reqText.rstrip()}")

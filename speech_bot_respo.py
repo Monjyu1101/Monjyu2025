@@ -558,7 +558,7 @@ class _respoAPI:
                         print("<<<<response>>>\n", response, "\n")
 
                     for output in response.output:
-                        
+
                         # 思考中
                         if (output.type == 'reasoning'):
                             if (res_api[:2] in ['o1', 'o3', 'o4']):
@@ -569,8 +569,8 @@ class _respoAPI:
                             if (res_api[:2] in ['o1', 'o3', 'o4']):
                                 print("message\n", output, "\n")
                             try:
-                                res_role = str(response.output[0].role)
-                                res_content = str(response.output[0].content[0].text)
+                                res_role = str(output.role)
+                                res_content = str(output.content[0].text)
                             except Exception as e:
                                 print(str(e))
                                 #text = output.content[0].text
@@ -611,15 +611,9 @@ class _respoAPI:
                             })
 
                             # メッセージに関数呼び出しを追加
-                            dic = {
-                                'type': 'function_call', 
-                                'id': o_id, 
-                                'call_id': f_id, 
-                                'name': f_name, 
-                                'arguments': f_kwargs
-                            }
+                            #dic = {'type': 'function_call', 'id': o_id, 'call_id': f_id, 'name': f_name, 'arguments': f_kwargs}
+                            dic = {'type': 'function_call', 'call_id': f_id, 'name': f_name, 'arguments': f_kwargs}
                             msg.append(dic)
-                            #msg.append(output)
 
                 # ツール実行処理
                 if (len(tool_calls) > 0):
@@ -876,8 +870,7 @@ if __name__ == '__main__':
         if function_modules:
             sysText = None
             reqText = ''
-            #inpText = 'respo-x,toolsで兵庫県三木市の天気を調べて'
-            inpText = 'respo-x,toolsで"今日"の休暇予定者調べて'
+            inpText = 'respo-x,toolsで兵庫県三木市の天気を調べて'
             filePath = []
             if reqText:
                 logger.info(f"ReqText : {reqText.rstrip()}")
